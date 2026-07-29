@@ -5,7 +5,7 @@ import api from "./api.js";
 export async function fetchDataByDate(date) {
   try {
     const { data } = await api.get(`/api/data/${date}`);
-    return data;
+    return data?.data || data;
   } catch (err) {
     if (err.response?.status === 404) return null;
     throw err;
@@ -14,14 +14,24 @@ export async function fetchDataByDate(date) {
 
 // 2. CREATE / SAVE DASHBOARD DATA
 export async function createData(payload) {
-  const { data } = await api.post("/api/data", payload);
-  return data;
+  try {
+    const { data } = await api.post("/api/data", payload);
+    return data?.data || data;
+  } catch (err) {
+    console.error("Create Data Error:", err);
+    throw err;
+  }
 }
 
 // 3. UPDATE DATA BY DATE
 export async function updateData(date, payload) {
-  const { data } = await api.put(`/api/data/${date}`, payload);
-  return data;
+  try {
+    const { data } = await api.put(`/api/data/${date}`, payload);
+    return data?.data || data;
+  } catch (err) {
+    console.error("Update Data Error:", err);
+    throw err;
+  }
 }
 
 // 4. DELETE DATA BY DATE
@@ -30,25 +40,27 @@ export async function deleteData(date) {
   return data;
 }
 
-// 5. FETCH ALL HISTORY DATA (UPDATED ROUTE & SAFETY CHECK)
+// 5. FETCH ALL HISTORY DATA (CORRECT ROUTE: /api/history)
 export async function fetchHistory(params = {}) {
   try {
-    // History ke liye /api/data URL par request jayegi
-    const { data } = await api.get("/api/data", { params });
+    // Correct Endpoint according to server.js
+    const { data } = await api.get("/api/history", { params });
 
-    // Ensure array format return ho taaki frontend crash na ho
+    // Safe array extraction
     if (Array.isArray(data)) {
       return data;
-    } else if (data && Array.isArray(data.records)) {
-      return data.records;
     } else if (data && Array.isArray(data.data)) {
       return data.data;
+    } else if (data && Array.isArray(data.history)) {
+      return data.history;
+    } else if (data && Array.isArray(data.records)) {
+      return data.records;
     }
 
     return [];
   } catch (err) {
     console.error("Error in fetchHistory:", err);
-    throw err;
+    return [];
   }
 }
 
