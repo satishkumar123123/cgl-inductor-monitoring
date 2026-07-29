@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Calendar, FileSpreadsheet, PenLine, ExternalLink } from "lucide-react";
+import { Search, Calendar, FileSpreadsheet, PenLine, ExternalLink, RefreshCw } from "lucide-react";
 import { fetchHistory } from "../services/dataService.js";
 import { fmtDateLong } from "../utils/rowsConfig.js";
 import { SkeletonTable } from "../components/Skeleton.jsx";
@@ -19,20 +19,32 @@ export default function HistoryPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
-  // Hook rules: Always call hooks at top level (never inside try-catch)
   const toast = useToast();
   const navigate = useNavigate();
 
-  const load = async () => {
+  // SAFE FETCH FUNCTION WITH FLEXIBLE RESPONSE PARSING
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchHistory({ 
+      const response = await fetchHistory({ 
         search: search || undefined, 
         from: from || undefined, 
         to: to || undefined 
       });
-      setRecords(Array.isArray(data) ? data : []);
+
+      // Handle direct array OR nested data array
+      let historyList = [];
+      if (Array.isArray(response)) {
+        historyList = response;
+      } else if (response && Array.isArray(response.data)) {
+        historyList = response.data;
+      } else if (response && Array.isArray(response.history)) {
+        historyList = response.history;
+      }
+
+      setRecords(historyList);
     } catch (err) {
+      console.error("Failed to load history:", err);
       if (toast?.notify) {
         toast.notify(err.response?.data?.message || "Failed to load history", "error");
       }
@@ -40,12 +52,11 @@ export default function HistoryPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, from, to, toast]);
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [load]);
 
   // Safe Date Formatting
   const safeFormatDate = (dateStr) => {
@@ -59,9 +70,17 @@ export default function HistoryPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div>
-        <h1 className="text-lg font-extrabold text-white">Saved Readings — History</h1>
-        <p className="text-xs text-slate-500 mt-1">Search by date, source, status, or remarks.</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-lg font-extrabold text-white">Saved Readings — History</h1>
+          <p className="text-xs text-slate-500 mt-1">Search by date, source, status, or remarks.</p>
+        </div>
+        <button 
+          onClick={load} 
+          className="p-2 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl text-slate-300 transition-all flex items-center gap-1.5 text-xs font-semibold"
+        >
+          <RefreshCw size={13} className={loading ? "animate-spin text-cyan-400" : "text-slate-400"} /> Refresh
+        </button>
       </div>
 
       <div className="flex flex-wrap items-center gap-2.5 bg-slate-900/60 border border-slate-800 rounded-2xl p-3.5 backdrop-blur-md">
@@ -87,11 +106,11 @@ export default function HistoryPage() {
         SkeletonTable ? (
           <SkeletonTable rows={7} cols={7} />
         ) : (
-          <div className="p-8 text-slate-400 text-sm">Loading history data...</div>
+          <div className="p-8 text-slate-400 text-sm text-center">Loading history data...</div>
         )
       ) : records.length === 0 ? (
         <div className="text-sm text-slate-500 bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center">
-          No saved records match your filters.
+          No saved records found in database.
         </div>
       ) : (
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden backdrop-blur-md">
