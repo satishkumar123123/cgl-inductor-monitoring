@@ -1,0 +1,59 @@
+{
+  "date": "2026-06-30",
+  "source": "manual",
+  "uploadedFileName": "",
+  "uploadedTime": null,
+  "createdByName": "Duty Engineer",
+  "remarks": "Routine shift readings, all inductors within normal band.",
+  "status": "Normal",
+  "lastUpdated": "2026-06-30T14:30:00.000Z",
+  "mainPot": {
+    "A": {
+      "high": {
+        "rPhase": 410, "yPhase": 405, "bPhase": 415, "inductorVoltage": 400,
+        "lineCurrent": 412, "linePF": 0.98, "power": 285, "inductorCurrent": 408,
+        "impedanceZ": 0.98, "resistanceR": 0.62, "reactanceX": 0.76,
+        "inductorPF": 0.99, "inductorKVA": 288, "conductanceInitial": 1.02,
+        "conductanceRatio": 0.99, "kvarConnected": 150, "balancingKvar": 5
+      },
+      "intermediate": {
+        "rPhase": 380, "yPhase": 378, "bPhase": 384, "inductorVoltage": 395,
+        "lineCurrent": 382, "linePF": 0.97, "power": 260, "inductorCurrent": 379,
+        "impedanceZ": 1.02, "resistanceR": 0.65, "reactanceX": 0.79,
+        "inductorPF": 0.98, "inductorKVA": 265, "conductanceInitial": 1.0,
+        "conductanceRatio": 0.97, "kvarConnected": 145, "balancingKvar": 4
+      }
+    },
+    "B": {
+      "high": {
+        "rPhase": 420, "yPhase": 418, "bPhase": 422, "inductorVoltage": 405,
+        "lineCurrent": 419, "linePF": 0.97, "power": 292, "inductorCurrent": 417,
+        "impedanceZ": 0.96, "resistanceR": 0.61, "reactanceX": 0.74,
+        "inductorPF": 0.98, "inductorKVA": 297, "conductanceInitial": 1.03,
+        "conductanceRatio": 0.98, "kvarConnected": 152, "balancingKvar": 6
+      },
+      "intermediate": {
+        "rPhase": 385, "yPhase": 383, "bPhase": 388, "inductorVoltage": 398,
+        "lineCurrent": 386, "linePF": 0.96, "power": 268, "inductorCurrent": 384,
+        "impedanceZ": 1.01, "resistanceR": 0.64, "reactanceX": 0.78,
+        "inductorPF": 0.97, "inductorKVA": 272, "conductanceInitial": 1.01,
+        "conductanceRatio": 0.96, "kvarConnected": 148, "balancingKvar": 5
+      }
+    },
+    "C": { "high": {}, "intermediate": {} },
+    "D": { "high": {}, "intermediate": {} }
+  },
+  "pmPot": {
+    "A": {
+      "high": {
+        "rPhase": 300, "yPhase": 298, "bPhase": 305, "inductorVoltage": 400,
+        "lineCurrent": 302, "linePF": 0.99, "power": 208, "inductorCurrent": 300,
+        "impedanceZ": 1.1, "resistanceR": 0.7, "reactanceX": 0.85,
+        "inductorPF": 0.99, "inductorKVA": 210, "conductanceInitial": 0.98,
+        "conductanceRatio": 0.99, "kvarConnected": 100, "balancingKvar": 2
+      },
+      "intermediate": {}
+    },
+    "B": { "high": {}, "intermediate": {} }
+  }
+}

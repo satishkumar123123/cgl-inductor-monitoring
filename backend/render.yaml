@@ -1,0 +1,25 @@
+# Render Blueprint — deploy this backend with "New + > Blueprint" in Render,
+# pointing at this repo with backend/ as the root, or import this file
+# directly. See docs/DEPLOYMENT.md for the full walkthrough.
+services:
+  - type: web
+    name: cgl-dashboard-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CLIENT_ORIGIN
+        sync: false
