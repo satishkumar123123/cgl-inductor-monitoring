@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 
 async function connectDB() {
-  // Agar .env me MONGO_URI nahi mila toh local Compass URI fallback use karega
-  const uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/cgl_dashboard";
+  // Check MONGODB_URI (Render) or MONGO_URI (.env) or fallback to local Compass
+  const uri = process.env.MONGODB_URI || process.env.MONGO_URI || "mongodb://127.0.0.1:27017/cgl_dashboard";
 
   try {
-    await mongoose.connect(uri);
-    console.log("Local MongoDB Compass connected:", mongoose.connection.host);
+    const conn = await mongoose.connect(uri);
+    console.log("MongoDB Connected successfully to host:", conn.connection.host);
   } catch (err) {
     console.error("MongoDB connection failed:", err.message);
     process.exit(1);
