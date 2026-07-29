@@ -1,7 +1,13 @@
 import axios from "axios";
 
+// FIXED: Correct Vercel Variable Name & Production Fallback
+const API_BASE = 
+  import.meta.env.VITE_API_BASE_URL || 
+  import.meta.env.VITE_API_URL || 
+  "https://cgl-inductor-monitoring.onrender.com";
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+  baseURL: API_BASE,
 });
 
 api.interceptors.request.use((config) => {
