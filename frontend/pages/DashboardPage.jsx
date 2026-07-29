@@ -93,6 +93,7 @@ export default function DashboardPage() {
   const [uploadResult, setUploadResult] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(null);
 
+  // FIXED: No toast spam loop on empty date
   const loadDate = useCallback(async (date) => {
     setLoading(true);
     setUploadResult(null);
@@ -107,13 +108,14 @@ export default function DashboardPage() {
         setExistsOnServer(false);
       }
     } catch (err) {
-      notify(err?.response?.data?.message || "Failed to load data for this date", "error");
+      console.warn("No data for date or fetch failed:", date, err?.message);
+      // Safely set empty record without triggering toast notification spam loop
       setRecord(emptyRecord(date));
       setExistsOnServer(false);
     } finally {
       setLoading(false);
     }
-  }, [notify]);
+  }, []);
 
   useEffect(() => {
     loadDate(selectedDate);
