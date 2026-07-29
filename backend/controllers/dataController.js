@@ -13,10 +13,20 @@ exports.getAllData = async (req, res) => {
   }
 };
 
-// 2. CREATE / SAVE DASHBOARD DATA
+// 2. CREATE / SAVE DASHBOARD DATA (FIXED: Added all fields including dross)
 exports.createData = async (req, res) => {
   try {
-    const { date, source, uploadedFileName, mainPot, pmPot, remarks, status } = req.body;
+    const { 
+      date, 
+      source, 
+      uploadedFileName, 
+      mainPot, 
+      pmPot, 
+      productionAndDross, 
+      bottomDrossReport, 
+      remarks, 
+      status 
+    } = req.body;
 
     if (!date) {
       return res.status(400).json({ message: "Date required hai!" });
@@ -26,10 +36,12 @@ exports.createData = async (req, res) => {
       date,
       source: source || "manual",
       uploadedFileName: uploadedFileName || "",
-      createdByName: req.user?.username || req.body.createdByName || "Admin User",
+      createdByName: req.user?.username || req.user?.name || req.body.createdByName || "Admin User",
       createdBy: req.user?._id || undefined,
       mainPot: mainPot || {},
       pmPot: pmPot || {},
+      productionAndDross: productionAndDross || {},
+      bottomDrossReport: bottomDrossReport || {},
       remarks: remarks || "",
       status: status || "Normal",
       lastUpdated: new Date(),
@@ -53,14 +65,13 @@ exports.createData = async (req, res) => {
   }
 };
 
-// 3. GET DATA BY DATE (FIXED: Returns 404 if date does not exist in DB)
+// 3. GET DATA BY DATE
 exports.getDataByDate = async (req, res) => {
   try {
     const { date } = req.params;
     const record = await DailyInductorData.findOne({ date });
 
     if (!record) {
-      // Return 404 so frontend knows this date is NOT on server yet
       return res.status(404).json({
         message: "No record found for this date",
         date,
@@ -73,7 +84,7 @@ exports.getDataByDate = async (req, res) => {
   }
 };
 
-// 4. UPDATE DATA (FIXED: Supports Upsert fallback)
+// 4. UPDATE DATA
 exports.updateData = async (req, res) => {
   try {
     const { date } = req.params;
@@ -81,7 +92,7 @@ exports.updateData = async (req, res) => {
     const record = await DailyInductorData.findOneAndUpdate(
       { date },
       { $set: { ...req.body, lastUpdated: new Date() } },
-      { new: true, upsert: true } // upsert: true ensures document is created if missing
+      { new: true, upsert: true }
     );
 
     return res.status(200).json({ message: "Updated successfully", data: record });
