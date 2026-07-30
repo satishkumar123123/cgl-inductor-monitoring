@@ -12,6 +12,7 @@ import DataTable from "../components/DataTable.jsx";
 import FileUploadCard from "../components/FileUploadCard.jsx";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import LoadingSpinner from "../components/LoadingSpinner.jsx";
+import InductorRemarkModal from "../components/InductorRemarkModal.jsx";
 import useAuth from "../hooks/useAuth.js";
 import useToast from "../hooks/useToast.js";
 import { ROWS, POTS, emptyRecord, todayStr, fmtDateLong } from "../utils/rowsConfig.js";
@@ -93,7 +94,10 @@ export default function DashboardPage() {
   const [uploadResult, setUploadResult] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(null);
 
-  // FIXED: No toast spam loop on empty date
+  // Modal State for Inductor Remarks
+  const [selectedInductor, setSelectedInductor] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const loadDate = useCallback(async (date) => {
     setLoading(true);
     setUploadResult(null);
@@ -109,7 +113,6 @@ export default function DashboardPage() {
       }
     } catch (err) {
       console.warn("No data for date or fetch failed:", date, err?.message);
-      // Safely set empty record without triggering toast notification spam loop
       setRecord(emptyRecord(date));
       setExistsOnServer(false);
     } finally {
@@ -356,18 +359,30 @@ export default function DashboardPage() {
   };
 
   const ALL_BLOCKS = [
-    { potKey: "mainPot", ind: "A", label: "Main Pot Inductor A" },
-    { potKey: "mainPot", ind: "B", label: "Main Pot Inductor B" },
-    { potKey: "mainPot", ind: "C", label: "Main Pot Inductor C" },
-    { potKey: "mainPot", ind: "D", label: "Main Pot Inductor D" },
-    { potKey: "pmPot", ind: "A", label: "PM Pot Inductor A" },
-    { potKey: "pmPot", ind: "B", label: "PM Pot Inductor B" },
+    { key: "MAIN_A", potKey: "mainPot", ind: "A", label: "Main Pot Inductor A" },
+    { key: "MAIN_B", potKey: "mainPot", ind: "B", label: "Main Pot Inductor B" },
+    { key: "MAIN_C", potKey: "mainPot", ind: "C", label: "Main Pot Inductor C" },
+    { key: "MAIN_D", potKey: "mainPot", ind: "D", label: "Main Pot Inductor D" },
+    { key: "PM_A", potKey: "pmPot", ind: "A", label: "PM Pot Inductor A" },
+    { key: "PM_B", potKey: "pmPot", ind: "B", label: "PM Pot Inductor B" },
   ];
+
+  const handleCardClick = (item, metrics) => {
+    setSelectedInductor({
+      key: item.key,
+      title: item.label,
+      level: "High Level",
+      potKey: item.potKey,
+      ind: item.ind,
+      metrics: metrics,
+    });
+    setIsModalOpen(true);
+  };
 
   if (loading) return <LoadingSpinner label="Loading readings…" />;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 p-6">
       {/* TOOLBAR */}
       <div className="no-print flex flex-wrap items-center gap-2.5 bg-slate-900/60 border border-slate-800 rounded-2xl p-3.5 backdrop-blur-md">
         <div className="flex flex-col gap-1">
@@ -406,8 +421,8 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* RECTANGULAR BLOCKS ARRANGED IN 3-3 GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+      {/* CLICKABLE INDUCTOR CARDS GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
         {ALL_BLOCKS.map((item, idx) => {
           const metrics = getInductorMetrics(item.potKey, item.ind);
           const style = BLOCK_STYLES[idx % BLOCK_STYLES.length];
@@ -415,14 +430,15 @@ export default function DashboardPage() {
           return (
             <div
               key={`${item.potKey}-${item.ind}`}
-              className={`p-4 rounded-2xl border backdrop-blur-md transition-all duration-300 hover:scale-[1.02] ${style.bg} ${style.border} ${style.glow}`}
+              onClick={() => handleCardClick(item, metrics)}
+              className={`p-4 rounded-2xl border backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.02] group ${style.bg} ${style.border} ${style.glow}`}
             >
               <div className="flex items-center justify-between border-b border-slate-700/50 pb-2 mb-3">
-                <span className="font-extrabold text-sm text-white uppercase tracking-wide">
+                <span className="font-extrabold text-xs text-white uppercase tracking-wide group-hover:text-cyan-300 transition-colors">
                   {item.label}
                 </span>
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${style.badge}`}>
-                  High Level
+                <span className="text-[10px] text-slate-400 group-hover:text-cyan-300 transition-colors">
+                  Remark &rarr;
                 </span>
               </div>
 
@@ -628,6 +644,13 @@ export default function DashboardPage() {
           setConfirmDialog(null);
           if (d?.onConfirm) await d.onConfirm();
         }}
+      />
+
+      {/* INDUCTOR REMARK POPUP MODAL */}
+      <InductorRemarkModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        inductor={selectedInductor}
       />
     </div>
   );

@@ -17,8 +17,10 @@ const reportRoutes = require("./routes/reportRoutes");
 const powerRoutes = require("./routes/powerRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const auditRoutes = require("./routes/auditRoutes");
-// 1. ADDED PRODUCTION & DROSS ROUTE IMPORT
 const productionDrossRoutes = require("./routes/productionDrossRoutes");
+
+// 1. ADDED INDUCTOR REMARKS ROUTE IMPORT
+const inductorRoutes = require("./routes/inductorRoutes");
 
 const app = express();
 
@@ -80,8 +82,10 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/power", powerRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/audit-logs", auditRoutes);
-// 2. MOUNTED PRODUCTION & DROSS ROUTE
 app.use("/api/production-dross", productionDrossRoutes);
+
+// 2. MOUNTED INDUCTOR REMARKS ROUTE
+app.use("/api/inductors", inductorRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
