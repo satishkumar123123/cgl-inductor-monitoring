@@ -117,7 +117,7 @@ export default function DashboardPage() {
       console.warn("No data for date or fetch failed:", date, err?.message);
       setRecord(emptyRecord(date));
       setExistsOnServer(false);
-    } fontally {
+    } finally {
       setLoading(false);
     }
   }, []);
