@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react";
+// ✅ FIXED: useParams and useNavigate imported from react-router-dom (NOT "react")
+import { useParams, useNavigate } from "react-router-dom"; 
 import { ArrowLeft, Send, History, Clock, User, BarChart2, TrendingUp } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import axios from "axios";
@@ -21,15 +22,17 @@ export default function InductorDetailPage() {
   const [remarksList, setRemarksList] = useState([]);
 
   // Chart States
-  const [metric, setMetric] = useState("conductanceRatio"); // "conductanceRatio" | "current"
-  const [timeRange, setTimeRange] = useState("30d"); // "30d" | "1y" | "2y"
-  const [chartType, setChartType] = useState("line"); // "line" | "bar"
+  const [metric, setMetric] = useState("conductanceRatio");
+  const [timeRange, setTimeRange] = useState("30d");
+  const [chartType, setChartType] = useState("line");
   const [chartData, setChartData] = useState([]);
   const [loadingChart, setLoadingChart] = useState(false);
 
   useEffect(() => {
-    fetchRemarks();
-    fetchChartData();
+    if (inductorKey) {
+      fetchRemarks();
+      fetchChartData();
+    }
   }, [inductorKey, timeRange]);
 
   const fetchRemarks = async () => {
@@ -37,7 +40,7 @@ export default function InductorDetailPage() {
       const res = await axios.get(`/api/inductors/remarks/${inductorKey}`);
       if (res.data.success) setRemarksList(res.data.data);
     } catch (err) {
-      console.error(err);
+      console.error("Remarks Fetch Error:", err);
     }
   };
 
@@ -47,7 +50,7 @@ export default function InductorDetailPage() {
       const res = await axios.get(`/api/inductors/analytics/${inductorKey}?range=${timeRange}`);
       if (res.data.success) setChartData(res.data.data);
     } catch (err) {
-      console.error(err);
+      console.error("Chart Fetch Error:", err);
     } finally {
       setLoadingChart(false);
     }
@@ -60,7 +63,7 @@ export default function InductorDetailPage() {
     try {
       const res = await axios.post("/api/inductors/remarks", {
         inductorKey,
-        inductorName: inductorKey.replace("_", " "),
+        inductorName: inductorKey ? inductorKey.replace("_", " ") : "Inductor",
         remark: remarkText,
         category,
       });
@@ -72,6 +75,8 @@ export default function InductorDetailPage() {
       alert("Error saving remark");
     }
   };
+
+  const formattedTitle = inductorKey ? inductorKey.replace("_", " ") : "INDUCTOR";
 
   return (
     <div className="p-6 space-y-6 text-slate-100 max-w-[1500px] mx-auto">
@@ -85,7 +90,7 @@ export default function InductorDetailPage() {
         </button>
         <div>
           <h1 className="text-lg font-extrabold text-cyan-400 uppercase">
-            {inductorKey.replace("_", " ")} ANALYTICAL DASHBOARD
+            {formattedTitle} ANALYTICAL DASHBOARD
           </h1>
           <p className="text-xs text-slate-400">Detailed logs, operational history &amp; graphical trend analytics</p>
         </div>
@@ -93,7 +98,6 @@ export default function InductorDetailPage() {
 
       {/* SECTION 1: REMARK ENTRY & HISTORY TIMELINE */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* REMARK ENTRY FORM */}
         <form onSubmit={handleSaveRemark} className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-cyan-400">Add Operational Remark</h2>
@@ -113,7 +117,7 @@ export default function InductorDetailPage() {
             rows="3"
             value={remarkText}
             onChange={(e) => setRemarkText(e.target.value)}
-            placeholder={`Enter detailed log or remark for ${inductorKey}...`}
+            placeholder={`Enter detailed log or remark for ${formattedTitle}...`}
             className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white outline-none focus:border-cyan-500 resize-none"
           ></textarea>
 
@@ -127,7 +131,6 @@ export default function InductorDetailPage() {
           </div>
         </form>
 
-        {/* REMARK HISTORY TIMELINE */}
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 max-h-[300px] overflow-y-auto">
           <h2 className="text-sm font-bold text-slate-300 uppercase mb-4 flex items-center gap-2">
             <History size={16} className="text-cyan-400" /> Remark History Logs ({remarksList.length})
@@ -139,7 +142,7 @@ export default function InductorDetailPage() {
                 <div key={item._id} className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 relative">
                   <div className="absolute -left-[23px] top-4 w-3 h-3 rounded-full bg-cyan-400 border-2 border-slate-900"></div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category]}`}>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category] || CATEGORY_COLORS.General}`}>
                       {item.category}
                     </span>
                     <span className="text-[10px] text-slate-500 flex items-center gap-1">
@@ -164,7 +167,6 @@ export default function InductorDetailPage() {
           </h2>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* METRIC SELECTION */}
             <select
               value={metric}
               onChange={(e) => setMetric(e.target.value)}
@@ -174,7 +176,6 @@ export default function InductorDetailPage() {
               <option value="current">Inductor Current (A)</option>
             </select>
 
-            {/* TIME RANGE TOGGLE */}
             <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
               {["30d", "1y", "2y"].map((r) => (
                 <button
@@ -189,7 +190,6 @@ export default function InductorDetailPage() {
               ))}
             </div>
 
-            {/* CHART TYPE TOGGLE */}
             <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
               <button
                 onClick={() => setChartType("line")}
@@ -207,7 +207,6 @@ export default function InductorDetailPage() {
           </div>
         </div>
 
-        {/* CHART DISPLAY AREA */}
         <div className="h-[380px] w-full pt-4">
           {loadingChart ? (
             <div className="h-full flex items-center justify-center text-xs text-slate-500">Loading chart analytics...</div>
