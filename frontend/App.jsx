@@ -20,6 +20,8 @@ const PowerConsumptionPage = lazy(() => import("./pages/power/PowerConsumptionPa
 const MonthlyAnalysisPage = lazy(() => import("./pages/power/MonthlyAnalysisPage.jsx"));
 const YearlyAnalysisPage = lazy(() => import("./pages/power/YearlyAnalysisPage.jsx"));
 const ProductionDrossPage = lazy(() => import("./pages/ProductionDrossPage.jsx"));
+// 1. ADDED INDUCTOR DETAIL PAGE (LAZY LOADED)
+const InductorDetailPage = lazy(() => import("./pages/InductorDetailPage.jsx"));
 
 const page = (Component) => (
   <Suspense fallback={<LoadingSpinner fullScreen label="Loading page…" />}>
@@ -41,6 +43,16 @@ export default function App() {
           element={
             <ProtectedRoute>
               <MainLayout>{page(DashboardPage)}</MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 2. DEDICATED INDUCTOR ANALYTICS ROUTE */}
+        <Route
+          path="/inductor/:inductorKey"
+          element={
+            <ProtectedRoute>
+              <MainLayout>{page(InductorDetailPage)}</MainLayout>
             </ProtectedRoute>
           }
         />

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, ResponsiveContainer
 } from "recharts";
@@ -12,7 +12,6 @@ import DataTable from "../components/DataTable.jsx";
 import FileUploadCard from "../components/FileUploadCard.jsx";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import LoadingSpinner from "../components/LoadingSpinner.jsx";
-import InductorRemarkModal from "../components/InductorRemarkModal.jsx";
 import useAuth from "../hooks/useAuth.js";
 import useToast from "../hooks/useToast.js";
 import { ROWS, POTS, emptyRecord, todayStr, fmtDateLong } from "../utils/rowsConfig.js";
@@ -66,6 +65,7 @@ const BLOCK_STYLES = [
 ];
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const auth = useAuth();
   const user = auth?.user || null;
 
@@ -100,10 +100,6 @@ export default function DashboardPage() {
   const [uploadResult, setUploadResult] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(null);
 
-  // Modal State for Inductor Remarks
-  const [selectedInductor, setSelectedInductor] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   const loadDate = useCallback(async (date) => {
     setLoading(true);
     setUploadResult(null);
@@ -121,7 +117,7 @@ export default function DashboardPage() {
       console.warn("No data for date or fetch failed:", date, err?.message);
       setRecord(emptyRecord(date));
       setExistsOnServer(false);
-    } finally {
+    } fontally {
       setLoading(false);
     }
   }, []);
@@ -373,22 +369,14 @@ export default function DashboardPage() {
     { key: "PM_B", potKey: "pmPot", ind: "B", label: "PM Pot Inductor B" },
   ];
 
-  const handleCardClick = (item, metrics) => {
-    setSelectedInductor({
-      key: item.key,
-      title: item.label,
-      level: "High Level",
-      potKey: item.potKey,
-      ind: item.ind,
-      metrics: metrics,
-    });
-    setIsModalOpen(true);
+  // Router handler to navigate to dedicated inductor page
+  const handleCardClick = (key) => {
+    navigate(`/inductor/${key}`);
   };
 
   if (loading) return <LoadingSpinner label="Loading readings…" />;
 
   return (
-    /* INDUSTRIAL SLATE-NAVY DARK BACKGROUND (BEST INDUSTRY STANDARD) */
     <div className="flex flex-col gap-6 p-6 bg-[#0B0F17] min-h-screen text-slate-100 font-sans">
       
       {/* TOOLBAR */}
@@ -429,7 +417,7 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* 6 DISTINCT ATTRACTIVE INDUSTRIAL INDUCTOR BLOCKS */}
+      {/* TOP 6 CLICKABLE INDUCTOR CARDS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
         {ALL_BLOCKS.map((item, idx) => {
           const metrics = getInductorMetrics(item.potKey, item.ind);
@@ -437,22 +425,22 @@ export default function DashboardPage() {
 
           return (
             <div
-              key={`${item.potKey}-${item.ind}`}
-              onClick={() => handleCardClick(item, metrics)}
+              key={item.key}
+              onClick={() => handleCardClick(item.key)}
               className={`p-4 rounded-2xl border cursor-pointer transition-all duration-300 hover:scale-[1.02] group ${style.bg} ${style.border} ${style.glow}`}
             >
               <div className="flex items-center justify-between border-b border-slate-700/60 pb-2 mb-3">
                 <span className={`font-extrabold text-xs uppercase tracking-wide ${style.title}`}>
                   {item.label}
                 </span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${style.badge}`}>
-                  Remark &rarr;
+                <span className="text-[10px] font-bold text-slate-400 group-hover:text-cyan-300 transition-colors">
+                  View &rarr;
                 </span>
               </div>
 
               {/* INDIVIDUAL DISTINCT PARAMETER TEXT COLORS */}
               <div className="space-y-2 text-xs">
-                {/* Voltage: Bright Sky Blue */}
+                {/* Voltage */}
                 <div className="flex justify-between items-center bg-slate-950/60 px-2.5 py-1.5 rounded-lg border border-sky-500/30">
                   <span className="text-sky-300 font-medium flex items-center gap-1">
                     <Activity size={12} className="text-sky-400" /> Voltage:
@@ -462,7 +450,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
 
-                {/* Current: Vibrant Neon Emerald */}
+                {/* Current */}
                 <div className="flex justify-between items-center bg-slate-950/60 px-2.5 py-1.5 rounded-lg border border-emerald-500/30">
                   <span className="text-emerald-300 font-medium flex items-center gap-1">
                     <Gauge size={12} className="text-emerald-400" /> Current:
@@ -472,7 +460,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
 
-                {/* Conductance Ratio: Golden Amber */}
+                {/* Conductance Ratio */}
                 <div className="flex justify-between items-center bg-slate-950/60 px-2.5 py-1.5 rounded-lg border border-amber-500/30">
                   <span className="text-amber-300 font-medium flex items-center gap-1">
                     <Zap size={12} className="text-amber-400" /> Ratio:
@@ -509,7 +497,7 @@ export default function DashboardPage() {
         </select>
       </div>
 
-      {/* DATA TABLES (UNIFORM INDUSTRIAL DARK THEME) */}
+      {/* DATA TABLES */}
       <div className="flex flex-col gap-5">
         {(potFilter === "all" || potFilter === "mainPot") && (
           <DataTable 
@@ -566,7 +554,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* TRENDS & CHARTS SECTION (MATCHING INDUSTRIAL DARK THEME) */}
+      {/* TRENDS & CHARTS SECTION */}
       <div>
         <h2 className="text-base font-black text-white mb-3.5 tracking-wide flex items-center gap-2">
           <span className="text-cyan-400">▍</span> DASHBOARD &amp; TRENDS ANALYTICS
@@ -690,13 +678,6 @@ export default function DashboardPage() {
           setConfirmDialog(null);
           if (d?.onConfirm) await d.onConfirm();
         }}
-      />
-
-      {/* INDUCTOR REMARK POPUP MODAL */}
-      <InductorRemarkModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        inductor={selectedInductor}
       />
     </div>
   );
