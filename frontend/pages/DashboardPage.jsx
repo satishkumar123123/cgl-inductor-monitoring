@@ -19,43 +19,49 @@ import { ROWS, POTS, emptyRecord, todayStr, fmtDateLong } from "../utils/rowsCon
 import { parseExcelFile, downloadSampleTemplate, exportRecordToExcel } from "../utils/excelMapper.js";
 import { fetchDataByDate, createData, updateData, deleteData } from "../services/dataService.js";
 
-// Unique attractive gradients for each inductor block
+// 6 Unique, Vibrant & Premium Color Themes for Light Dashboard
 const BLOCK_STYLES = [
   {
-    bg: "bg-gradient-to-br from-cyan-950/80 via-slate-900/90 to-blue-950/80",
-    border: "border-cyan-500/40 hover:border-cyan-400",
-    badge: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
-    glow: "shadow-[0_0_15px_rgba(6,182,212,0.15)]",
+    bg: "bg-gradient-to-br from-cyan-50 via-cyan-100/60 to-blue-100/80",
+    border: "border-cyan-300 hover:border-cyan-500",
+    badge: "bg-cyan-600 text-white border-cyan-600",
+    titleColor: "text-cyan-950",
+    glow: "shadow-md hover:shadow-cyan-500/20",
   },
   {
-    bg: "bg-gradient-to-br from-amber-950/80 via-slate-900/90 to-orange-950/80",
-    border: "border-amber-500/40 hover:border-amber-400",
-    badge: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-    glow: "shadow-[0_0_15px_rgba(245,158,11,0.15)]",
+    bg: "bg-gradient-to-br from-amber-50 via-amber-100/60 to-orange-100/80",
+    border: "border-amber-300 hover:border-amber-500",
+    badge: "bg-amber-600 text-white border-amber-600",
+    titleColor: "text-amber-950",
+    glow: "shadow-md hover:shadow-amber-500/20",
   },
   {
-    bg: "bg-gradient-to-br from-emerald-950/80 via-slate-900/90 to-teal-950/80",
-    border: "border-emerald-500/40 hover:border-emerald-400",
-    badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-    glow: "shadow-[0_0_15px_rgba(16,185,129,0.15)]",
+    bg: "bg-gradient-to-br from-emerald-50 via-emerald-100/60 to-teal-100/80",
+    border: "border-emerald-300 hover:border-emerald-500",
+    badge: "bg-emerald-600 text-white border-emerald-600",
+    titleColor: "text-emerald-950",
+    glow: "shadow-md hover:shadow-emerald-500/20",
   },
   {
-    bg: "bg-gradient-to-br from-purple-950/80 via-slate-900/90 to-violet-950/80",
-    border: "border-purple-500/40 hover:border-purple-400",
-    badge: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-    glow: "shadow-[0_0_15px_rgba(168,85,247,0.15)]",
+    bg: "bg-gradient-to-br from-purple-50 via-purple-100/60 to-indigo-100/80",
+    border: "border-purple-300 hover:border-purple-500",
+    badge: "bg-purple-600 text-white border-purple-600",
+    titleColor: "text-purple-950",
+    glow: "shadow-md hover:shadow-purple-500/20",
   },
   {
-    bg: "bg-gradient-to-br from-rose-950/80 via-slate-900/90 to-pink-950/80",
-    border: "border-rose-500/40 hover:border-rose-400",
-    badge: "bg-rose-500/20 text-rose-300 border-rose-500/30",
-    glow: "shadow-[0_0_15px_rgba(244,63,94,0.15)]",
+    bg: "bg-gradient-to-br from-rose-50 via-rose-100/60 to-pink-100/80",
+    border: "border-rose-300 hover:border-rose-500",
+    badge: "bg-rose-600 text-white border-rose-600",
+    titleColor: "text-rose-950",
+    glow: "shadow-md hover:shadow-rose-500/20",
   },
   {
-    bg: "bg-gradient-to-br from-indigo-950/80 via-slate-900/90 to-blue-950/80",
-    border: "border-indigo-500/40 hover:border-indigo-400",
-    badge: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30",
-    glow: "shadow-[0_0_15px_rgba(99,102,241,0.15)]",
+    bg: "bg-gradient-to-br from-sky-50 via-sky-100/60 to-indigo-100/80",
+    border: "border-sky-300 hover:border-sky-500",
+    badge: "bg-sky-600 text-white border-sky-600",
+    titleColor: "text-sky-950",
+    glow: "shadow-md hover:shadow-sky-500/20",
   },
 ];
 
@@ -382,34 +388,36 @@ export default function DashboardPage() {
   if (loading) return <LoadingSpinner label="Loading readings…" />;
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    /* MAIN CONTAINER HAS WHITE / LIGHT SLATE BACKGROUND */
+    <div className="flex flex-col gap-6 p-6 bg-slate-50 min-h-screen text-slate-800">
+      
       {/* TOOLBAR */}
-      <div className="no-print flex flex-wrap items-center gap-2.5 bg-slate-900/60 border border-slate-800 rounded-2xl p-3.5 backdrop-blur-md">
+      <div className="no-print flex flex-wrap items-center gap-2.5 bg-white border border-slate-200 rounded-2xl p-3.5 shadow-sm">
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase text-slate-500">Date</span>
+          <span className="text-[10px] uppercase font-bold text-slate-500">Date</span>
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="bg-slate-950/60 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white"
+            className="bg-slate-100 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500"
           />
         </div>
-        <button onClick={() => setUploadOpen((o) => !o)} className="toolbar-btn"><UploadCloud size={14} /> Upload Excel</button>
-        <button onClick={downloadSampleTemplate} className="toolbar-btn"><Download size={14} /> Sample Excel</button>
-        <button onClick={handleSave} disabled={saving} className="toolbar-btn-primary"><Save size={14} /> {saving ? "Saving…" : "Save"}</button>
-        <button onClick={handleUpdate} disabled={saving} className="toolbar-btn"><RefreshCcw size={14} /> Update</button>
+        <button onClick={() => setUploadOpen((o) => !o)} className="toolbar-btn text-slate-700 bg-slate-100 hover:bg-slate-200 border-slate-300"><UploadCloud size={14} /> Upload Excel</button>
+        <button onClick={downloadSampleTemplate} className="toolbar-btn text-slate-700 bg-slate-100 hover:bg-slate-200 border-slate-300"><Download size={14} /> Sample Excel</button>
+        <button onClick={handleSave} disabled={saving} className="toolbar-btn-primary bg-cyan-600 hover:bg-cyan-700 text-white"><Save size={14} /> {saving ? "Saving…" : "Save"}</button>
+        <button onClick={handleUpdate} disabled={saving} className="toolbar-btn text-slate-700 bg-slate-100 hover:bg-slate-200 border-slate-300"><RefreshCcw size={14} /> Update</button>
         {user?.role === "Admin" && (
-          <button onClick={handleDelete} className="toolbar-btn-danger"><Trash2 size={14} /> Delete</button>
+          <button onClick={handleDelete} className="toolbar-btn-danger bg-red-600 hover:bg-red-700 text-white"><Trash2 size={14} /> Delete</button>
         )}
-        <button onClick={exportExcel} className="toolbar-btn"><FileSpreadsheet size={14} /> Export Excel</button>
-        <button onClick={exportPDF} className="toolbar-btn"><FileText size={14} /> Export PDF / Print</button>
+        <button onClick={exportExcel} className="toolbar-btn text-slate-700 bg-slate-100 hover:bg-slate-200 border-slate-300"><FileSpreadsheet size={14} /> Export Excel</button>
+        <button onClick={exportPDF} className="toolbar-btn text-slate-700 bg-slate-100 hover:bg-slate-200 border-slate-300"><FileText size={14} /> Export PDF / Print</button>
       </div>
 
-      <div className="text-xs text-slate-500 flex items-center gap-2 flex-wrap">
-        Showing <b className="text-cyan-400">{fmtDateLong ? fmtDateLong(selectedDate) : selectedDate}</b>
+      <div className="text-xs text-slate-600 flex items-center gap-2 flex-wrap">
+        Showing <b className="text-cyan-700">{fmtDateLong ? fmtDateLong(selectedDate) : selectedDate}</b>
         {record?.lastUpdated && <>· Last updated {new Date(record.lastUpdated).toLocaleString()}</>}
         {record?.source === "excel" && record?.uploadedFileName && <>· Source: Excel ({record.uploadedFileName})</>}
-        {!existsOnServer && <span className="flex items-center gap-1 text-orange-400"><Clock size={11} /> Not yet saved</span>}
+        {!existsOnServer && <span className="flex items-center gap-1 text-orange-600 font-medium"><Clock size={11} /> Not yet saved</span>}
       </div>
 
       {uploadOpen && (
@@ -421,7 +429,7 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* CLICKABLE INDUCTOR CARDS GRID */}
+      {/* 6 ATTRACTIVE VIBRANT INDUCTOR CARDS IN WHITE THEME */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
         {ALL_BLOCKS.map((item, idx) => {
           const metrics = getInductorMetrics(item.potKey, item.ind);
@@ -431,29 +439,47 @@ export default function DashboardPage() {
             <div
               key={`${item.potKey}-${item.ind}`}
               onClick={() => handleCardClick(item, metrics)}
-              className={`p-4 rounded-2xl border backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.02] group ${style.bg} ${style.border} ${style.glow}`}
+              className={`p-4 rounded-2xl border cursor-pointer transition-all duration-300 hover:-translate-y-1 group ${style.bg} ${style.border} ${style.glow}`}
             >
-              <div className="flex items-center justify-between border-b border-slate-700/50 pb-2 mb-3">
-                <span className="font-extrabold text-xs text-white uppercase tracking-wide group-hover:text-cyan-300 transition-colors">
+              <div className="flex items-center justify-between border-b border-slate-300/60 pb-2 mb-3">
+                <span className={`font-extrabold text-xs uppercase tracking-wide ${style.titleColor}`}>
                   {item.label}
                 </span>
-                <span className="text-[10px] text-slate-400 group-hover:text-cyan-300 transition-colors">
+                <span className="text-[10px] font-bold text-slate-500 group-hover:text-slate-800 transition-colors">
                   Remark &rarr;
                 </span>
               </div>
 
+              {/* INDIVIDUAL DISTINCT PARAMETER COLORS */}
               <div className="space-y-2 text-xs">
-                <div className="flex justify-between items-center bg-slate-950/40 px-2.5 py-1.5 rounded-lg border border-slate-800/60">
-                  <span className="text-slate-400 flex items-center gap-1"><Activity size={12} className="text-blue-400" /> Voltage:</span>
-                  <span className="font-bold text-white">{metrics.voltage} {metrics.voltage !== "—" && "V"}</span>
+                {/* Voltage Block - Indigo Theme */}
+                <div className="flex justify-between items-center bg-white/80 px-2.5 py-1.5 rounded-lg border border-indigo-200/80 shadow-sm">
+                  <span className="text-indigo-900 font-semibold flex items-center gap-1">
+                    <Activity size={13} className="text-indigo-600" /> Voltage:
+                  </span>
+                  <span className="font-extrabold text-indigo-700">
+                    {metrics.voltage} {metrics.voltage !== "—" && "V"}
+                  </span>
                 </div>
-                <div className="flex justify-between items-center bg-slate-950/40 px-2.5 py-1.5 rounded-lg border border-slate-800/60">
-                  <span className="text-slate-400 flex items-center gap-1"><Gauge size={12} className="text-cyan-400" /> Current:</span>
-                  <span className="font-bold text-white">{metrics.current} {metrics.current !== "—" && "A"}</span>
+
+                {/* Current Block - Emerald Theme */}
+                <div className="flex justify-between items-center bg-white/80 px-2.5 py-1.5 rounded-lg border border-emerald-200/80 shadow-sm">
+                  <span className="text-emerald-900 font-semibold flex items-center gap-1">
+                    <Gauge size={13} className="text-emerald-600" /> Current:
+                  </span>
+                  <span className="font-extrabold text-emerald-700">
+                    {metrics.current} {metrics.current !== "—" && "A"}
+                  </span>
                 </div>
-                <div className="flex justify-between items-center bg-slate-950/40 px-2.5 py-1.5 rounded-lg border border-slate-800/60">
-                  <span className="text-slate-400 flex items-center gap-1"><Zap size={12} className="text-amber-400" /> Conductance Ratio:</span>
-                  <span className="font-bold text-cyan-300">{metrics.ratio}</span>
+
+                {/* Conductance Ratio Block - Amber/Rose Theme */}
+                <div className="flex justify-between items-center bg-white/80 px-2.5 py-1.5 rounded-lg border border-amber-200/80 shadow-sm">
+                  <span className="text-amber-900 font-semibold flex items-center gap-1">
+                    <Zap size={13} className="text-amber-600" /> Conductance Ratio:
+                  </span>
+                  <span className="font-extrabold text-amber-700">
+                    {metrics.ratio}
+                  </span>
                 </div>
               </div>
             </div>
@@ -462,22 +488,22 @@ export default function DashboardPage() {
       </div>
 
       {/* FILTERS */}
-      <div className="no-print flex flex-wrap items-center gap-2.5 bg-slate-900/60 border border-slate-800 rounded-2xl p-3 backdrop-blur-md">
+      <div className="no-print flex flex-wrap items-center gap-2.5 bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
         <Settings2 size={14} className="text-slate-500" />
-        <select value={potFilter} onChange={(e) => setPotFilter(e.target.value)} className="select-input">
+        <select value={potFilter} onChange={(e) => setPotFilter(e.target.value)} className="select-input bg-slate-100 border-slate-300 text-slate-800">
           <option value="all">All Pots</option>
           <option value="mainPot">Main Pot</option>
           <option value="pmPot">PM Pot</option>
         </select>
-        <select value={paramFilter} onChange={(e) => setParamFilter(e.target.value)} className="select-input">
+        <select value={paramFilter} onChange={(e) => setParamFilter(e.target.value)} className="select-input bg-slate-100 border-slate-300 text-slate-800">
           <option value="all">All Parameters</option>
           {ROWS.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
         </select>
-        <div className="flex items-center gap-1.5 bg-slate-950/60 border border-slate-700 rounded-lg px-2.5 py-1.5">
+        <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-300 rounded-lg px-2.5 py-1.5">
           <Search size={13} className="text-slate-500" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search parameter…" className="bg-transparent outline-none text-xs w-36 text-white" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search parameter…" className="bg-transparent outline-none text-xs w-36 text-slate-800 placeholder-slate-400" />
         </div>
-        <select value={chartLevel} onChange={(e) => setChartLevel(e.target.value)} className="select-input ml-auto">
+        <select value={chartLevel} onChange={(e) => setChartLevel(e.target.value)} className="select-input bg-slate-100 border-slate-300 text-slate-800 ml-auto">
           <option value="high">Charts: High level</option>
           <option value="intermediate">Charts: Intermediate level</option>
         </select>
@@ -494,17 +520,17 @@ export default function DashboardPage() {
       </div>
 
       {/* META */}
-      <div className="no-print grid gap-3 bg-slate-900/60 border border-slate-800 rounded-2xl p-4 backdrop-blur-md" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+      <div className="no-print grid gap-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
         <div>
-          <div className="text-[10.5px] uppercase text-slate-500 mb-1">Created By</div>
-          <div className="text-sm text-slate-200">{record?.createdByName || user?.name || "—"}</div>
+          <div className="text-[10.5px] uppercase font-bold text-slate-500 mb-1">Created By</div>
+          <div className="text-sm font-semibold text-slate-800">{record?.createdByName || user?.name || "—"}</div>
         </div>
         <div>
-          <div className="text-[10.5px] uppercase text-slate-500 mb-1">Daily Status</div>
+          <div className="text-[10.5px] uppercase font-bold text-slate-500 mb-1">Daily Status</div>
           <select
             value={record?.status || "Normal"}
             onChange={(e) => setRecord((p) => ({ ...p, status: e.target.value }))}
-            className="select-input w-full"
+            className="select-input w-full bg-slate-100 border-slate-300 text-slate-800"
           >
             <option>Excellent</option>
             <option>Normal</option>
@@ -512,25 +538,25 @@ export default function DashboardPage() {
           </select>
         </div>
         <div className="sm:col-span-2">
-          <div className="text-[10.5px] uppercase text-slate-500 mb-1">Remarks</div>
+          <div className="text-[10.5px] uppercase font-bold text-slate-500 mb-1">Remarks</div>
           <input
             value={record?.remarks || ""}
             onChange={(e) => setRecord((p) => ({ ...p, remarks: e.target.value }))}
             placeholder="Shift observations…"
-            className="w-full bg-slate-950/60 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
+            className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500"
           />
         </div>
       </div>
 
       {/* CHARTS */}
       <div>
-        <h2 className="text-[15px] font-extrabold text-white mb-3.5"><span className="text-cyan-400">▍</span> Dashboard &amp; Trends</h2>
+        <h2 className="text-[15px] font-extrabold text-slate-900 mb-3.5"><span className="text-cyan-600">▍</span> Dashboard &amp; Trends</h2>
         <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))" }}>
           <ChartCard title="Three Phase Current">
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
-                <CartesianGrid stroke={chartTheme?.grid || "#334155"} vertical={false} />
-                <XAxis dataKey="name" tick={chartTheme?.tick} /><YAxis tick={chartTheme?.tick} /><Tooltip {...chartTheme?.tooltip} /><Legend wrapperStyle={{ fontSize: 11 }} />
+                <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "#475569", fontSize: 11 }} /><YAxis tick={{ fill: "#475569", fontSize: 11 }} /><Tooltip /><Legend wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="rPhase" name="R Phase" fill="#EF4444" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="yPhase" name="Y Phase" fill="#F59E0B" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="bPhase" name="B Phase" fill="#3B82F6" radius={[4, 4, 0, 0]} />
@@ -541,8 +567,8 @@ export default function DashboardPage() {
           <ChartCard title="Power">
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
-                <CartesianGrid stroke={chartTheme?.grid || "#334155"} vertical={false} />
-                <XAxis dataKey="name" tick={chartTheme?.tick} /><YAxis tick={chartTheme?.tick} /><Tooltip {...chartTheme?.tooltip} />
+                <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "#475569", fontSize: 11 }} /><YAxis tick={{ fill: "#475569", fontSize: 11 }} /><Tooltip />
                 <Bar dataKey="power" name="Power (kW)" fill="#F97316" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -551,9 +577,9 @@ export default function DashboardPage() {
           <ChartCard title="Voltage">
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={allInductorRows}>
-                <CartesianGrid stroke={chartTheme?.grid || "#334155"} vertical={false} />
-                <XAxis dataKey="name" tick={chartTheme?.tick} /><YAxis tick={chartTheme?.tick} domain={["auto", "auto"]} /><Tooltip {...chartTheme?.tooltip} />
-                <Line type="monotone" dataKey="inductorVoltage" name="Voltage (V)" stroke="#22D3EE" strokeWidth={2.5} dot={{ r: 3 }} />
+                <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "#475569", fontSize: 11 }} /><YAxis tick={{ fill: "#475569", fontSize: 11 }} domain={["auto", "auto"]} /><Tooltip />
+                <Line type="monotone" dataKey="inductorVoltage" name="Voltage (V)" stroke="#0891B2" strokeWidth={2.5} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
@@ -561,9 +587,9 @@ export default function DashboardPage() {
           <ChartCard title="Current">
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={allInductorRows}>
-                <CartesianGrid stroke={chartTheme?.grid || "#334155"} vertical={false} />
-                <XAxis dataKey="name" tick={chartTheme?.tick} /><YAxis tick={chartTheme?.tick} /><Tooltip {...chartTheme?.tooltip} />
-                <Line type="monotone" dataKey="lineCurrent" name="Line Current (A)" stroke="#3B82F6" strokeWidth={2.5} dot={{ r: 3 }} />
+                <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "#475569", fontSize: 11 }} /><YAxis tick={{ fill: "#475569", fontSize: 11 }} /><Tooltip />
+                <Line type="monotone" dataKey="lineCurrent" name="Line Current (A)" stroke="#2563EB" strokeWidth={2.5} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
@@ -571,10 +597,10 @@ export default function DashboardPage() {
           <ChartCard title="Power Factor">
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={allInductorRows}>
-                <CartesianGrid stroke={chartTheme?.grid || "#334155"} vertical={false} />
-                <XAxis dataKey="name" tick={chartTheme?.tick} /><YAxis tick={chartTheme?.tick} domain={[0, 1]} /><Tooltip {...chartTheme?.tooltip} /><Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="linePF" name="Line PF" stroke="#F59E0B" strokeWidth={2.5} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="inductorPF" name="Inductor PF" stroke="#22D3EE" strokeWidth={2.5} dot={{ r: 3 }} />
+                <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "#475569", fontSize: 11 }} /><YAxis tick={{ fill: "#475569", fontSize: 11 }} domain={[0, 1]} /><Tooltip /><Legend wrapperStyle={{ fontSize: 11 }} />
+                <Line type="monotone" dataKey="linePF" name="Line PF" stroke="#D97706" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="inductorPF" name="Inductor PF" stroke="#0891B2" strokeWidth={2.5} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
@@ -582,9 +608,9 @@ export default function DashboardPage() {
           <ChartCard title="Inductor Current">
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
-                <CartesianGrid stroke={chartTheme?.grid || "#334155"} vertical={false} />
-                <XAxis dataKey="name" tick={chartTheme?.tick} /><YAxis tick={chartTheme?.tick} /><Tooltip {...chartTheme?.tooltip} />
-                <Bar dataKey="inductorCurrent" name="Inductor Current (A)" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "#475569", fontSize: 11 }} /><YAxis tick={{ fill: "#475569", fontSize: 11 }} /><Tooltip />
+                <Bar dataKey="inductorCurrent" name="Inductor Current (A)" fill="#2563EB" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
@@ -592,11 +618,11 @@ export default function DashboardPage() {
           <ChartCard title="Impedance / Resistance / Reactance">
             <ResponsiveContainer width="100%" height={260}>
               <ComposedChart data={allInductorRows}>
-                <CartesianGrid stroke={chartTheme?.grid || "#334155"} vertical={false} />
-                <XAxis dataKey="name" tick={chartTheme?.tick} /><YAxis tick={chartTheme?.tick} /><Tooltip {...chartTheme?.tooltip} /><Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="impedanceZ" name="Impedance" stroke="#22D3EE" strokeWidth={2} dot={{ r: 2.5 }} />
-                <Line type="monotone" dataKey="resistanceR" name="Resistance" stroke="#F97316" strokeWidth={2} dot={{ r: 2.5 }} />
-                <Line type="monotone" dataKey="reactanceX" name="Reactance" stroke="#3B82F6" strokeWidth={2} dot={{ r: 2.5 }} />
+                <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "#475569", fontSize: 11 }} /><YAxis tick={{ fill: "#475569", fontSize: 11 }} /><Tooltip /><Legend wrapperStyle={{ fontSize: 11 }} />
+                <Line type="monotone" dataKey="impedanceZ" name="Impedance" stroke="#0891B2" strokeWidth={2} dot={{ r: 2.5 }} />
+                <Line type="monotone" dataKey="resistanceR" name="Resistance" stroke="#EA580C" strokeWidth={2} dot={{ r: 2.5 }} />
+                <Line type="monotone" dataKey="reactanceX" name="Reactance" stroke="#2563EB" strokeWidth={2} dot={{ r: 2.5 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </ChartCard>
@@ -604,9 +630,9 @@ export default function DashboardPage() {
           <ChartCard title="Conductance Ratio">
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={allInductorRows}>
-                <CartesianGrid stroke={chartTheme?.grid || "#334155"} vertical={false} />
-                <XAxis dataKey="name" tick={chartTheme?.tick} /><YAxis tick={chartTheme?.tick} /><Tooltip {...chartTheme?.tooltip} />
-                <Line type="monotone" dataKey="conductanceRatio" name="Conductance Ratio" stroke="#F97316" strokeWidth={2.5} dot={{ r: 3 }} />
+                <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "#475569", fontSize: 11 }} /><YAxis tick={{ fill: "#475569", fontSize: 11 }} /><Tooltip />
+                <Line type="monotone" dataKey="conductanceRatio" name="Conductance Ratio" stroke="#EA580C" strokeWidth={2.5} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
@@ -614,9 +640,9 @@ export default function DashboardPage() {
           <ChartCard title="KVAR Connected">
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
-                <CartesianGrid stroke={chartTheme?.grid || "#334155"} vertical={false} />
-                <XAxis dataKey="name" tick={chartTheme?.tick} /><YAxis tick={chartTheme?.tick} /><Tooltip {...chartTheme?.tooltip} />
-                <Bar dataKey="kvarConnected" name="KVAR Connected" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "#475569", fontSize: 11 }} /><YAxis tick={{ fill: "#475569", fontSize: 11 }} /><Tooltip />
+                <Bar dataKey="kvarConnected" name="KVAR Connected" fill="#2563EB" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
@@ -624,9 +650,9 @@ export default function DashboardPage() {
           <ChartCard title="Balancing KVAR">
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
-                <CartesianGrid stroke={chartTheme?.grid || "#334155"} vertical={false} />
-                <XAxis dataKey="name" tick={chartTheme?.tick} /><YAxis tick={chartTheme?.tick} /><Tooltip {...chartTheme?.tooltip} />
-                <Bar dataKey="balancingKvar" name="Balancing KVAR" fill="#F97316" radius={[4, 4, 0, 0]} />
+                <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "#475569", fontSize: 11 }} /><YAxis tick={{ fill: "#475569", fontSize: 11 }} /><Tooltip />
+                <Bar dataKey="balancingKvar" name="Balancing KVAR" fill="#EA580C" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
