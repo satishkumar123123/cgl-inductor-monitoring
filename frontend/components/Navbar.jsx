@@ -1,20 +1,22 @@
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { Zap, LayoutDashboard, History, LogOut, Menu, Factory } from "lucide-react";
-import useAuth from "../hooks/useAuth.js";
+import { NavLink } from "react-router-dom";
+import { Zap, LayoutDashboard, History, Menu, Factory } from "lucide-react";
 
 export default function Navbar({ onMenuClick }) {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  // Satish name with individual stylish colors & soft glow
+  const stylishSatish = [
+    { char: "S", color: "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" },
+    { char: "a", color: "text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" },
+    { char: "t", color: "text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" },
+    { char: "i", color: "text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]" },
+    { char: "s", color: "text-rose-400 drop-shadow-[0_0_8px_rgba(251,113,133,0.8)]" },
+    { char: "h", color: "text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]" },
+  ];
 
   return (
     <header className="no-print sticky top-0 z-30 border-b border-slate-800 bg-slate-950/85 backdrop-blur-md">
       <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
+        
         {/* LOGO & BRAND */}
         <div className="flex items-center gap-3">
           <button
@@ -82,21 +84,17 @@ export default function Navbar({ onMenuClick }) {
           </NavLink>
         </nav>
 
-        {/* USER PROFILE & LOGOUT */}
-        <div className="flex items-center gap-3">
-          <div className="text-right hidden sm:block">
-            <div className="text-xs font-bold text-white tracking-wide">Satish</div>
-            <div className="text-[10px] font-semibold text-cyan-400 uppercase tracking-wider">
-              Site Admin
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20 hover:text-red-200 hover:border-red-500/50 transition-all shadow-sm"
-          >
-            <LogOut size={14} /> Logout
-          </button>
+        {/* STYLISH MULTI-COLOR NAME 'SATISH' */}
+        <div className="flex items-center px-4 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 shadow-md">
+          <span className="text-base font-black tracking-widest uppercase">
+            {stylishSatish.map((item, index) => (
+              <span key={index} className={item.color}>
+                {item.char}
+              </span>
+            ))}
+          </span>
         </div>
+
       </div>
     </header>
   );
