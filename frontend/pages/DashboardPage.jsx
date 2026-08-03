@@ -4,8 +4,8 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, ResponsiveContainer
 } from "recharts";
 import {
-  Save, RefreshCcw, Trash2, FileSpreadsheet, FileText, Search, UploadCloud, Download,
-  Settings2, Clock, Zap, Activity, Gauge
+  Save, RefreshCcw, Trash2, FileSpreadsheet, FileText, UploadCloud, Download,
+  Clock, Zap, Activity, Gauge
 } from "lucide-react";
 import ChartCard, { chartTheme } from "../components/ChartCard.jsx";
 import DataTable from "../components/DataTable.jsx";
@@ -88,11 +88,6 @@ export default function DashboardPage() {
   const [existsOnServer, setExistsOnServer] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  const [potFilter, setPotFilter] = useState("all");
-  const [paramFilter, setParamFilter] = useState("all");
-  const [search, setSearch] = useState("");
-  const [chartLevel, setChartLevel] = useState("high");
 
   const [errorCells, setErrorCells] = useState(new Set());
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -293,7 +288,7 @@ export default function DashboardPage() {
     Object.values(POTS).forEach((pot) => {
       pot.inductors.forEach((ind) => {
         const name = pot.key === "mainPot" ? ind : `PM-${ind}`;
-        const lvlData = record?.[pot.key]?.[ind]?.[chartLevel] || {};
+        const lvlData = record?.[pot.key]?.[ind]?.high || {};
         const row = { name };
 
         ROWS.forEach((r) => {
@@ -305,7 +300,7 @@ export default function DashboardPage() {
     });
 
     return out;
-  }, [record, chartLevel]);
+  }, [record]);
 
   /* -------------------------- SAFE MULTI-KEY INDUCTOR METRICS EXTRACTOR -------------------------- */
   const getInductorMetrics = (potKey, ind) => {
@@ -475,54 +470,24 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* FILTERS TOOLBAR */}
-      <div className="no-print flex flex-wrap items-center gap-2.5 bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-md backdrop-blur-md">
-        <Settings2 size={14} className="text-slate-400" />
-        <select value={potFilter} onChange={(e) => setPotFilter(e.target.value)} className="select-input bg-slate-950 border-slate-700 text-slate-200">
-          <option value="all">All Pots</option>
-          <option value="mainPot">Main Pot</option>
-          <option value="pmPot">PM Pot</option>
-        </select>
-        <select value={paramFilter} onChange={(e) => setParamFilter(e.target.value)} className="select-input bg-slate-950 border-slate-700 text-slate-200">
-          <option value="all">All Parameters</option>
-          {ROWS.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
-        </select>
-        <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5">
-          <Search size={13} className="text-slate-400" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search parameter…" className="bg-transparent outline-none text-xs w-36 text-white placeholder-slate-500" />
-        </div>
-        <select value={chartLevel} onChange={(e) => setChartLevel(e.target.value)} className="select-input bg-slate-950 border-slate-700 text-slate-200 ml-auto">
-          <option value="high">Charts: High level</option>
-          <option value="intermediate">Charts: Intermediate level</option>
-        </select>
-      </div>
-
       {/* DATA TABLES */}
       <div className="flex flex-col gap-5">
-        {(potFilter === "all" || potFilter === "mainPot") && (
-          <DataTable 
-            potKey="mainPot" 
-            potLabel="MAIN POT" 
-            inductors={POTS.mainPot.inductors} 
-            potData={record?.mainPot || {}} 
-            onChange={updateCell} 
-            search={search} 
-            paramFilter={paramFilter} 
-            errorCells={errorCells} 
-          />
-        )}
-        {(potFilter === "all" || potFilter === "pmPot") && (
-          <DataTable 
-            potKey="pmPot" 
-            potLabel="PM POT" 
-            inductors={POTS.pmPot.inductors} 
-            potData={record?.pmPot || {}} 
-            onChange={updateCell} 
-            search={search} 
-            paramFilter={paramFilter} 
-            errorCells={errorCells} 
-          />
-        )}
+        <DataTable 
+          potKey="mainPot" 
+          potLabel="MAIN POT" 
+          inductors={POTS.mainPot.inductors} 
+          potData={record?.mainPot || {}} 
+          onChange={updateCell} 
+          errorCells={errorCells} 
+        />
+        <DataTable 
+          potKey="pmPot" 
+          potLabel="PM POT" 
+          inductors={POTS.pmPot.inductors} 
+          potData={record?.pmPot || {}} 
+          onChange={updateCell} 
+          errorCells={errorCells} 
+        />
       </div>
 
       {/* SHIFT META SECTION */}
