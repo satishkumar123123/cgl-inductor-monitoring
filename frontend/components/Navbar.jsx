@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { Zap, LayoutDashboard, History, Menu, Factory } from "lucide-react";
 
 export default function Navbar({ onMenuClick }) {
-  // Satish name with individual stylish colors & soft glow
+  // Multi-color letters for SATISH
   const stylishSatish = [
     { char: "S", color: "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" },
     { char: "a", color: "text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" },
@@ -17,7 +17,7 @@ export default function Navbar({ onMenuClick }) {
     <header className="no-print sticky top-0 z-30 border-b border-slate-800 bg-slate-950/85 backdrop-blur-md">
       <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
         
-        {/* LOGO & BRAND */}
+        {/* LOGO & BRANDING WITH ATTRACTIVE MULTI-COLORS */}
         <div className="flex items-center gap-3">
           <button
             onClick={onMenuClick}
@@ -26,15 +26,29 @@ export default function Navbar({ onMenuClick }) {
           >
             <Menu size={18} />
           </button>
+          
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.3)]">
             <Zap size={18} className="text-slate-950" />
           </div>
+
           <div>
-            <div className="font-extrabold text-white text-sm leading-tight tracking-wide">
-              CGL INDUCTOR MONITORING
+            {/* CGL INDUCTOR MONITORING - MULTI-COLOR WORDS */}
+            <div className="font-extrabold text-sm leading-tight tracking-wide flex items-center gap-1.5">
+              <span className="text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]">CGL</span>
+              <span className="text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]">INDUCTOR</span>
+              <span className="text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.5)]">MONITORING</span>
             </div>
-            <div className="text-[11px] text-slate-500 hidden sm:block">
-              APL Apollo Building Products Ltd. · Electrical Dept.
+
+            {/* APL APOLLO SUB-TEXT - MULTI-COLOR WORDS */}
+            <div className="text-[11px] font-medium hidden sm:flex items-center gap-1">
+              <span className="text-rose-400">APL</span>
+              <span className="text-purple-400">Apollo</span>
+              <span className="text-blue-400">Building</span>
+              <span className="text-sky-300">Products</span>
+              <span className="text-slate-400">Ltd.</span>
+              <span className="text-slate-600">·</span>
+              <span className="text-yellow-400 font-semibold">Electrical</span>
+              <span className="text-emerald-300 font-semibold">Dept.</span>
             </div>
           </div>
         </div>
