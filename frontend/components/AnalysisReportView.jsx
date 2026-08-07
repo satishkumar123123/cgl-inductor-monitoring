@@ -8,7 +8,7 @@ import ReportSignatureBlock from "./ReportSignatureBlock.jsx";
 import ObservationsPanel from "./ObservationsPanel.jsx";
 import RecommendationsPanel from "./RecommendationsPanel.jsx";
 import ParamReportTable from "./ParamReportTable.jsx";
-import ChartCard, { chartTheme } from "./ChartCard.jsx";
+import ChartCard from "./ChartCard.jsx";
 import LoadingSpinner from "./LoadingSpinner.jsx";
 import { SkeletonCards, SkeletonChart } from "./Skeleton.jsx";
 import useAuth from "../hooks/useAuth.js";
@@ -19,7 +19,7 @@ import { logReport } from "../services/reportService.js";
 
 /**
  * Shared implementation behind both the PM Pot and Main Pot Analysis Report
- * pages (Modules 1 & 2) — updated for enhanced UI & tailored metric display.
+ * pages (Modules 1 & 2) — Clean White & Vibrant UI layout.
  */
 export default function AnalysisReportView({ title, reportType, elementId, fetchReport }) {
   const { user } = useAuth();
@@ -86,7 +86,6 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
     const body = rowIds.map((id, i) => [rowLabels[i], ...report.entries.map((e) => e[id])]);
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([header, ...body]), "Readings");
 
-    // Excel summary Sheet without removed metrics
     const summarySheet = [
       ["Report", reportType],
       ["Date", fmtDateLong(date)],
@@ -130,34 +129,34 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
   }, [report]);
 
   return (
-    <div className="flex flex-col gap-6 p-2 md:p-4 max-w-[1600px] mx-auto text-slate-100 font-sans">
+    <div className="flex flex-col gap-6 p-2 md:p-6 max-w-[1600px] mx-auto text-slate-900 bg-white min-h-screen font-sans">
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <h1 className="text-2xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-teal-300 flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-blue-400 animate-pulse" />
+          <h1 className="text-2xl font-black tracking-wide text-slate-900 flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-cyan-600 animate-pulse" />
             {title}
           </h1>
-          <p className="text-xs text-slate-400 mt-1">Select a date to generate, analyze, or export industrial telemetry reports.</p>
+          <p className="text-xs text-slate-500 mt-1">Select a date to generate, analyze, or export industrial telemetry reports.</p>
         </div>
       </div>
 
       {/* Control Action Toolbar */}
-      <div className="no-print flex flex-wrap items-center justify-between gap-4 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-xl transition-all">
+      <div className="no-print flex flex-wrap items-center justify-between gap-4 bg-slate-100 border border-slate-200 rounded-2xl p-4 shadow-sm transition-all">
         <div className="flex items-center gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Select Date</label>
+            <label className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Select Date</label>
             <input 
               type="date" 
               value={date} 
               onChange={(e) => setDate(e.target.value)} 
-              className="bg-slate-950/80 border border-slate-700/80 focus:border-blue-500 rounded-xl px-3 py-1.5 text-xs font-semibold text-white outline-none shadow-inner transition-colors" 
+              className="bg-white border border-slate-300 focus:border-cyan-600 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none transition-colors" 
             />
           </div>
           <button 
             onClick={generate} 
             disabled={loading} 
-            className="mt-4 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20 active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+            className="mt-4 flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
           >
             {loading ? <Loader2 size={15} className="animate-spin" /> : <PlayCircle size={15} />} Generate
           </button>
@@ -167,23 +166,23 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
           <button 
             onClick={downloadPdf} 
             disabled={!report || busy} 
-            className="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer shadow-sm"
+            className="flex items-center gap-1.5 bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-800 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer shadow-sm"
           >
-            <FileText size={14} className="text-red-400" /> PDF
+            <FileText size={14} className="text-red-600" /> PDF
           </button>
           <button 
             onClick={downloadExcel} 
             disabled={!report} 
-            className="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer shadow-sm"
+            className="flex items-center gap-1.5 bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-800 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer shadow-sm"
           >
-            <FileSpreadsheet size={14} className="text-emerald-400" /> Excel
+            <FileSpreadsheet size={14} className="text-emerald-600" /> Excel
           </button>
           <button 
             onClick={printReport} 
             disabled={!report} 
-            className="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer shadow-sm"
+            className="flex items-center gap-1.5 bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-800 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer shadow-sm"
           >
-            <Printer size={14} className="text-sky-400" /> Print
+            <Printer size={14} className="text-sky-600" /> Print
           </button>
         </div>
       </div>
@@ -201,12 +200,12 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
 
       {/* Main Report Container */}
       {!loading && report && (
-        <div id={elementId} className="bg-slate-950/90 border border-slate-800/90 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md transition-all">
+        <div id={elementId} className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-md transition-all">
           
           <ReportHeader title={title.toUpperCase()} date={report.date} generatedTime={report.generatedTime} generatedBy={report.generatedByName || user?.name} />
 
           {/* Data Table */}
-          <div className="my-6 rounded-2xl overflow-hidden border border-slate-800/80 shadow-lg bg-slate-900/40">
+          <div className="my-6 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-white">
             <ParamReportTable entries={report.entries} />
           </div>
 
@@ -221,11 +220,11 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
             <ChartCard title="Power Comparison">
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={report.entries}>
-                  <CartesianGrid stroke={chartTheme.grid} vertical={false} />
-                  <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
-                  <YAxis tick={chartTheme.tick} />
-                  <Tooltip {...chartTheme.tooltip} />
-                  <Bar dataKey="power" name="Power (kW)" fill="#F97316" radius={[6, 6, 0, 0]} />
+                  <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: "#475569", fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
+                  <YAxis tick={{ fill: "#475569" }} />
+                  <Tooltip />
+                  <Bar dataKey="power" name="Power (kW)" fill="#ea580c" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -233,11 +232,11 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
             <ChartCard title="Voltage Comparison">
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={report.entries}>
-                  <CartesianGrid stroke={chartTheme.grid} vertical={false} />
-                  <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
-                  <YAxis tick={chartTheme.tick} />
-                  <Tooltip {...chartTheme.tooltip} />
-                  <Bar dataKey="inductorVoltage" name="Voltage (V)" fill="#22D3EE" radius={[6, 6, 0, 0]} />
+                  <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: "#475569", fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
+                  <YAxis tick={{ fill: "#475569" }} />
+                  <Tooltip />
+                  <Bar dataKey="inductorVoltage" name="Voltage (V)" fill="#0284c7" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -245,10 +244,10 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
             <ChartCard title="Phase Current Comparison">
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={report.entries}>
-                  <CartesianGrid stroke={chartTheme.grid} vertical={false} />
-                  <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
-                  <YAxis tick={chartTheme.tick} />
-                  <Tooltip {...chartTheme.tooltip} />
+                  <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: "#475569", fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
+                  <YAxis tick={{ fill: "#475569" }} />
+                  <Tooltip />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
                   <Bar dataKey="rPhase" name="R Phase" fill="#EF4444" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="yPhase" name="Y Phase" fill="#F59E0B" radius={[4, 4, 0, 0]} />
@@ -260,11 +259,11 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
             <ChartCard title="Power Factor (PF)">
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={report.entries}>
-                  <CartesianGrid stroke={chartTheme.grid} vertical={false} />
-                  <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
-                  <YAxis tick={chartTheme.tick} domain={[0, 1]} />
-                  <Tooltip {...chartTheme.tooltip} />
-                  <Bar dataKey="inductorPF" name="Inductor PF" fill="#14B8A6" radius={[6, 6, 0, 0]} />
+                  <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: "#475569", fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
+                  <YAxis tick={{ fill: "#475569" }} domain={[0, 1]} />
+                  <Tooltip />
+                  <Bar dataKey="inductorPF" name="Inductor PF" fill="#0d9488" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -272,11 +271,11 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
             <ChartCard title="Inductor Apparent Power (KVA)">
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={report.entries}>
-                  <CartesianGrid stroke={chartTheme.grid} vertical={false} />
-                  <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
-                  <YAxis tick={chartTheme.tick} />
-                  <Tooltip {...chartTheme.tooltip} />
-                  <Bar dataKey="inductorKVA" name="Inductor KVA" fill="#6366F1" radius={[6, 6, 0, 0]} />
+                  <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: "#475569", fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
+                  <YAxis tick={{ fill: "#475569" }} />
+                  <Tooltip />
+                  <Bar dataKey="inductorKVA" name="Inductor KVA" fill="#4f46e5" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -284,23 +283,23 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
 
           {/* Remarks Inputs */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 my-6">
-            <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">Operator Remarks</label>
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-2 block">Operator Remarks</label>
               <textarea 
                 value={operatorRemarks} 
                 onChange={(e) => setOperatorRemarks(e.target.value)} 
                 rows={3} 
-                className="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl p-3 text-xs text-slate-200 outline-none focus:border-blue-500 transition-colors resize-none" 
+                className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs text-slate-800 outline-none focus:border-cyan-600 transition-colors resize-none" 
                 placeholder="Shift observations and operator notes…" 
               />
             </div>
-            <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">Engineer Remarks</label>
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-2 block">Engineer Remarks</label>
               <textarea 
                 value={engineerRemarks} 
                 onChange={(e) => setEngineerRemarks(e.target.value)} 
                 rows={3} 
-                className="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl p-3 text-xs text-slate-200 outline-none focus:border-blue-500 transition-colors resize-none" 
+                className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs text-slate-800 outline-none focus:border-cyan-600 transition-colors resize-none" 
                 placeholder="Technical evaluations and maintenance review notes…" 
               />
             </div>
@@ -309,8 +308,8 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
           {/* Signatures & Footer */}
           <ReportSignatureBlock />
 
-          <div className="text-center text-[11px] font-medium text-slate-500 mt-8 pt-4 border-t border-slate-800/80">
-            Generated automatically via <span className="text-slate-300 font-bold">CGL Dashboard System</span>
+          <div className="text-center text-[11px] font-medium text-slate-500 mt-8 pt-4 border-t border-slate-200">
+            Generated automatically via <span className="text-slate-800 font-bold">CGL Dashboard System</span>
           </div>
         </div>
       )}
