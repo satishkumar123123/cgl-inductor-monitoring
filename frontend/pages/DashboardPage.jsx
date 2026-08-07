@@ -370,10 +370,9 @@ export default function DashboardPage() {
   };
 
   if (loading) return <LoadingSpinner label="Loading readings…" />;
-
-  return (
-    /* LIGHT BLUE BACKGROUND APPLIED HERE: bg-sky-950/80 or bg-blue-950/70 with slate tint */
-    <div className="flex flex-col gap-6 p-6 bg-[#0e1a2b] min-h-screen text-slate-100 font-sans">
+return (
+  /* TEAL GREEN BACKGROUND APPLIED HERE */
+  <div className="flex flex-col gap-6 p-6 bg-[#062c2a] min-h-screen text-slate-100 font-sans">
       
       {/* TOOLBAR */}
       <div className="no-print flex flex-wrap items-center gap-2.5 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-lg backdrop-blur-md">
