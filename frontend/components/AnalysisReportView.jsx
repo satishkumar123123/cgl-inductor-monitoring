@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import * as XLSX from "xlsx";
-import { FileText, FileSpreadsheet, Printer, PlayCircle, Loader2 } from "lucide-react";
+import { FileText, FileSpreadsheet, Printer, PlayCircle, Loader2, Gauge, Zap, Activity, TrendingUp, TrendingDown, Sparkles } from "lucide-react";
 import ReportHeader from "./ReportHeader.jsx";
 import ReportSignatureBlock from "./ReportSignatureBlock.jsx";
 import HealthScoreCard from "./HealthScoreCard.jsx";
@@ -18,11 +18,10 @@ import useToast from "../hooks/useToast.js";
 import { todayStr, fmtDateLong } from "../utils/rowsConfig.js";
 import { exportElementToPdf } from "../utils/pdfExport.js";
 import { logReport } from "../services/reportService.js";
-import { Gauge, Zap, Activity, TrendingUp, TrendingDown } from "lucide-react";
 
 /**
  * Shared implementation behind both the PM Pot and Main Pot Analysis Report
- * pages (Modules 1 & 2) — same functionality, different data source.
+ * pages (Modules 1 & 2) — updated for enhanced UI & tailored metric display.
  */
 export default function AnalysisReportView({ title, reportType, elementId, fetchReport }) {
   const { user } = useAuth();
@@ -72,7 +71,7 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
     try {
       await exportElementToPdf(elementId, `${reportType.replace(/\s+/g, "_")}_${date}.pdf`);
       await log("pdf");
-      notify("PDF downloaded");
+      notify("PDF downloaded successfully!");
     } catch (err) {
       notify("PDF export failed: " + err.message, "error");
     } finally {
@@ -89,22 +88,19 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
     const body = rowIds.map((id, i) => [rowLabels[i], ...report.entries.map((e) => e[id])]);
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([header, ...body]), "Readings");
 
+    // Excel summary Sheet without removed metrics
     const summarySheet = [
       ["Report", reportType],
       ["Date", fmtDateLong(date)],
       ["Equipment Health Score", report.healthScore + " / 100"],
       ["Equipment Status", report.equipmentStatus],
-      ["Average Current", report.stats.avgCurrent.toFixed(2)],
-      ["Average Voltage", report.stats.avgVoltage.toFixed(2)],
-      ["Average Power", report.stats.avgPower.toFixed(2)],
       ["Average PF", report.stats.avgPF.toFixed(3)],
-      ["Total Power", report.stats.totalPower.toFixed(2)],
+      ["Total Power Consumption", report.stats.totalPower.toFixed(2)],
       ["Maximum Current", report.stats.maxCurrent ? `${report.stats.maxCurrent.value.toFixed(2)} (${report.stats.maxCurrent.label})` : "—"],
       ["Minimum Current", report.stats.minCurrent ? `${report.stats.minCurrent.value.toFixed(2)} (${report.stats.minCurrent.label})` : "—"],
       ["Highest Power Inductor", report.stats.highestPowerInductor ? `${report.stats.highestPowerInductor.label} (${report.stats.highestPowerInductor.value.toFixed(2)} kW)` : "—"],
       ["Lowest Power Inductor", report.stats.lowestPowerInductor ? `${report.stats.lowestPowerInductor.label} (${report.stats.lowestPowerInductor.value.toFixed(2)} kW)` : "—"],
       ["Current Balance %", report.stats.currentBalancePercent],
-      ["Voltage Balance %", report.stats.voltageBalancePercent],
       [],
       ["Observations", "Severity"],
       ...report.observations.map((o) => [o.message, o.severity]),
@@ -118,7 +114,7 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summarySheet), "Summary");
     XLSX.writeFile(wb, `${reportType.replace(/\s+/g, "_")}_${date}.xlsx`);
     await log("excel");
-    notify("Excel downloaded");
+    notify("Excel downloaded successfully!");
   };
 
   const printReport = async () => {
@@ -126,13 +122,10 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
     await log("print");
   };
 
-  // "Download Again" from Report History arrives with { date, autoDownload }
-  // in navigation state — generate immediately, then fire the matching
-  // download once the report data is in.
   useEffect(() => {
     if (location.state?.autoDownload) {
       generate();
-      navigate(location.pathname, { replace: true, state: {} }); // don't re-trigger on refresh/back
+      navigate(location.pathname, { replace: true, state: {} });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -147,123 +140,203 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
   }, [report]);
 
   return (
-    <div className="flex flex-col gap-5">
-      <div>
-        <h1 className="text-lg font-extrabold text-white">{title}</h1>
-        <p className="text-xs text-slate-500 mt-1">Select a saved date, generate the report, then preview, print, or download.</p>
-      </div>
-
-      <div className="no-print flex flex-wrap items-center gap-2.5 bg-slate-900/60 border border-slate-800 rounded-2xl p-3.5 backdrop-blur-md">
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase text-slate-500">Date</span>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-slate-950/60 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white" />
+    <div className="flex flex-col gap-6 p-2 md:p-4 max-w-[1600px] mx-auto text-slate-100 font-sans">
+      {/* Header Banner */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+        <div>
+          <h1 className="text-2xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-teal-300 flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-blue-400 animate-pulse" />
+            {title}
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">Select a date to generate, analyze, or export industrial telemetry reports.</p>
         </div>
-        <button onClick={generate} disabled={loading} className="toolbar-btn-primary">
-          {loading ? <Loader2 size={14} className="animate-spin" /> : <PlayCircle size={14} />} Generate Report
-        </button>
-        <button onClick={downloadPdf} disabled={!report || busy} className="toolbar-btn"><FileText size={14} /> Download PDF</button>
-        <button onClick={downloadExcel} disabled={!report} className="toolbar-btn"><FileSpreadsheet size={14} /> Download Excel</button>
-        <button onClick={printReport} disabled={!report} className="toolbar-btn"><Printer size={14} /> Print</button>
       </div>
 
+      {/* Control Action Toolbar */}
+      <div className="no-print flex flex-wrap items-center justify-between gap-4 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-xl transition-all">
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Select Date</label>
+            <input 
+              type="date" 
+              value={date} 
+              onChange={(e) => setDate(e.target.value)} 
+              className="bg-slate-950/80 border border-slate-700/80 focus:border-blue-500 rounded-xl px-3 py-1.5 text-xs font-semibold text-white outline-none shadow-inner transition-colors" 
+            />
+          </div>
+          <button 
+            onClick={generate} 
+            disabled={loading} 
+            className="mt-4 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20 active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+          >
+            {loading ? <Loader2 size={15} className="animate-spin" /> : <PlayCircle size={15} />} Generate
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2 mt-4 md:mt-0">
+          <button 
+            onClick={downloadPdf} 
+            disabled={!report || busy} 
+            className="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer shadow-sm"
+          >
+            <FileText size={14} className="text-red-400" /> PDF
+          </button>
+          <button 
+            onClick={downloadExcel} 
+            disabled={!report} 
+            className="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer shadow-sm"
+          >
+            <FileSpreadsheet size={14} className="text-emerald-400" /> Excel
+          </button>
+          <button 
+            onClick={printReport} 
+            disabled={!report} 
+            className="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer shadow-sm"
+          >
+            <Printer size={14} className="text-sky-400" /> Print
+          </button>
+        </div>
+      </div>
+
+      {/* Loading Skeleton View */}
       {loading && (
-        <div className="flex flex-col gap-4">
-          <LoadingSpinner label="Building report…" />
+        <div className="flex flex-col gap-6 my-4">
+          <LoadingSpinner label="Compiling report analytics…" />
           <SkeletonCards count={6} />
-          <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             <SkeletonChart /><SkeletonChart />
           </div>
         </div>
       )}
 
+      {/* Main Report Container */}
       {!loading && report && (
-        <div id={elementId} className="bg-slate-950 border border-slate-800 rounded-2xl p-6">
+        <div id={elementId} className="bg-slate-950/90 border border-slate-800/90 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md transition-all">
+          
           <ReportHeader title={title.toUpperCase()} date={report.date} generatedTime={report.generatedTime} generatedBy={report.generatedByName || user?.name} />
 
-          <div className="mb-5">
+          {/* Health Score Overview */}
+          <div className="mb-6 my-4">
             <HealthScoreCard score={report.healthScore} status={report.equipmentStatus} statusColor={report.statusColor} />
           </div>
 
-          <div className="grid gap-3 mb-5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
-            <StatCard icon={Activity} label="Average Current" value={report.stats.avgCurrent.toFixed(1) + " A"} accent="text-blue-400" />
-            <StatCard icon={Activity} label="Average Voltage" value={report.stats.avgVoltage.toFixed(0) + " V"} accent="text-blue-400" />
-            <StatCard icon={Zap} label="Average Power" value={report.stats.avgPower.toFixed(1) + " kW"} accent="text-orange-400" />
+          {/* Key Metrics Cards (Average Current, Average Voltage, Average Power & Voltage Balance removed) */}
+          <div className="grid gap-3.5 mb-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
             <StatCard icon={Gauge} label="Average PF" value={report.stats.avgPF.toFixed(3)} accent="text-cyan-400" />
-            <StatCard icon={Zap} label="Power Consumption" value={report.stats.totalPower.toFixed(1) + " kW"} accent="text-orange-400" />
-            <StatCard icon={TrendingUp} label="Max Current" value={report.stats.maxCurrent ? report.stats.maxCurrent.value.toFixed(1) + " A" : "—"} sub={report.stats.maxCurrent?.label} accent="text-red-400" />
+            <StatCard icon={Zap} label="Power Consumption" value={report.stats.totalPower.toFixed(1) + " kW"} accent="text-amber-400" />
+            <StatCard icon={TrendingUp} label="Max Current" value={report.stats.maxCurrent ? report.stats.maxCurrent.value.toFixed(1) + " A" : "—"} sub={report.stats.maxCurrent?.label} accent="text-rose-400" />
             <StatCard icon={TrendingDown} label="Min Current" value={report.stats.minCurrent ? report.stats.minCurrent.value.toFixed(1) + " A" : "—"} sub={report.stats.minCurrent?.label} accent="text-emerald-400" />
-            <StatCard icon={TrendingUp} label="Highest Power Inductor" value={report.stats.highestPowerInductor ? report.stats.highestPowerInductor.label : "—"} sub={report.stats.highestPowerInductor ? report.stats.highestPowerInductor.value.toFixed(1) + " kW" : ""} accent="text-orange-400" />
-            <StatCard icon={TrendingDown} label="Lowest Power Inductor" value={report.stats.lowestPowerInductor ? report.stats.lowestPowerInductor.label : "—"} sub={report.stats.lowestPowerInductor ? report.stats.lowestPowerInductor.value.toFixed(1) + " kW" : ""} accent="text-cyan-400" />
-            <StatCard icon={Gauge} label="Current Balance %" value={report.stats.currentBalancePercent + "%"} accent="text-cyan-400" />
-            <StatCard icon={Gauge} label="Voltage Balance %" value={report.stats.voltageBalancePercent + "%"} accent="text-cyan-400" />
+            <StatCard icon={TrendingUp} label="Highest Inductor" value={report.stats.highestPowerInductor ? report.stats.highestPowerInductor.label : "—"} sub={report.stats.highestPowerInductor ? report.stats.highestPowerInductor.value.toFixed(1) + " kW" : ""} accent="text-orange-400" />
+            <StatCard icon={TrendingDown} label="Lowest Inductor" value={report.stats.lowestPowerInductor ? report.stats.lowestPowerInductor.label : "—"} sub={report.stats.lowestPowerInductor ? report.stats.lowestPowerInductor.value.toFixed(1) + " kW" : ""} accent="text-teal-400" />
+            <StatCard icon={Gauge} label="Current Balance %" value={report.stats.currentBalancePercent + "%"} accent="text-blue-400" />
           </div>
 
-          <ParamReportTable entries={report.entries} />
+          {/* Data Table */}
+          <div className="my-6 rounded-2xl overflow-hidden border border-slate-800/80 shadow-lg bg-slate-900/40">
+            <ParamReportTable entries={report.entries} />
+          </div>
 
-          <ObservationsPanel observations={report.observations} />
+          {/* Diagnostics Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+            <ObservationsPanel observations={report.observations} />
+            <RecommendationsPanel recommendations={report.recommendations} />
+          </div>
 
-          <RecommendationsPanel recommendations={report.recommendations} />
-
-          <div className="grid gap-4 my-5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}>
+          {/* Graphical Analysis */}
+          <div className="grid gap-5 my-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <ChartCard title="Power Comparison">
-              <BarChart data={report.entries}>
-                <CartesianGrid stroke={chartTheme.grid} vertical={false} />
-                <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={50} />
-                <YAxis tick={chartTheme.tick} /><Tooltip {...chartTheme.tooltip} />
-                <Bar dataKey="power" name="Power (kW)" fill="#F97316" radius={[4, 4, 0, 0]} />
-              </BarChart>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={report.entries}>
+                  <CartesianGrid stroke={chartTheme.grid} vertical={false} />
+                  <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
+                  <YAxis tick={chartTheme.tick} />
+                  <Tooltip {...chartTheme.tooltip} />
+                  <Bar dataKey="power" name="Power (kW)" fill="#F97316" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </ChartCard>
+
             <ChartCard title="Voltage Comparison">
-              <BarChart data={report.entries}>
-                <CartesianGrid stroke={chartTheme.grid} vertical={false} />
-                <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={50} />
-                <YAxis tick={chartTheme.tick} /><Tooltip {...chartTheme.tooltip} />
-                <Bar dataKey="inductorVoltage" name="Voltage (V)" fill="#22D3EE" radius={[4, 4, 0, 0]} />
-              </BarChart>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={report.entries}>
+                  <CartesianGrid stroke={chartTheme.grid} vertical={false} />
+                  <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
+                  <YAxis tick={chartTheme.tick} />
+                  <Tooltip {...chartTheme.tooltip} />
+                  <Bar dataKey="inductorVoltage" name="Voltage (V)" fill="#22D3EE" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </ChartCard>
-            <ChartCard title="Current Comparison">
-              <BarChart data={report.entries}>
-                <CartesianGrid stroke={chartTheme.grid} vertical={false} />
-                <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={50} />
-                <YAxis tick={chartTheme.tick} /><Tooltip {...chartTheme.tooltip} /><Legend wrapperStyle={{ fontSize: 10 }} />
-                <Bar dataKey="rPhase" name="R Phase" fill="#EF4444" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="yPhase" name="Y Phase" fill="#F59E0B" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="bPhase" name="B Phase" fill="#3B82F6" radius={[3, 3, 0, 0]} />
-              </BarChart>
+
+            <ChartCard title="Phase Current Comparison">
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={report.entries}>
+                  <CartesianGrid stroke={chartTheme.grid} vertical={false} />
+                  <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
+                  <YAxis tick={chartTheme.tick} />
+                  <Tooltip {...chartTheme.tooltip} />
+                  <Legend wrapperStyle={{ fontSize: 10 }} />
+                  <Bar dataKey="rPhase" name="R Phase" fill="#EF4444" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="yPhase" name="Y Phase" fill="#F59E0B" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="bPhase" name="B Phase" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </ChartCard>
-            <ChartCard title="PF Comparison">
-              <BarChart data={report.entries}>
-                <CartesianGrid stroke={chartTheme.grid} vertical={false} />
-                <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={50} />
-                <YAxis tick={chartTheme.tick} domain={[0, 1]} /><Tooltip {...chartTheme.tooltip} />
-                <Bar dataKey="inductorPF" name="Inductor PF" fill="#22D3EE" radius={[4, 4, 0, 0]} />
-              </BarChart>
+
+            <ChartCard title="Power Factor (PF)">
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={report.entries}>
+                  <CartesianGrid stroke={chartTheme.grid} vertical={false} />
+                  <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
+                  <YAxis tick={chartTheme.tick} domain={[0, 1]} />
+                  <Tooltip {...chartTheme.tooltip} />
+                  <Bar dataKey="inductorPF" name="Inductor PF" fill="#14B8A6" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </ChartCard>
-            <ChartCard title="KVA Comparison">
-              <BarChart data={report.entries}>
-                <CartesianGrid stroke={chartTheme.grid} vertical={false} />
-                <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={50} />
-                <YAxis tick={chartTheme.tick} /><Tooltip {...chartTheme.tooltip} />
-                <Bar dataKey="inductorKVA" name="Inductor KVA" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-              </BarChart>
+
+            <ChartCard title="Inductor Apparent Power (KVA)">
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={report.entries}>
+                  <CartesianGrid stroke={chartTheme.grid} vertical={false} />
+                  <XAxis dataKey="label" tick={{ ...chartTheme.tick, fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={45} />
+                  <YAxis tick={chartTheme.tick} />
+                  <Tooltip {...chartTheme.tooltip} />
+                  <Bar dataKey="inductorKVA" name="Inductor KVA" fill="#6366F1" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </ChartCard>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-2">
-            <div>
-              <div className="text-[10.5px] uppercase text-slate-500 mb-1">Operator Remarks</div>
-              <textarea value={operatorRemarks} onChange={(e) => setOperatorRemarks(e.target.value)} rows={2} className="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white" placeholder="Shift observations from the operator…" />
+          {/* Remarks Inputs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 my-6">
+            <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">Operator Remarks</label>
+              <textarea 
+                value={operatorRemarks} 
+                onChange={(e) => setOperatorRemarks(e.target.value)} 
+                rows={3} 
+                className="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl p-3 text-xs text-slate-200 outline-none focus:border-blue-500 transition-colors resize-none" 
+                placeholder="Shift observations and operator notes…" 
+              />
             </div>
-            <div>
-              <div className="text-[10.5px] uppercase text-slate-500 mb-1">Engineer Remarks</div>
-              <textarea value={engineerRemarks} onChange={(e) => setEngineerRemarks(e.target.value)} rows={2} className="w-full bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white" placeholder="Engineering review notes…" />
+            <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">Engineer Remarks</label>
+              <textarea 
+                value={engineerRemarks} 
+                onChange={(e) => setEngineerRemarks(e.target.value)} 
+                rows={3} 
+                className="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl p-3 text-xs text-slate-200 outline-none focus:border-blue-500 transition-colors resize-none" 
+                placeholder="Technical evaluations and maintenance review notes…" 
+              />
             </div>
           </div>
 
+          {/* Signatures & Footer */}
           <ReportSignatureBlock />
 
-          <div className="text-center text-[10.5px] text-slate-600 mt-6 pt-3 border-t border-slate-800">
-            Generated automatically from CGL Dashboard
+          <div className="text-center text-[11px] font-medium text-slate-500 mt-8 pt-4 border-t border-slate-800/80">
+            Generated automatically via <span className="text-slate-300 font-bold">CGL Dashboard System</span>
           </div>
         </div>
       )}
