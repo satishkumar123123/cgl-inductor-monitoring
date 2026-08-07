@@ -2,15 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import * as XLSX from "xlsx";
-import { FileText, FileSpreadsheet, Printer, PlayCircle, Loader2, Gauge, Zap, Activity, TrendingUp, TrendingDown, Sparkles } from "lucide-react";
+import { FileText, FileSpreadsheet, Printer, PlayCircle, Loader2, Sparkles } from "lucide-react";
 import ReportHeader from "./ReportHeader.jsx";
 import ReportSignatureBlock from "./ReportSignatureBlock.jsx";
-import HealthScoreCard from "./HealthScoreCard.jsx";
 import ObservationsPanel from "./ObservationsPanel.jsx";
 import RecommendationsPanel from "./RecommendationsPanel.jsx";
 import ParamReportTable from "./ParamReportTable.jsx";
 import ChartCard, { chartTheme } from "./ChartCard.jsx";
-import StatCard from "./StatCard.jsx";
 import LoadingSpinner from "./LoadingSpinner.jsx";
 import { SkeletonCards, SkeletonChart } from "./Skeleton.jsx";
 import useAuth from "../hooks/useAuth.js";
@@ -92,15 +90,7 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
     const summarySheet = [
       ["Report", reportType],
       ["Date", fmtDateLong(date)],
-      ["Equipment Health Score", report.healthScore + " / 100"],
       ["Equipment Status", report.equipmentStatus],
-      ["Average PF", report.stats.avgPF.toFixed(3)],
-      ["Total Power Consumption", report.stats.totalPower.toFixed(2)],
-      ["Maximum Current", report.stats.maxCurrent ? `${report.stats.maxCurrent.value.toFixed(2)} (${report.stats.maxCurrent.label})` : "—"],
-      ["Minimum Current", report.stats.minCurrent ? `${report.stats.minCurrent.value.toFixed(2)} (${report.stats.minCurrent.label})` : "—"],
-      ["Highest Power Inductor", report.stats.highestPowerInductor ? `${report.stats.highestPowerInductor.label} (${report.stats.highestPowerInductor.value.toFixed(2)} kW)` : "—"],
-      ["Lowest Power Inductor", report.stats.lowestPowerInductor ? `${report.stats.lowestPowerInductor.label} (${report.stats.lowestPowerInductor.value.toFixed(2)} kW)` : "—"],
-      ["Current Balance %", report.stats.currentBalancePercent],
       [],
       ["Observations", "Severity"],
       ...report.observations.map((o) => [o.message, o.severity]),
@@ -214,22 +204,6 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
         <div id={elementId} className="bg-slate-950/90 border border-slate-800/90 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md transition-all">
           
           <ReportHeader title={title.toUpperCase()} date={report.date} generatedTime={report.generatedTime} generatedBy={report.generatedByName || user?.name} />
-
-          {/* Health Score Overview */}
-          <div className="mb-6 my-4">
-            <HealthScoreCard score={report.healthScore} status={report.equipmentStatus} statusColor={report.statusColor} />
-          </div>
-
-          {/* Key Metrics Cards (Average Current, Average Voltage, Average Power & Voltage Balance removed) */}
-          <div className="grid gap-3.5 mb-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
-            <StatCard icon={Gauge} label="Average PF" value={report.stats.avgPF.toFixed(3)} accent="text-cyan-400" />
-            <StatCard icon={Zap} label="Power Consumption" value={report.stats.totalPower.toFixed(1) + " kW"} accent="text-amber-400" />
-            <StatCard icon={TrendingUp} label="Max Current" value={report.stats.maxCurrent ? report.stats.maxCurrent.value.toFixed(1) + " A" : "—"} sub={report.stats.maxCurrent?.label} accent="text-rose-400" />
-            <StatCard icon={TrendingDown} label="Min Current" value={report.stats.minCurrent ? report.stats.minCurrent.value.toFixed(1) + " A" : "—"} sub={report.stats.minCurrent?.label} accent="text-emerald-400" />
-            <StatCard icon={TrendingUp} label="Highest Inductor" value={report.stats.highestPowerInductor ? report.stats.highestPowerInductor.label : "—"} sub={report.stats.highestPowerInductor ? report.stats.highestPowerInductor.value.toFixed(1) + " kW" : ""} accent="text-orange-400" />
-            <StatCard icon={TrendingDown} label="Lowest Inductor" value={report.stats.lowestPowerInductor ? report.stats.lowestPowerInductor.label : "—"} sub={report.stats.lowestPowerInductor ? report.stats.lowestPowerInductor.value.toFixed(1) + " kW" : ""} accent="text-teal-400" />
-            <StatCard icon={Gauge} label="Current Balance %" value={report.stats.currentBalancePercent + "%"} accent="text-blue-400" />
-          </div>
 
           {/* Data Table */}
           <div className="my-6 rounded-2xl overflow-hidden border border-slate-800/80 shadow-lg bg-slate-900/40">
