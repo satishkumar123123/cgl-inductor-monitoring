@@ -371,8 +371,8 @@ export default function DashboardPage() {
 
   if (loading) return <LoadingSpinner label="Loading readings…" />;
 return (
-  /* TEAL GREEN BACKGROUND APPLIED HERE */
-  <div className="flex flex-col gap-6 p-6 bg-[#062c2a] min-h-screen text-slate-100 font-sans">
+  /* DEEP GREEN BACKGROUND APPLIED HERE */
+  <div className="flex flex-col gap-6 p-6 bg-[#052014] min-h-screen text-slate-100 font-sans">
       
       {/* TOOLBAR */}
       <div className="no-print flex flex-wrap items-center gap-2.5 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-lg backdrop-blur-md">
