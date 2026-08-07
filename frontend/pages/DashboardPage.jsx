@@ -18,49 +18,49 @@ import { ROWS, POTS, emptyRecord, todayStr, fmtDateLong } from "../utils/rowsCon
 import { parseExcelFile, downloadSampleTemplate, exportRecordToExcel } from "../utils/excelMapper.js";
 import { fetchDataByDate, createData, updateData, deleteData } from "../services/dataService.js";
 
-// 6 Top-tier Industrial Grade Distinct Color Themes for Inductor Blocks
+// 6 Distinct Light & Modern Color Themes for the 6 Inductor Blocks
 const BLOCK_STYLES = [
+  // 1. Red / Rose Theme
   {
-    bg: "bg-gradient-to-br from-cyan-950/90 via-slate-900 to-cyan-900/40",
-    border: "border-cyan-500/50 hover:border-cyan-400",
-    badge: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
-    glow: "shadow-[0_4px_20px_rgba(6,182,212,0.15)]",
-    title: "text-cyan-300",
+    bg: "bg-red-950/80 hover:bg-red-900/90",
+    border: "border-red-500/60 hover:border-red-400",
+    glow: "shadow-lg shadow-red-500/10",
+    title: "text-red-300",
   },
+  // 2. Yellow / Amber Theme
   {
-    bg: "bg-gradient-to-br from-amber-950/90 via-slate-900 to-amber-900/40",
-    border: "border-amber-500/50 hover:border-amber-400",
-    badge: "bg-amber-500/20 text-amber-300 border-amber-500/40",
-    glow: "shadow-[0_4px_20px_rgba(245,158,11,0.15)]",
+    bg: "bg-amber-950/80 hover:bg-amber-900/90",
+    border: "border-amber-500/60 hover:border-amber-400",
+    glow: "shadow-lg shadow-amber-500/10",
     title: "text-amber-300",
   },
+  // 3. Blue / Cobalt Theme
   {
-    bg: "bg-gradient-to-br from-emerald-950/90 via-slate-900 to-emerald-900/40",
-    border: "border-emerald-500/50 hover:border-emerald-400",
-    badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
-    glow: "shadow-[0_4px_20px_rgba(16,185,129,0.15)]",
+    bg: "bg-blue-950/80 hover:bg-blue-900/90",
+    border: "border-blue-500/60 hover:border-blue-400",
+    glow: "shadow-lg shadow-blue-500/10",
+    title: "text-blue-300",
+  },
+  // 4. Cyan / Teal Theme
+  {
+    bg: "bg-cyan-950/80 hover:bg-cyan-900/90",
+    border: "border-cyan-500/60 hover:border-cyan-400",
+    glow: "shadow-lg shadow-cyan-500/10",
+    title: "text-cyan-300",
+  },
+  // 5. Emerald / Green Theme
+  {
+    bg: "bg-emerald-950/80 hover:bg-emerald-900/90",
+    border: "border-emerald-500/60 hover:border-emerald-400",
+    glow: "shadow-lg shadow-emerald-500/10",
     title: "text-emerald-300",
   },
+  // 6. Purple / Violet Theme
   {
-    bg: "bg-gradient-to-br from-purple-950/90 via-slate-900 to-purple-900/40",
-    border: "border-purple-500/50 hover:border-purple-400",
-    badge: "bg-purple-500/20 text-purple-300 border-purple-500/40",
-    glow: "shadow-[0_4px_20px_rgba(168,85,247,0.15)]",
+    bg: "bg-purple-950/80 hover:bg-purple-900/90",
+    border: "border-purple-500/60 hover:border-purple-400",
+    glow: "shadow-lg shadow-purple-500/10",
     title: "text-purple-300",
-  },
-  {
-    bg: "bg-gradient-to-br from-rose-950/90 via-slate-900 to-rose-900/40",
-    border: "border-rose-500/50 hover:border-rose-400",
-    badge: "bg-rose-500/20 text-rose-300 border-rose-500/40",
-    glow: "shadow-[0_4px_20px_rgba(244,63,94,0.15)]",
-    title: "text-rose-300",
-  },
-  {
-    bg: "bg-gradient-to-br from-blue-950/90 via-slate-900 to-indigo-900/40",
-    border: "border-blue-500/50 hover:border-blue-400",
-    badge: "bg-blue-500/20 text-blue-300 border-blue-500/40",
-    glow: "shadow-[0_4px_20px_rgba(59,130,246,0.15)]",
-    title: "text-blue-300",
   },
 ];
 
@@ -372,7 +372,8 @@ export default function DashboardPage() {
   if (loading) return <LoadingSpinner label="Loading readings…" />;
 
   return (
-    <div className="flex flex-col gap-6 p-6 bg-[#0B0F17] min-h-screen text-slate-100 font-sans">
+    /* LIGHT BLUE BACKGROUND APPLIED HERE: bg-sky-950/80 or bg-blue-950/70 with slate tint */
+    <div className="flex flex-col gap-6 p-6 bg-[#0e1a2b] min-h-screen text-slate-100 font-sans">
       
       {/* TOOLBAR */}
       <div className="no-print flex flex-wrap items-center gap-2.5 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-lg backdrop-blur-md">
@@ -396,7 +397,7 @@ export default function DashboardPage() {
         <button onClick={exportPDF} className="toolbar-btn bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"><FileText size={14} /> Export PDF / Print</button>
       </div>
 
-      <div className="text-xs text-slate-400 flex items-center gap-2 flex-wrap">
+      <div className="text-xs text-slate-300 flex items-center gap-2 flex-wrap">
         Showing <b className="text-cyan-400">{fmtDateLong ? fmtDateLong(selectedDate) : selectedDate}</b>
         {record?.lastUpdated && <>· Last updated {new Date(record.lastUpdated).toLocaleString()}</>}
         {record?.source === "excel" && record?.uploadedFileName && <>· Source: Excel ({record.uploadedFileName})</>}
@@ -412,7 +413,7 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* TOP 6 CLICKABLE INDUCTOR CARDS GRID */}
+      {/* TOP 6 CLICKABLE INDUCTOR CARDS GRID - 6 DIFFERENT COLORS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
         {ALL_BLOCKS.map((item, idx) => {
           const metrics = getInductorMetrics(item.potKey, item.ind);
@@ -428,15 +429,15 @@ export default function DashboardPage() {
                 <span className={`font-extrabold text-xs uppercase tracking-wide ${style.title}`}>
                   {item.label}
                 </span>
-                <span className="text-[10px] font-bold text-slate-400 group-hover:text-cyan-300 transition-colors">
+                <span className="text-[10px] font-bold text-slate-300 group-hover:text-white transition-colors">
                   View &rarr;
                 </span>
               </div>
 
-              {/* INDIVIDUAL DISTINCT PARAMETER TEXT COLORS */}
+              {/* INDIVIDUAL PARAMETER DISPLAY */}
               <div className="space-y-2 text-xs">
                 {/* Voltage */}
-                <div className="flex justify-between items-center bg-slate-950/60 px-2.5 py-1.5 rounded-lg border border-sky-500/30">
+                <div className="flex justify-between items-center bg-slate-950/70 px-2.5 py-1.5 rounded-lg border border-slate-800">
                   <span className="text-sky-300 font-medium flex items-center gap-1">
                     <Activity size={12} className="text-sky-400" /> Voltage:
                   </span>
@@ -446,7 +447,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Current */}
-                <div className="flex justify-between items-center bg-slate-950/60 px-2.5 py-1.5 rounded-lg border border-emerald-500/30">
+                <div className="flex justify-between items-center bg-slate-950/70 px-2.5 py-1.5 rounded-lg border border-slate-800">
                   <span className="text-emerald-300 font-medium flex items-center gap-1">
                     <Gauge size={12} className="text-emerald-400" /> Current:
                   </span>
@@ -456,7 +457,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Conductance Ratio */}
-                <div className="flex justify-between items-center bg-slate-950/60 px-2.5 py-1.5 rounded-lg border border-amber-500/30">
+                <div className="flex justify-between items-center bg-slate-950/70 px-2.5 py-1.5 rounded-lg border border-slate-800">
                   <span className="text-amber-300 font-medium flex items-center gap-1">
                     <Zap size={12} className="text-amber-400" /> Ratio:
                   </span>
