@@ -5,7 +5,7 @@ import useAuth from "../hooks/useAuth.js";
 
 const itemClass = ({ isActive }) =>
   `flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-    isActive ? "bg-cyan-500/15 text-cyan-300" : "text-slate-400 hover:text-white hover:bg-slate-800"
+    isActive ? "bg-cyan-50 text-cyan-700 font-bold" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
   }`;
 
 function SidebarSection({ icon: Icon, label, defaultOpen, items, onNavigate }) {
@@ -14,15 +14,15 @@ function SidebarSection({ icon: Icon, label, defaultOpen, items, onNavigate }) {
     <div className="mb-1">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold text-slate-300 hover:bg-slate-800 transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors"
       >
         <span className="flex items-center gap-2">
-          <Icon size={15} className="text-cyan-400" /> {label}
+          <Icon size={15} className="text-cyan-600" /> {label}
         </span>
-        <ChevronDown size={13} className={open ? "rotate-180 transition-transform" : "transition-transform"} />
+        <ChevronDown size={13} className={open ? "rotate-180 transition-transform text-slate-500" : "transition-transform text-slate-500"} />
       </button>
       {open && (
-        <div className="flex flex-col gap-1 mt-1 pl-2 border-l border-slate-800 ml-3">
+        <div className="flex flex-col gap-1 mt-1 pl-2 border-l border-slate-200 ml-3">
           {items.map((item) => (
             <NavLink key={item.to} to={item.to} className={itemClass} onClick={onNavigate}>
               <item.icon size={13} /> {item.label}
@@ -36,12 +36,7 @@ function SidebarSection({ icon: Icon, label, defaultOpen, items, onNavigate }) {
 
 /**
  * Left sidebar housing the Reports and Production modules. Self-contained
- * and additive — it doesn't touch the existing top Navbar's Dashboard/History
- * links, it just gives these related modules a persistent, always-visible menu.
- *
- * On screens narrower than `md`, it renders as a slide-in drawer (controlled
- * by `open`/`onClose`) instead of a permanent 240px column, so it doesn't
- * crush the main content on phones.
+ * and additive — fitted for clean white/light theme dashboards.
  */
 export default function Sidebar({ open = false, onClose }) {
   const { user } = useAuth();
@@ -49,9 +44,9 @@ export default function Sidebar({ open = false, onClose }) {
   const content = (
     <>
       <NavLink to="/analytics" className={({ isActive }) => itemClass({ isActive }) + " mb-2 font-bold"} onClick={onClose}>
-        <LineChart size={15} className="text-cyan-400" /> Analytics Dashboard
+        <LineChart size={15} className="text-cyan-600" /> Analytics Dashboard
       </NavLink>
-      <div className="border-t border-slate-800 my-2" />
+      <div className="border-t border-slate-200 my-2" />
       <SidebarSection
         icon={FileBarChart2}
         label="Reports"
@@ -76,9 +71,9 @@ export default function Sidebar({ open = false, onClose }) {
       />
       {user?.role === "Admin" && (
         <>
-          <div className="border-t border-slate-800 my-2" />
+          <div className="border-t border-slate-200 my-2" />
           <NavLink to="/audit-logs" className={({ isActive }) => itemClass({ isActive }) + " font-bold"} onClick={onClose}>
-            <ShieldAlert size={15} className="text-orange-400" /> Audit Logs
+            <ShieldAlert size={15} className="text-orange-600" /> Audit Logs
           </NavLink>
         </>
       )}
@@ -89,11 +84,11 @@ export default function Sidebar({ open = false, onClose }) {
     <>
       {/* Mobile backdrop */}
       {open && (
-        <div className="no-print fixed inset-0 z-40 bg-slate-950/70 md:hidden" onClick={onClose} />
+        <div className="no-print fixed inset-0 z-40 bg-slate-900/40 md:hidden" onClick={onClose} />
       )}
 
       <aside
-        className={`no-print w-60 shrink-0 border-r border-slate-800 bg-slate-950/95 md:bg-slate-950/60 backdrop-blur-md min-h-[calc(100vh-64px)] px-3 py-4 fixed md:static inset-y-0 left-0 z-50 md:z-auto transform transition-transform duration-200 ${
+        className={`no-print w-60 shrink-0 border-r border-slate-200 bg-white md:bg-slate-50/80 backdrop-blur-md min-h-[calc(100vh-64px)] px-3 py-4 fixed md:static inset-y-0 left-0 z-50 md:z-auto transform transition-transform duration-200 ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
       >
