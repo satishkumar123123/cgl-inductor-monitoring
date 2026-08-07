@@ -51,6 +51,26 @@ const getCellValue = (lvlObj, rowId) => {
   return "";
 };
 
+// R Phase Current से लेकर Conductance Ratio तक के अलग-अलग पैरामीटर कलर्स
+const PARAM_TEXT_COLORS = {
+  rPhase: "text-red-400 font-semibold",
+  yPhase: "text-amber-400 font-semibold",
+  bPhase: "text-blue-400 font-semibold",
+  inductorVoltage: "text-cyan-300 font-semibold",
+  lineCurrent: "text-emerald-400 font-semibold",
+  linePF: "text-teal-300 font-semibold",
+  power: "text-orange-400 font-semibold",
+  inductorCurrent: "text-indigo-400 font-semibold",
+  impedanceZ: "text-purple-400 font-semibold",
+  resistanceR: "text-pink-400 font-semibold",
+  reactanceX: "text-fuchsia-400 font-semibold",
+  inductorPF: "text-sky-300 font-semibold",
+  inductorKVA: "text-violet-400 font-semibold",
+  conductanceInitial: "text-lime-400 font-semibold",
+  initialValue: "text-lime-400 font-semibold",
+  conductanceRatio: "text-yellow-300 font-semibold",
+};
+
 export default function DataTable({
   potKey,
   potLabel,
@@ -111,53 +131,60 @@ export default function DataTable({
             </tr>
           </thead>
           <tbody>
-            {filteredRows.map((row) => (
-              <tr
-                key={row.id}
-                className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors"
-              >
-                <td className="p-2.5 font-medium text-slate-200 sticky left-0 bg-slate-900/90 z-10 border-r border-slate-800/60 whitespace-nowrap">
-                  {row.label}{" "}
-                  {row.unit && (
-                    <span className="text-[10px] text-slate-500 font-normal">
-                      ({row.unit})
-                    </span>
-                  )}
-                </td>
+            {filteredRows.map((row) => {
+              // पैरामीटर ID के अनुसार कस्टम कलर प्राप्त करें
+              const customColorClass = PARAM_TEXT_COLORS[row.id] || "text-slate-200";
 
-                {inductors.map((ind) =>
-                  levels.map((lvl) => {
-                    const lvlObj = potData?.[ind]?.[lvl] || {};
-                    const cellValue = getCellValue(lvlObj, row.id);
-                    const cellKey = `${potKey}:${ind}:${lvl}:${row.id}`;
-                    const isError = errorCells.has(cellKey);
+              return (
+                <tr
+                  key={row.id}
+                  className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors"
+                >
+                  {/* Parameter Label Column with Dynamic Color */}
+                  <td className={`p-2.5 font-medium sticky left-0 bg-slate-900/90 z-10 border-r border-slate-800/60 whitespace-nowrap ${customColorClass}`}>
+                    {row.label}{" "}
+                    {row.unit && (
+                      <span className="text-[10px] text-slate-500 font-normal">
+                        ({row.unit})
+                      </span>
+                    )}
+                  </td>
 
-                    return (
-                      <td
-                        key={`${ind}-${lvl}`}
-                        className={`p-1 text-center border-l border-slate-800/40 ${
-                          lvl === "high" ? "bg-slate-950/10" : ""
-                        }`}
-                      >
-                        <input
-                          type="text"
-                          value={cellValue}
-                          onChange={(e) =>
-                            onChange &&
-                            onChange(potKey, ind, lvl, row.id, e.target.value)
-                          }
-                          className={`w-16 sm:w-20 px-1.5 py-1 text-center bg-slate-950/60 border rounded text-xs text-white outline-none transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 ${
-                            isError
-                              ? "border-red-500 text-red-300 bg-red-950/20"
-                              : "border-slate-800/80 hover:border-slate-700"
+                  {inductors.map((ind) =>
+                    levels.map((lvl) => {
+                      const lvlObj = potData?.[ind]?.[lvl] || {};
+                      const cellValue = getCellValue(lvlObj, row.id);
+                      const cellKey = `${potKey}:${ind}:${lvl}:${row.id}`;
+                      const isError = errorCells.has(cellKey);
+
+                      return (
+                        <td
+                          key={`${ind}-${lvl}`}
+                          className={`p-1 text-center border-l border-slate-800/40 ${
+                            lvl === "high" ? "bg-slate-950/10" : ""
                           }`}
-                        />
-                      </td>
-                    );
-                  })
-                )}
-              </tr>
-            ))}
+                        >
+                          {/* Input Cell with Dynamic Color */}
+                          <input
+                            type="text"
+                            value={cellValue}
+                            onChange={(e) =>
+                              onChange &&
+                              onChange(potKey, ind, lvl, row.id, e.target.value)
+                            }
+                            className={`w-16 sm:w-20 px-1.5 py-1 text-center bg-slate-950/60 border rounded text-xs outline-none transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 ${customColorClass} ${
+                              isError
+                                ? "border-red-500 text-red-300 bg-red-950/20"
+                                : "border-slate-800/80 hover:border-slate-700"
+                            }`}
+                          />
+                        </td>
+                      );
+                    })
+                  )}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
