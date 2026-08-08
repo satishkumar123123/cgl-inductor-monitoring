@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { FileBarChart2, Factory, ChevronDown, FileText, History, Gauge, CalendarRange, CalendarDays, LineChart, ShieldAlert } from "lucide-react";
+import { FileBarChart2, Factory, ChevronDown, FileText, Gauge, CalendarRange, CalendarDays, LineChart, ShieldAlert } from "lucide-react";
 import useAuth from "../hooks/useAuth.js";
 
 // Helper function to colorize every character in a text
@@ -17,7 +17,6 @@ const COLOR_PALETTES = {
   analytics: ["text-cyan-600", "text-blue-600", "text-indigo-600", "text-purple-600", "text-pink-600", "text-rose-600", "text-amber-600", "text-emerald-600"],
   pmPot: ["text-purple-600", "text-pink-600", "text-rose-600", "text-red-600", "text-amber-600", "text-emerald-600", "text-cyan-600", "text-blue-600"],
   mainPot: ["text-cyan-600", "text-teal-600", "text-emerald-600", "text-amber-600", "text-rose-600", "text-indigo-600", "text-purple-600", "text-blue-600"],
-  reportHistory: ["text-amber-600", "text-orange-600", "text-rose-600", "text-purple-600", "text-blue-600", "text-cyan-600", "text-emerald-600"],
   dailyProd: ["text-emerald-600", "text-teal-600", "text-cyan-600", "text-blue-600", "text-indigo-600", "text-purple-600", "text-rose-600"],
   monthly: ["text-blue-600", "text-indigo-600", "text-purple-600", "text-pink-600", "text-rose-600", "text-amber-600", "text-emerald-600"],
   yearly: ["text-rose-600", "text-purple-600", "text-indigo-600", "text-blue-600", "text-cyan-600", "text-emerald-600", "text-amber-600"],
@@ -74,7 +73,7 @@ export default function Sidebar({ open = false, onClose }) {
 
       <div className="border-t border-slate-200 my-2.5" />
 
-      {/* Reports Section */}
+      {/* Reports Section (Only PM POT and MAIN POT) */}
       <SidebarSection
         icon={FileBarChart2}
         label="Reports"
@@ -83,7 +82,6 @@ export default function Sidebar({ open = false, onClose }) {
         items={[
           { to: "/reports/pm-pot", label: "PM POT Analysis Report", icon: FileText, iconColor: "text-purple-600", colors: COLOR_PALETTES.pmPot },
           { to: "/reports/main-pot", label: "MAIN POT Analysis Report", icon: FileText, iconColor: "text-cyan-600", colors: COLOR_PALETTES.mainPot },
-          { to: "/reports/history", label: "Report History", icon: History, iconColor: "text-amber-600", colors: COLOR_PALETTES.reportHistory },
         ]}
         onNavigate={onClose}
       />
