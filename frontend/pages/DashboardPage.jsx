@@ -380,26 +380,80 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6 p-6 bg-white min-h-screen text-slate-900 font-sans">
       
-      {/* TOOLBAR */}
-      <div className="no-print flex flex-wrap items-center gap-2.5 bg-slate-100 border border-slate-200 rounded-2xl p-3.5 shadow-sm">
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase font-bold text-slate-500">Date</span>
+      {/* TOOLBAR WITH VIBRANT COLORS */}
+      <div className="no-print flex flex-wrap items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-2xl p-3.5 shadow-sm">
+        
+        {/* DATE INPUT BLOCK (CYAN THEME) */}
+        <div className="flex flex-col gap-1 bg-cyan-50/80 border border-cyan-200 px-3 py-1 rounded-xl shadow-xs">
+          <span className="text-[10px] uppercase font-black text-cyan-800">Select Date</span>
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-cyan-600"
+            className="bg-white border border-cyan-300 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 cursor-pointer"
           />
         </div>
-        <button onClick={() => setUploadOpen((o) => !o)} className="toolbar-btn bg-slate-200 hover:bg-slate-300 text-slate-800 border-slate-300"><UploadCloud size={14} /> Upload Excel</button>
-        <button onClick={downloadSampleTemplate} className="toolbar-btn bg-slate-200 hover:bg-slate-300 text-slate-800 border-slate-300"><Download size={14} /> Sample Excel</button>
-        <button onClick={handleSave} disabled={saving} className="toolbar-btn-primary bg-cyan-600 hover:bg-cyan-700 text-white font-bold"><Save size={14} /> {saving ? "Saving…" : "Save"}</button>
-        <button onClick={handleUpdate} disabled={saving} className="toolbar-btn bg-slate-200 hover:bg-slate-300 text-slate-800 border-slate-300"><RefreshCcw size={14} /> Update</button>
+
+        {/* UPLOAD EXCEL (EMERALD GREEN) */}
+        <button 
+          onClick={() => setUploadOpen((o) => !o)} 
+          className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+        >
+          <UploadCloud size={15} /> Upload Excel
+        </button>
+
+        {/* SAMPLE EXCEL (BLUE THEME) */}
+        <button 
+          onClick={downloadSampleTemplate} 
+          className="flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+        >
+          <Download size={15} /> Sample Excel
+        </button>
+
+        {/* SAVE BUTTON (INDIGO THEME) */}
+        <button 
+          onClick={handleSave} 
+          disabled={saving} 
+          className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50"
+        >
+          <Save size={15} /> {saving ? "Saving…" : "Save"}
+        </button>
+
+        {/* UPDATE BUTTON (AMBER / ORANGE) */}
+        <button 
+          onClick={handleUpdate} 
+          disabled={saving} 
+          className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+        >
+          <RefreshCcw size={15} /> Update
+        </button>
+
+        {/* DELETE BUTTON (ADMIN - RED THEME) */}
         {user?.role === "Admin" && (
-          <button onClick={handleDelete} className="toolbar-btn-danger bg-red-600 hover:bg-red-700 text-white"><Trash2 size={14} /> Delete</button>
+          <button 
+            onClick={handleDelete} 
+            className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+          >
+            <Trash2 size={15} /> Delete
+          </button>
         )}
-        <button onClick={exportExcel} className="toolbar-btn bg-slate-200 hover:bg-slate-300 text-slate-800 border-slate-300"><FileSpreadsheet size={14} /> Export Excel</button>
-        <button onClick={exportPDF} className="toolbar-btn bg-slate-200 hover:bg-slate-300 text-slate-800 border-slate-300"><FileText size={14} /> Export PDF / Print</button>
+
+        {/* EXPORT EXCEL (TEAL / DARK GREEN) */}
+        <button 
+          onClick={exportExcel} 
+          className="flex items-center gap-1.5 bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+        >
+          <FileSpreadsheet size={15} /> Export Excel
+        </button>
+
+        {/* EXPORT PDF / PRINT (PURPLE THEME) */}
+        <button 
+          onClick={exportPDF} 
+          className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+        >
+          <FileText size={15} /> Export PDF / Print
+        </button>
+
       </div>
 
       <div className="text-xs text-slate-600 flex items-center gap-2 flex-wrap">
