@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { FileBarChart2, Factory, ChevronDown, FileText, Gauge, CalendarRange, CalendarDays, LineChart, ShieldAlert } from "lucide-react";
-import useAuth from "../hooks/useAuth.js";
+import { FileBarChart2, ChevronDown, FileText } from "lucide-react";
 
 // Helper function to colorize every character in a text
 const colorizeText = (text, colors) => {
@@ -12,15 +11,10 @@ const colorizeText = (text, colors) => {
   ));
 };
 
-// Vibrant color sets for each menu item
+// Vibrant color sets for menu items
 const COLOR_PALETTES = {
-  analytics: ["text-cyan-600", "text-blue-600", "text-indigo-600", "text-purple-600", "text-pink-600", "text-rose-600", "text-amber-600", "text-emerald-600"],
   pmPot: ["text-purple-600", "text-pink-600", "text-rose-600", "text-red-600", "text-amber-600", "text-emerald-600", "text-cyan-600", "text-blue-600"],
   mainPot: ["text-cyan-600", "text-teal-600", "text-emerald-600", "text-amber-600", "text-rose-600", "text-indigo-600", "text-purple-600", "text-blue-600"],
-  dailyProd: ["text-emerald-600", "text-teal-600", "text-cyan-600", "text-blue-600", "text-indigo-600", "text-purple-600", "text-rose-600"],
-  monthly: ["text-blue-600", "text-indigo-600", "text-purple-600", "text-pink-600", "text-rose-600", "text-amber-600", "text-emerald-600"],
-  yearly: ["text-rose-600", "text-purple-600", "text-indigo-600", "text-blue-600", "text-cyan-600", "text-emerald-600", "text-amber-600"],
-  auditLogs: ["text-orange-600", "text-amber-600", "text-red-600", "text-rose-600", "text-purple-600", "text-indigo-600", "text-blue-600"]
 };
 
 const itemClass = ({ isActive }) =>
@@ -59,20 +53,8 @@ function SidebarSection({ icon: Icon, label, labelColor, defaultOpen, items, onN
 }
 
 export default function Sidebar({ open = false, onClose }) {
-  const { user } = useAuth();
-
   const content = (
     <>
-      {/* Analytics Dashboard */}
-      <NavLink to="/analytics" className={({ isActive }) => itemClass({ isActive }) + " mb-2 font-black"} onClick={onClose}>
-        <LineChart size={15} className="text-cyan-600 shrink-0" />
-        <span className="tracking-wide">
-          {colorizeText("Analytics Dashboard", COLOR_PALETTES.analytics)}
-        </span>
-      </NavLink>
-
-      <div className="border-t border-slate-200 my-2.5" />
-
       {/* Reports Section (Only PM POT and MAIN POT) */}
       <SidebarSection
         icon={FileBarChart2}
@@ -85,33 +67,6 @@ export default function Sidebar({ open = false, onClose }) {
         ]}
         onNavigate={onClose}
       />
-
-      {/* Production Section */}
-      <SidebarSection
-        icon={Factory}
-        label="Production"
-        labelColor="text-emerald-600"
-        defaultOpen
-        items={[
-          { to: "/power/consumption", label: "Daily Production & Power", icon: Gauge, iconColor: "text-emerald-600", colors: COLOR_PALETTES.dailyProd },
-          { to: "/power/monthly", label: "Monthly Report", icon: CalendarDays, iconColor: "text-blue-600", colors: COLOR_PALETTES.monthly },
-          { to: "/power/yearly", label: "Yearly Report", icon: CalendarRange, iconColor: "text-rose-600", colors: COLOR_PALETTES.yearly },
-        ]}
-        onNavigate={onClose}
-      />
-
-      {/* Admin Audit Logs */}
-      {user?.role === "Admin" && (
-        <>
-          <div className="border-t border-slate-200 my-2.5" />
-          <NavLink to="/audit-logs" className={({ isActive }) => itemClass({ isActive }) + " font-black"} onClick={onClose}>
-            <ShieldAlert size={15} className="text-orange-600 shrink-0" />
-            <span className="tracking-wide">
-              {colorizeText("Audit Logs", COLOR_PALETTES.auditLogs)}
-            </span>
-          </NavLink>
-        </>
-      )}
     </>
   );
 
