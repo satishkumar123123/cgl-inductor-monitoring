@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
-// ✅ FIXED: useParams and useNavigate imported from react-router-dom (NOT "react")
 import { useParams, useNavigate } from "react-router-dom"; 
 import { ArrowLeft, Send, History, Clock, User, BarChart2, TrendingUp } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import axios from "axios";
 
 const CATEGORY_COLORS = {
-  Maintenance: "bg-red-500/20 text-red-400 border-red-500/30",
-  Greasing: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  Inspection: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  General: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+  Maintenance: "bg-red-100 text-red-700 border-red-200",
+  Greasing: "bg-amber-100 text-amber-700 border-amber-200",
+  Inspection: "bg-purple-100 text-purple-700 border-purple-200",
+  General: "bg-cyan-100 text-cyan-700 border-cyan-200",
 };
 
 export default function InductorDetailPage() {
@@ -79,32 +78,32 @@ export default function InductorDetailPage() {
   const formattedTitle = inductorKey ? inductorKey.replace("_", " ") : "INDUCTOR";
 
   return (
-    <div className="p-6 space-y-6 text-slate-100 max-w-[1500px] mx-auto">
+    <div className="p-6 space-y-6 text-slate-900 bg-white min-h-screen max-w-[1500px] mx-auto font-sans">
       {/* HEADER WITH BACK BUTTON */}
-      <div className="flex items-center gap-4 bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+      <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
         <button
           onClick={() => navigate("/dashboard")}
-          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 transition-colors"
+          className="p-2 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg text-slate-700 transition-colors"
         >
           <ArrowLeft size={18} />
         </button>
         <div>
-          <h1 className="text-lg font-extrabold text-cyan-400 uppercase">
+          <h1 className="text-lg font-extrabold text-cyan-700 uppercase">
             {formattedTitle} ANALYTICAL DASHBOARD
           </h1>
-          <p className="text-xs text-slate-400">Detailed logs, operational history &amp; graphical trend analytics</p>
+          <p className="text-xs text-slate-500">Detailed logs, operational history &amp; graphical trend analytics</p>
         </div>
       </div>
 
       {/* SECTION 1: REMARK ENTRY & HISTORY TIMELINE */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <form onSubmit={handleSaveRemark} className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <form onSubmit={handleSaveRemark} className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-cyan-400">Add Operational Remark</h2>
+            <h2 className="text-sm font-bold text-cyan-700">Add Operational Remark</h2>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-1 text-xs text-slate-200 outline-none focus:border-cyan-500"
+              className="bg-white border border-slate-300 rounded-lg px-3 py-1 text-xs text-slate-800 outline-none focus:border-cyan-600"
             >
               <option value="General">General</option>
               <option value="Maintenance">Maintenance</option>
@@ -118,29 +117,29 @@ export default function InductorDetailPage() {
             value={remarkText}
             onChange={(e) => setRemarkText(e.target.value)}
             placeholder={`Enter detailed log or remark for ${formattedTitle}...`}
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white outline-none focus:border-cyan-500 resize-none"
+            className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs text-slate-800 outline-none focus:border-cyan-600 resize-none"
           ></textarea>
 
           <div className="flex justify-end">
             <button
               type="submit"
-              className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg transition-all"
+              className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm"
             >
               <Send size={14} /> Save Remark
             </button>
           </div>
         </form>
 
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 max-h-[300px] overflow-y-auto">
-          <h2 className="text-sm font-bold text-slate-300 uppercase mb-4 flex items-center gap-2">
-            <History size={16} className="text-cyan-400" /> Remark History Logs ({remarksList.length})
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 max-h-[300px] overflow-y-auto shadow-sm">
+          <h2 className="text-sm font-bold text-slate-800 uppercase mb-4 flex items-center gap-2">
+            <History size={16} className="text-cyan-600" /> Remark History Logs ({remarksList.length})
           </h2>
 
           {remarksList.length > 0 ? (
-            <div className="space-y-3 relative border-l-2 border-slate-800 ml-3 pl-4">
+            <div className="space-y-3 relative border-l-2 border-slate-200 ml-3 pl-4">
               {remarksList.map((item) => (
-                <div key={item._id} className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 relative">
-                  <div className="absolute -left-[23px] top-4 w-3 h-3 rounded-full bg-cyan-400 border-2 border-slate-900"></div>
+                <div key={item._id} className="bg-white border border-slate-200 rounded-xl p-3 relative shadow-sm">
+                  <div className="absolute -left-[23px] top-4 w-3 h-3 rounded-full bg-cyan-600 border-2 border-white"></div>
                   <div className="flex items-center justify-between mb-1">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category] || CATEGORY_COLORS.General}`}>
                       {item.category}
@@ -149,7 +148,7 @@ export default function InductorDetailPage() {
                       <Clock size={10} /> {new Date(item.createdAt).toLocaleString()}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-200 mt-1">{item.remark}</p>
+                  <p className="text-xs text-slate-800 mt-1">{item.remark}</p>
                 </div>
               ))}
             </div>
@@ -160,9 +159,9 @@ export default function InductorDetailPage() {
       </div>
 
       {/* SECTION 2: GRAPHICAL ANALYTICS SECTION */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
-          <h2 className="text-sm font-extrabold text-cyan-400 uppercase tracking-wide">
+      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
+          <h2 className="text-sm font-extrabold text-cyan-700 uppercase tracking-wide">
             Graphical Performance Analytics
           </h2>
 
@@ -170,19 +169,19 @@ export default function InductorDetailPage() {
             <select
               value={metric}
               onChange={(e) => setMetric(e.target.value)}
-              className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 outline-none"
+              className="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-cyan-600"
             >
               <option value="conductanceRatio">Conductance Ratio</option>
               <option value="current">Inductor Current (A)</option>
             </select>
 
-            <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
+            <div className="flex bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
               {["30d", "1y", "2y"].map((r) => (
                 <button
                   key={r}
                   onClick={() => setTimeRange(r)}
                   className={`px-3 py-1 text-xs font-bold rounded-md uppercase transition-all ${
-                    timeRange === r ? "bg-cyan-500 text-slate-950" : "text-slate-400 hover:text-white"
+                    timeRange === r ? "bg-cyan-600 text-white" : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   {r === "30d" ? "30 Days" : r === "1y" ? "1 Year" : "2 Years"}
@@ -190,16 +189,16 @@ export default function InductorDetailPage() {
               ))}
             </div>
 
-            <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
+            <div className="flex bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
               <button
                 onClick={() => setChartType("line")}
-                className={`p-1.5 rounded-md ${chartType === "line" ? "bg-cyan-500/20 text-cyan-400" : "text-slate-400"}`}
+                className={`p-1.5 rounded-md ${chartType === "line" ? "bg-cyan-100 text-cyan-700" : "text-slate-500"}`}
               >
                 <TrendingUp size={16} />
               </button>
               <button
                 onClick={() => setChartType("bar")}
-                className={`p-1.5 rounded-md ${chartType === "bar" ? "bg-cyan-500/20 text-cyan-400" : "text-slate-400"}`}
+                className={`p-1.5 rounded-md ${chartType === "bar" ? "bg-cyan-100 text-cyan-700" : "text-slate-500"}`}
               >
                 <BarChart2 size={16} />
               </button>
@@ -214,27 +213,27 @@ export default function InductorDetailPage() {
             <ResponsiveContainer width="100%" height="100%">
               {chartType === "line" ? (
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis dataKey="date" stroke="#64748b" fontSize={11} />
                   <YAxis stroke="#64748b" fontSize={11} />
-                  <Tooltip contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155" }} />
+                  <Tooltip contentStyle={{ backgroundColor: "#ffffff", borderColor: "#cbd5e1", color: "#0f172a" }} />
                   <Line
                     type="monotone"
                     dataKey={metric}
-                    stroke={metric === "conductanceRatio" ? "#22d3ee" : "#a855f7"}
+                    stroke={metric === "conductanceRatio" ? "#0891b2" : "#9333ea"}
                     strokeWidth={2}
                     dot={{ r: 3 }}
                   />
                 </LineChart>
               ) : (
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis dataKey="date" stroke="#64748b" fontSize={11} />
                   <YAxis stroke="#64748b" fontSize={11} />
-                  <Tooltip contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155" }} />
+                  <Tooltip contentStyle={{ backgroundColor: "#ffffff", borderColor: "#cbd5e1", color: "#0f172a" }} />
                   <Bar
                     dataKey={metric}
-                    fill={metric === "conductanceRatio" ? "#22d3ee" : "#a855f7"}
+                    fill={metric === "conductanceRatio" ? "#0891b2" : "#9333ea"}
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
