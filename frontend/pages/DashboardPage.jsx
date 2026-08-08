@@ -577,117 +577,133 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* TRENDS & CHARTS SECTION */}
+      {/* TRENDS & CHARTS SECTION WITH VIBRANT MULTI-COLORS */}
       <div>
-        <h2 className="text-base font-black text-slate-900 mb-3.5 tracking-wide flex items-center gap-2">
-          <span className="text-cyan-600">▍</span> DASHBOARD &amp; TRENDS ANALYTICS
+        <h2 className="text-base font-black text-slate-900 mb-4 tracking-wide flex items-center gap-2">
+          <span className="text-purple-600 animate-pulse">▍</span> 
+          <span className="text-cyan-700">DASHBOARD</span> &amp; 
+          <span className="text-amber-700">TRENDS</span> 
+          <span className="text-emerald-700">ANALYTICS</span>
         </h2>
+
         <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))" }}>
-          <ChartCard title="Three Phase Current">
+          
+          {/* 1. THREE PHASE CURRENT */}
+          <ChartCard title={<span className="text-rose-600 font-extrabold uppercase">Three Phase Current</span>}>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="rPhase" name="R Phase" fill="#EF4444" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="yPhase" name="Y Phase" fill="#F59E0B" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="bPhase" name="B Phase" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="yPhase" name="Y Phase" fill="#EAB308" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="bPhase" name="B Phase" fill="#2563EB" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Power">
+          {/* 2. POWER */}
+          <ChartCard title={<span className="text-amber-600 font-extrabold uppercase">Power (kW)</span>}>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
-                <Bar dataKey="power" name="Power (kW)" fill="#F97316" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="power" name="Power (kW)" fill="#D97706" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Voltage">
+          {/* 3. VOLTAGE */}
+          <ChartCard title={<span className="text-sky-600 font-extrabold uppercase">Voltage (V)</span>}>
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} domain={["auto", "auto"]} /><Tooltip />
-                <Line type="monotone" dataKey="inductorVoltage" name="Voltage (V)" stroke="#0284c7" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="inductorVoltage" name="Voltage (V)" stroke="#0284C7" strokeWidth={3} dot={{ r: 4, fill: "#0284C7" }} />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Current">
+          {/* 4. CURRENT */}
+          <ChartCard title={<span className="text-blue-600 font-extrabold uppercase">Line Current (A)</span>}>
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
-                <Line type="monotone" dataKey="lineCurrent" name="Line Current (A)" stroke="#2563eb" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="lineCurrent" name="Line Current (A)" stroke="#1D4ED8" strokeWidth={3} dot={{ r: 4, fill: "#1D4ED8" }} />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Power Factor">
+          {/* 5. POWER FACTOR */}
+          <ChartCard title={<span className="text-purple-600 font-extrabold uppercase">Power Factor</span>}>
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} domain={[0, 1]} /><Tooltip /><Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="linePF" name="Line PF" stroke="#d97706" strokeWidth={2.5} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="inductorPF" name="Inductor PF" stroke="#0284c7" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="linePF" name="Line PF" stroke="#7C3AED" strokeWidth={3} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="inductorPF" name="Inductor PF" stroke="#EC4899" strokeWidth={3} dot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Inductor Current">
+          {/* 6. INDUCTOR CURRENT */}
+          <ChartCard title={<span className="text-emerald-600 font-extrabold uppercase">Inductor Current (A)</span>}>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
-                <Bar dataKey="inductorCurrent" name="Inductor Current (A)" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="inductorCurrent" name="Inductor Current (A)" fill="#059669" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Impedance / Resistance / Reactance">
+          {/* 7. IMPEDANCE / RESISTANCE / REACTANCE */}
+          <ChartCard title={<span className="text-indigo-600 font-extrabold uppercase">Impedance / Resistance / Reactance</span>}>
             <ResponsiveContainer width="100%" height={260}>
               <ComposedChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip /><Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="impedanceZ" name="Impedance" stroke="#0284c7" strokeWidth={2} dot={{ r: 2.5 }} />
-                <Line type="monotone" dataKey="resistanceR" name="Resistance" stroke="#ea580c" strokeWidth={2} dot={{ r: 2.5 }} />
-                <Line type="monotone" dataKey="reactanceX" name="Reactance" stroke="#2563eb" strokeWidth={2} dot={{ r: 2.5 }} />
+                <Line type="monotone" dataKey="impedanceZ" name="Impedance" stroke="#0284C7" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="resistanceR" name="Resistance" stroke="#EA580C" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="reactanceX" name="Reactance" stroke="#16A34A" strokeWidth={2.5} dot={{ r: 3 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Conductance Ratio">
+          {/* 8. CONDUCTANCE RATIO */}
+          <ChartCard title={<span className="text-orange-600 font-extrabold uppercase">Conductance Ratio</span>}>
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
-                <Line type="monotone" dataKey="conductanceRatio" name="Conductance Ratio" stroke="#ea580c" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="conductanceRatio" name="Conductance Ratio" stroke="#EA580C" strokeWidth={3} dot={{ r: 4, fill: "#EA580C" }} />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="KVAR Connected">
+          {/* 9. KVAR CONNECTED */}
+          <ChartCard title={<span className="text-cyan-600 font-extrabold uppercase">KVAR Connected</span>}>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
-                <Bar dataKey="kvarConnected" name="KVAR Connected" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="kvarConnected" name="KVAR Connected" fill="#0891B2" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Balancing KVAR">
+          {/* 10. BALANCING KVAR */}
+          <ChartCard title={<span className="text-teal-600 font-extrabold uppercase">Balancing KVAR</span>}>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
-                <Bar dataKey="balancingKvar" name="Balancing KVAR" fill="#ea580c" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="balancingKvar" name="Balancing KVAR" fill="#0D9488" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
+
         </div>
       </div>
 
