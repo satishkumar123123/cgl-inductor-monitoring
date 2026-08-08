@@ -18,55 +18,55 @@ import { ROWS, POTS, emptyRecord, todayStr, fmtDateLong } from "../utils/rowsCon
 import { parseExcelFile, downloadSampleTemplate, exportRecordToExcel } from "../utils/excelMapper.js";
 import { fetchDataByDate, createData, updateData, deleteData } from "../services/dataService.js";
 
-// 6 Distinct Premium Themes for 6 Inductor Blocks (Light / Pure White BG Compatible)
+// 6 Custom Colors with User Specified Hex Codes
 const BLOCK_STYLES = [
-  // 1. Red / Rose Theme
+  // 1. MAIN POT INDUCTOR A - Olive Green (#6B8E23)
   {
-    bg: "bg-red-50 hover:bg-red-100",
-    border: "border-red-300 hover:border-red-400",
+    hexBg: "#6B8E23",
+    border: "border-[#55721B]",
     glow: "shadow-sm hover:shadow-md",
-    title: "text-red-700 font-extrabold",
-    boxBg: "bg-white border-red-200",
+    title: "text-white font-extrabold",
+    boxBg: "bg-white/90 border-[#55721B]/30",
   },
-  // 2. Yellow / Amber Theme
+  // 2. MAIN POT INDUCTOR B - Terracotta / Dark Orange (#E2725B)
   {
-    bg: "bg-amber-50 hover:bg-amber-100",
-    border: "border-amber-300 hover:border-amber-400",
+    hexBg: "#E2725B",
+    border: "border-[#C85A43]",
     glow: "shadow-sm hover:shadow-md",
-    title: "text-amber-700 font-extrabold",
-    boxBg: "bg-white border-amber-200",
+    title: "text-white font-extrabold",
+    boxBg: "bg-white/90 border-[#C85A43]/30",
   },
-  // 3. Blue / Cobalt Theme
+  // 3. MAIN POT INDUCTOR C - Navy Blue / Dark Blue (#1E315A)
   {
-    bg: "bg-blue-50 hover:bg-blue-100",
-    border: "border-blue-300 hover:border-blue-400",
+    hexBg: "#1E315A",
+    border: "border-[#132243]",
     glow: "shadow-sm hover:shadow-md",
-    title: "text-blue-700 font-extrabold",
-    boxBg: "bg-white border-blue-200",
+    title: "text-white font-extrabold",
+    boxBg: "bg-white/90 border-[#132243]/30",
   },
-  // 4. Cyan / Teal Theme
+  // 4. MAIN POT INDUCTOR D - Mustard Yellow / Gold (#E1B382)
   {
-    bg: "bg-cyan-50 hover:bg-cyan-100",
-    border: "border-cyan-300 hover:border-cyan-400",
+    hexBg: "#E1B382",
+    border: "border-[#C89B67]",
     glow: "shadow-sm hover:shadow-md",
-    title: "text-cyan-700 font-extrabold",
-    boxBg: "bg-white border-cyan-200",
+    title: "text-slate-900 font-extrabold",
+    boxBg: "bg-white/90 border-[#C89B67]/30",
   },
-  // 5. Emerald / Green Theme
+  // 5. PM POT INDUCTOR A - Emerald Green / Medium Green (#3CB371)
   {
-    bg: "bg-emerald-50 hover:bg-emerald-100",
-    border: "border-emerald-300 hover:border-emerald-400",
+    hexBg: "#3CB371",
+    border: "border-[#2E9B5B]",
     glow: "shadow-sm hover:shadow-md",
-    title: "text-emerald-700 font-extrabold",
-    boxBg: "bg-white border-emerald-200",
+    title: "text-white font-extrabold",
+    boxBg: "bg-white/90 border-[#2E9B5B]/30",
   },
-  // 6. Purple / Violet Theme
+  // 6. PM POT INDUCTOR B - Deep Rust Brown (#B5651D)
   {
-    bg: "bg-purple-50 hover:bg-purple-100",
-    border: "border-purple-300 hover:border-purple-400",
+    hexBg: "#B5651D",
+    border: "border-[#964E11]",
     glow: "shadow-sm hover:shadow-md",
-    title: "text-purple-700 font-extrabold",
-    boxBg: "bg-white border-purple-200",
+    title: "text-white font-extrabold",
+    boxBg: "bg-white/90 border-[#964E11]/30",
   },
 ];
 
@@ -418,7 +418,7 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* TOP 6 CLICKABLE INDUCTOR CARDS GRID */}
+      {/* TOP 6 CLICKABLE INDUCTOR CARDS GRID WITH EXACT CUSTOM HEX COLORS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
         {ALL_BLOCKS.map((item, idx) => {
           const metrics = getInductorMetrics(item.potKey, item.ind);
@@ -428,42 +428,43 @@ export default function DashboardPage() {
             <div
               key={item.key}
               onClick={() => handleCardClick(item.key)}
-              className={`p-4 rounded-2xl border cursor-pointer transition-all duration-300 hover:scale-[1.02] group ${style.bg} ${style.border} ${style.glow}`}
+              style={{ backgroundColor: style.hexBg }}
+              className={`p-4 rounded-2xl border cursor-pointer transition-all duration-300 hover:scale-[1.03] group ${style.border} ${style.glow}`}
             >
-              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2 mb-3">
+              <div className="flex items-center justify-between border-b border-black/10 pb-2 mb-3">
                 <span className={`text-xs uppercase tracking-wide ${style.title}`}>
                   {item.label}
                 </span>
-                <span className="text-[10px] font-bold text-slate-500 group-hover:text-slate-900 transition-colors">
+                <span className="text-[10px] font-bold text-white/80 group-hover:text-white transition-colors">
                   View &rarr;
                 </span>
               </div>
 
               {/* INDIVIDUAL PARAMETER DISPLAY */}
               <div className="space-y-2 text-xs">
-                <div className={`flex justify-between items-center px-2.5 py-1.5 rounded-lg border ${style.boxBg}`}>
-                  <span className="text-sky-600 font-semibold flex items-center gap-1">
-                    <Activity size={12} className="text-sky-500" /> Voltage:
+                <div className={`flex justify-between items-center px-2.5 py-1.5 rounded-lg border shadow-xs ${style.boxBg}`}>
+                  <span className="text-sky-700 font-bold flex items-center gap-1">
+                    <Activity size={12} className="text-sky-600" /> Voltage:
                   </span>
-                  <span className="font-extrabold text-slate-800">
+                  <span className="font-extrabold text-slate-900">
                     {metrics.voltage} {metrics.voltage !== "—" && "V"}
                   </span>
                 </div>
 
-                <div className={`flex justify-between items-center px-2.5 py-1.5 rounded-lg border ${style.boxBg}`}>
-                  <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                    <Gauge size={12} className="text-emerald-500" /> Current:
+                <div className={`flex justify-between items-center px-2.5 py-1.5 rounded-lg border shadow-xs ${style.boxBg}`}>
+                  <span className="text-emerald-700 font-bold flex items-center gap-1">
+                    <Gauge size={12} className="text-emerald-600" /> Current:
                   </span>
-                  <span className="font-extrabold text-slate-800">
+                  <span className="font-extrabold text-slate-900">
                     {metrics.current} {metrics.current !== "—" && "A"}
                   </span>
                 </div>
 
-                <div className={`flex justify-between items-center px-2.5 py-1.5 rounded-lg border ${style.boxBg}`}>
-                  <span className="text-amber-600 font-semibold flex items-center gap-1">
-                    <Zap size={12} className="text-amber-500" /> Ratio:
+                <div className={`flex justify-between items-center px-2.5 py-1.5 rounded-lg border shadow-xs ${style.boxBg}`}>
+                  <span className="text-amber-700 font-bold flex items-center gap-1">
+                    <Zap size={12} className="text-amber-600" /> Ratio:
                   </span>
-                  <span className="font-extrabold text-slate-800">
+                  <span className="font-extrabold text-slate-900">
                     {metrics.ratio}
                   </span>
                 </div>
