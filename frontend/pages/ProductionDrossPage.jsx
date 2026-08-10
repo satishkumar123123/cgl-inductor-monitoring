@@ -9,6 +9,12 @@ import {
   Flame,
   Award,
   Calendar,
+  Layers,
+  Zap,
+  Tag,
+  MessageSquare,
+  Scale,
+  Clock
 } from "lucide-react";
 import axios from "axios";
 import * as XLSX from "xlsx";
@@ -475,16 +481,16 @@ export default function ProductionDrossPage() {
   return (
     <div className="p-6 space-y-8 bg-white text-slate-800 min-h-screen max-w-[1600px] mx-auto">
       {/* HEADER SECTION */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-900 p-5 rounded-2xl border border-slate-200 shadow-md text-white">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-cyan-900 p-5 rounded-2xl border border-indigo-200 shadow-md text-white">
         <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-white/10 rounded-xl border border-white/20 text-cyan-400">
+          <div className="p-3 bg-white/10 rounded-xl border border-white/20 text-cyan-300">
             <Flame size={24} />
           </div>
           <div>
             <h1 className="text-xl font-black text-white tracking-wide flex items-center gap-2">
               INDUCTOR PRODUCTION & DROSS REPORT
             </h1>
-            <p className="text-xs text-slate-300 font-medium">
+            <p className="text-xs text-cyan-200 font-medium">
               Data Entry, Custom Range Reports & Print Exports
             </p>
           </div>
@@ -498,12 +504,12 @@ export default function ProductionDrossPage() {
       )}
 
       {/* ================================================= */}
-      {/* 1. ENTRY SECTION WITH INTERACTIVE MONTH/YEAR SELECTOR */}
+      {/* 1. ENTRY SECTION WITH COLOURFUL PARAMETER INPUTS */}
       {/* ================================================= */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-slate-100 pb-4">
           <div>
-            <h2 className="text-base font-black text-cyan-700 uppercase tracking-wide flex items-center gap-2">
+            <h2 className="text-base font-black text-blue-700 uppercase tracking-wide flex items-center gap-2">
               <TrendingUp size={18} /> Production Entry Form
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -512,32 +518,37 @@ export default function ProductionDrossPage() {
           </div>
 
           {/* CHANGEABLE MONTH & YEAR SELECTOR FOR ENTRY */}
-          <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
-            <Calendar size={16} className="text-cyan-600" />
-            <label className="text-xs font-bold text-slate-600 uppercase">
+          <div className="flex items-center gap-3 bg-blue-50/70 px-4 py-2 rounded-xl border border-blue-200 shadow-xs">
+            <Calendar size={16} className="text-blue-600" />
+            <label className="text-xs font-bold text-blue-900 uppercase">
               Select Month/Year:
             </label>
             <input
               type="month"
               value={entryMonth}
               onChange={(e) => setEntryMonth(e.target.value)}
-              className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-700 outline-none cursor-pointer focus:border-cyan-500"
+              className="bg-white border border-blue-300 rounded-lg px-2.5 py-1 text-xs font-bold text-blue-700 outline-none cursor-pointer focus:border-blue-500 shadow-xs"
             />
             <button
               onClick={handleSaveMonthly}
-              className="flex items-center gap-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-extrabold px-4 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 ml-2"
+              className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-extrabold px-4 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 ml-2"
             >
               <Save size={14} /> Save Data
             </button>
           </div>
         </div>
 
-        {/* INPUT GRID */}
+        {/* INPUT GRID - COLOURFUL PARAMETERS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-cyan-500 transition-all">
-            <label className="text-[11px] font-semibold text-slate-500 uppercase">
-              Production (MT)
-            </label>
+          
+          {/* PRODUCTION (MT) - BLUE THEME */}
+          <div className="bg-blue-50/70 p-3.5 rounded-xl border border-blue-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200 transition-all shadow-xs">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-black text-blue-800 uppercase tracking-wide flex items-center gap-1.5">
+                <Layers size={13} className="text-blue-600" /> Production (MT)
+              </label>
+              <span className="text-[10px] font-bold bg-blue-200/80 text-blue-800 px-1.5 py-0.5 rounded">MT</span>
+            </div>
             <input
               type="number"
               value={monthlyData.productionMT}
@@ -545,14 +556,18 @@ export default function ProductionDrossPage() {
                 setMonthlyData({ ...monthlyData, productionMT: e.target.value })
               }
               placeholder="0.00"
-              className="w-full mt-1.5 bg-transparent font-bold text-sm text-slate-800 outline-none"
+              className="w-full mt-2 bg-white px-3 py-1.5 rounded-lg border border-blue-200 font-extrabold text-sm text-blue-900 outline-none focus:border-blue-400 placeholder:text-blue-300 shadow-xs"
             />
           </div>
 
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-cyan-500 transition-all">
-            <label className="text-[11px] font-semibold text-slate-500 uppercase">
-              Metal Charged (MT)
-            </label>
+          {/* METAL CHARGED (MT) - TEAL THEME */}
+          <div className="bg-teal-50/70 p-3.5 rounded-xl border border-teal-200 focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-200 transition-all shadow-xs">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-black text-teal-800 uppercase tracking-wide flex items-center gap-1.5">
+                <Zap size={13} className="text-teal-600" /> Metal Charged (MT)
+              </label>
+              <span className="text-[10px] font-bold bg-teal-200/80 text-teal-800 px-1.5 py-0.5 rounded">MT</span>
+            </div>
             <input
               type="number"
               value={monthlyData.metalChargedMT}
@@ -563,14 +578,18 @@ export default function ProductionDrossPage() {
                 })
               }
               placeholder="0.00"
-              className="w-full mt-1.5 bg-transparent font-bold text-sm text-slate-800 outline-none"
+              className="w-full mt-2 bg-white px-3 py-1.5 rounded-lg border border-teal-200 font-extrabold text-sm text-teal-900 outline-none focus:border-teal-400 placeholder:text-teal-300 shadow-xs"
             />
           </div>
 
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-cyan-500 transition-all">
-            <label className="text-[11px] font-semibold text-slate-500 uppercase">
-              Total Dross (MT)
-            </label>
+          {/* TOTAL DROSS (MT) - AMBER THEME */}
+          <div className="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all shadow-xs">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-black text-amber-800 uppercase tracking-wide flex items-center gap-1.5">
+                <Flame size={13} className="text-amber-600" /> Total Dross (MT)
+              </label>
+              <span className="text-[10px] font-bold bg-amber-200/80 text-amber-800 px-1.5 py-0.5 rounded">MT</span>
+            </div>
             <input
               type="number"
               value={monthlyData.totalDrossMT}
@@ -578,14 +597,18 @@ export default function ProductionDrossPage() {
                 setMonthlyData({ ...monthlyData, totalDrossMT: e.target.value })
               }
               placeholder="0.00"
-              className="w-full mt-1.5 bg-transparent font-bold text-sm text-amber-600 outline-none"
+              className="w-full mt-2 bg-white px-3 py-1.5 rounded-lg border border-amber-200 font-extrabold text-sm text-amber-900 outline-none focus:border-amber-400 placeholder:text-amber-300 shadow-xs"
             />
           </div>
 
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-cyan-500 transition-all">
-            <label className="text-[11px] font-semibold text-slate-500 uppercase">
-              Remarks
-            </label>
+          {/* REMARKS - VIOLET THEME */}
+          <div className="bg-violet-50/70 p-3.5 rounded-xl border border-violet-200 focus-within:border-violet-500 focus-within:ring-2 focus-within:ring-violet-200 transition-all shadow-xs">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-black text-violet-800 uppercase tracking-wide flex items-center gap-1.5">
+                <MessageSquare size={13} className="text-violet-600" /> Remarks
+              </label>
+              <span className="text-[10px] font-bold bg-violet-200/80 text-violet-800 px-1.5 py-0.5 rounded">Note</span>
+            </div>
             <input
               type="text"
               value={monthlyData.remarks}
@@ -593,41 +616,42 @@ export default function ProductionDrossPage() {
                 setMonthlyData({ ...monthlyData, remarks: e.target.value })
               }
               placeholder="Monthly remarks..."
-              className="w-full mt-1.5 bg-transparent text-xs text-slate-800 outline-none"
+              className="w-full mt-2 bg-white px-3 py-1.5 rounded-lg border border-violet-200 text-xs font-semibold text-violet-900 outline-none focus:border-violet-400 placeholder:text-violet-300 shadow-xs"
             />
           </div>
+
         </div>
 
         {/* CALCULATED KPI CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-          <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
+          <div className="bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-xl p-4 flex items-center justify-between shadow-md">
             <div>
-              <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">
+              <span className="text-xs font-bold text-amber-100 uppercase tracking-wider">
                 Dross Percentage ({entryMonth})
               </span>
-              <div className="text-2xl font-black text-amber-600 mt-1">
+              <div className="text-2xl font-black text-white mt-1 drop-shadow-sm">
                 {drossPct}%
               </div>
             </div>
-            <div className="p-3 bg-amber-100 rounded-xl border border-amber-200 text-amber-600">
-              <Award size={22} />
+            <div className="p-3 bg-white/20 rounded-xl text-white">
+              <Award size={24} />
             </div>
           </div>
 
-          <div className="bg-emerald-50/80 border border-emerald-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
+          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-xl p-4 flex items-center justify-between shadow-md">
             <div>
-              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+              <span className="text-xs font-bold text-emerald-100 uppercase tracking-wider">
                 Dross Kg/MT Production ({entryMonth})
               </span>
-              <div className="text-2xl font-black text-emerald-600 mt-1">
+              <div className="text-2xl font-black text-white mt-1 drop-shadow-sm">
                 {drossKgMT}{" "}
-                <span className="text-xs font-normal text-slate-500">
+                <span className="text-xs font-medium text-emerald-100">
                   Kg/MT
                 </span>
               </div>
             </div>
-            <div className="p-3 bg-emerald-100 rounded-xl border border-emerald-200 text-emerald-600">
-              <TrendingUp size={22} />
+            <div className="p-3 bg-white/20 rounded-xl text-white">
+              <TrendingUp size={24} />
             </div>
           </div>
         </div>
@@ -639,7 +663,7 @@ export default function ProductionDrossPage() {
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6 border-b border-slate-100 pb-4">
           <div>
-            <h3 className="flex items-center gap-2 text-sm font-black text-cyan-700 uppercase tracking-wider">
+            <h3 className="flex items-center gap-2 text-sm font-black text-blue-700 uppercase tracking-wider">
               <History size={16} /> Print & Consolidated Report Section
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -655,7 +679,7 @@ export default function ProductionDrossPage() {
                 type="month"
                 value={printStartMonth}
                 onChange={(e) => setPrintStartMonth(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-700 outline-none cursor-pointer focus:border-cyan-500"
+                className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-blue-700 outline-none cursor-pointer focus:border-blue-500"
               />
             </div>
 
@@ -667,7 +691,7 @@ export default function ProductionDrossPage() {
                 type="month"
                 value={printEndMonth}
                 onChange={(e) => setPrintEndMonth(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-700 outline-none cursor-pointer focus:border-cyan-500"
+                className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-blue-700 outline-none cursor-pointer focus:border-blue-500"
               />
             </div>
 
@@ -689,7 +713,7 @@ export default function ProductionDrossPage() {
         {/* CONSOLIDATED DYNAMIC REPORT TABLE */}
         <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full text-xs text-left">
-            <thead className="bg-slate-100 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
+            <thead className="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
               <tr>
                 <th className="p-3.5">Month / Year</th>
                 <th className="p-3.5 text-center">Production (MT)</th>
@@ -706,13 +730,13 @@ export default function ProductionDrossPage() {
                     key={item._id || item.monthYear}
                     className="hover:bg-slate-50/80 transition-colors"
                   >
-                    <td className="p-3.5 font-bold text-cyan-700">
+                    <td className="p-3.5 font-bold text-blue-700">
                       {item.monthYear}
                     </td>
-                    <td className="p-3.5 text-center font-medium text-slate-800">
+                    <td className="p-3.5 text-center font-bold text-blue-900">
                       {Number(item.productionMT || 0).toFixed(2)}
                     </td>
-                    <td className="p-3.5 text-center font-medium text-slate-800">
+                    <td className="p-3.5 text-center font-bold text-teal-800">
                       {Number(item.metalChargedMT || 0).toFixed(2)}
                     </td>
                     <td className="p-3.5 text-center font-bold text-amber-600">
@@ -740,12 +764,12 @@ export default function ProductionDrossPage() {
 
               {/* SUMMARY ROW FOR SELECTED RANGE */}
               {rangeFilteredData.length > 0 && (
-                <tr className="bg-cyan-50/80 font-extrabold text-cyan-900 border-t-2 border-cyan-200">
+                <tr className="bg-blue-50/80 font-extrabold text-blue-900 border-t-2 border-blue-200">
                   <td className="p-3.5">TOTAL / AVERAGE</td>
-                  <td className="p-3.5 text-center text-slate-900">
+                  <td className="p-3.5 text-center text-blue-900">
                     {rangeTotals.totalProd.toFixed(2)}
                   </td>
-                  <td className="p-3.5 text-center text-slate-900">
+                  <td className="p-3.5 text-center text-teal-900">
                     {rangeTotals.totalMetal.toFixed(2)}
                   </td>
                   <td className="p-3.5 text-center text-amber-700">
@@ -765,13 +789,13 @@ export default function ProductionDrossPage() {
       </div>
 
       {/* ================================================= */}
-      {/* 3. BOTTOM DROSS ENTRY FORM */}
+      {/* 3. BOTTOM DROSS ENTRY FORM (COLOURFUL PARAMETERS) */}
       {/* ================================================= */}
       <div className="bg-white border border-purple-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap justify-between items-center gap-3 mb-6 border-b border-purple-100 pb-4">
           <div>
-            <h2 className="text-base font-black text-purple-700 uppercase tracking-wide">
-              Bottom Dross Logging
+            <h2 className="text-base font-black text-purple-700 uppercase tracking-wide flex items-center gap-2">
+              <Flame size={18} className="text-purple-600" /> Bottom Dross Logging
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
               Record individual day-wise bottom dross quantities
@@ -800,25 +824,35 @@ export default function ProductionDrossPage() {
           </div>
         </div>
 
+        {/* BOTTOM DROSS COLOURFUL INPUT GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-purple-500 transition-all">
-            <label className="text-[11px] font-semibold text-slate-500 uppercase">
-              Log Date
-            </label>
+          
+          {/* LOG DATE - ROSE THEME */}
+          <div className="bg-rose-50/70 p-3.5 rounded-xl border border-rose-200 focus-within:border-rose-500 focus-within:ring-2 focus-within:ring-rose-200 transition-all shadow-xs">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-black text-rose-800 uppercase tracking-wide flex items-center gap-1.5">
+                <Clock size={13} className="text-rose-600" /> Log Date
+              </label>
+              <span className="text-[10px] font-bold bg-rose-200/80 text-rose-800 px-1.5 py-0.5 rounded">Date</span>
+            </div>
             <input
               type="date"
               value={bottomEntry.date}
               onChange={(e) =>
                 setBottomEntry({ ...bottomEntry, date: e.target.value })
               }
-              className="w-full mt-1.5 bg-transparent font-bold text-xs text-slate-800 outline-none"
+              className="w-full mt-2 bg-white px-3 py-1.5 rounded-lg border border-rose-200 text-xs font-bold text-rose-900 outline-none focus:border-rose-400 shadow-xs cursor-pointer"
             />
           </div>
 
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-purple-500 transition-all">
-            <label className="text-[11px] font-semibold text-slate-500 uppercase">
-              Quantity (MT)
-            </label>
+          {/* QUANTITY (MT) - PURPLE THEME */}
+          <div className="bg-purple-50/70 p-3.5 rounded-xl border border-purple-200 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-200 transition-all shadow-xs">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-black text-purple-800 uppercase tracking-wide flex items-center gap-1.5">
+                <Scale size={13} className="text-purple-600" /> Quantity (MT)
+              </label>
+              <span className="text-[10px] font-bold bg-purple-200/80 text-purple-800 px-1.5 py-0.5 rounded">MT</span>
+            </div>
             <input
               type="number"
               value={bottomEntry.quantityMT}
@@ -826,14 +860,18 @@ export default function ProductionDrossPage() {
                 setBottomEntry({ ...bottomEntry, quantityMT: e.target.value })
               }
               placeholder="0.00"
-              className="w-full mt-1.5 bg-transparent font-bold text-sm text-purple-700 outline-none"
+              className="w-full mt-2 bg-white px-3 py-1.5 rounded-lg border border-purple-200 font-extrabold text-sm text-purple-900 outline-none focus:border-purple-400 placeholder:text-purple-300 shadow-xs"
             />
           </div>
 
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-purple-500 transition-all">
-            <label className="text-[11px] font-semibold text-slate-500 uppercase">
-              Line Remarks
-            </label>
+          {/* LINE REMARKS - INDIGO THEME */}
+          <div className="bg-indigo-50/70 p-3.5 rounded-xl border border-indigo-200 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-200 transition-all shadow-xs">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-black text-indigo-800 uppercase tracking-wide flex items-center gap-1.5">
+                <Tag size={13} className="text-indigo-600" /> Line Remarks
+              </label>
+              <span className="text-[10px] font-bold bg-indigo-200/80 text-indigo-800 px-1.5 py-0.5 rounded">Status</span>
+            </div>
             <input
               type="text"
               value={bottomEntry.lineRemarks}
@@ -841,9 +879,10 @@ export default function ProductionDrossPage() {
                 setBottomEntry({ ...bottomEntry, lineRemarks: e.target.value })
               }
               placeholder="Line status / observation"
-              className="w-full mt-1.5 bg-transparent text-xs text-slate-800 outline-none"
+              className="w-full mt-2 bg-white px-3 py-1.5 rounded-lg border border-indigo-200 text-xs font-semibold text-indigo-900 outline-none focus:border-indigo-400 placeholder:text-indigo-300 shadow-xs"
             />
           </div>
+
         </div>
       </div>
 
@@ -856,7 +895,7 @@ export default function ProductionDrossPage() {
             <History size={16} /> Bottom Dross Logs ({entryMonth})
           </h3>
 
-          <div className="text-xs font-bold text-purple-800 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-xl">
+          <div className="text-xs font-bold text-purple-800 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-xl shadow-xs">
             Total Monthly:{" "}
             <span className="text-purple-950 font-extrabold">
               {Number(currentReport?.totalBottomDrossMT || 0).toFixed(2)} MT
@@ -880,13 +919,13 @@ export default function ProductionDrossPage() {
                     key={log._id || index}
                     className="hover:bg-purple-50/40 transition-colors"
                   >
-                    <td className="p-3.5 font-bold text-cyan-700">
+                    <td className="p-3.5 font-bold text-rose-700">
                       {log.date}
                     </td>
                     <td className="p-3.5 font-extrabold text-purple-700">
                       {Number(log.quantityMT || 0).toFixed(2)}
                     </td>
-                    <td className="p-3.5 text-slate-600">
+                    <td className="p-3.5 text-indigo-800 font-medium">
                       {log.lineRemarks || "Line Active"}
                     </td>
                   </tr>
