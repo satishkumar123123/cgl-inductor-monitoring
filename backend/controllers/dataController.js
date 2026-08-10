@@ -12,7 +12,7 @@ exports.getAllData = async (req, res) => {
   }
 };
 
-// 2. CREATE / SAVE DASHBOARD DATA
+// 2. CREATE / SAVE DASHBOARD DATA (FIXED: Payload Sanitized & _id/validation bypass)
 exports.createData = async (req, res) => {
   try {
     const { 
@@ -31,6 +31,7 @@ exports.createData = async (req, res) => {
       return res.status(400).json({ message: "Date required hai!" });
     }
 
+    // Clean payload and omit immutable fields
     const payload = {
       date,
       source: source || "manual",
@@ -46,11 +47,11 @@ exports.createData = async (req, res) => {
       lastUpdated: new Date(),
     };
 
-    // findOneAndUpdate with upsert:true guarantees save/insert in MongoDB
+    // findOneAndUpdate with runValidators: false so empty excel fields won't crash
     const updatedRecord = await DailyInductorData.findOneAndUpdate(
       { date },
       { $set: payload },
-      { new: true, upsert: true, runValidators: false }
+      { new: true, upsert: true, runValidators: false, setDefaultsOnInsert: true }
     );
 
     console.log(`[SAVE SUCCESS] Data saved for date: ${date}`);
@@ -59,8 +60,11 @@ exports.createData = async (req, res) => {
       data: updatedRecord,
     });
   } catch (err) {
-    console.error("[SAVE ERROR]", err);
-    return res.status(500).json({ message: "Data save karne me error aaya", error: err.message });
+    console.error("[SAVE ERROR DETAILS]:", err);
+    return res.status(500).json({ 
+      message: "Data save karne me error aaya", 
+      error: err.message 
+    });
   }
 };
 
@@ -83,12 +87,12 @@ exports.getDataByDate = async (req, res) => {
   }
 };
 
-// 4. UPDATE DATA (FIXED: Cleaned _id & __v to prevent MongoDB immutable field crash)
+// 4. UPDATE DATA (FIXED: Deleted _id, __v & disabled strict validation)
 exports.updateData = async (req, res) => {
   try {
     const { date } = req.params;
 
-    // Remove immutable fields from payload to prevent MongoDB error
+    // Remove immutable fields from body to prevent MongoDB update crash
     const updatePayload = { ...req.body };
     delete updatePayload._id;
     delete updatePayload.__v;
@@ -103,8 +107,11 @@ exports.updateData = async (req, res) => {
     console.log(`[UPDATE SUCCESS] Data updated for date: ${date}`);
     return res.status(200).json({ message: "Updated successfully", data: record });
   } catch (err) {
-    console.error("[UPDATE ERROR]", err);
-    return res.status(500).json({ message: "Update fail ho gaya", error: err.message });
+    console.error("[UPDATE ERROR DETAILS]:", err);
+    return res.status(500).json({ 
+      message: "Update fail ho gaya", 
+      error: err.message 
+    });
   }
 };
 
