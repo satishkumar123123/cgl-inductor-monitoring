@@ -18,8 +18,6 @@ const powerRoutes = require("./routes/powerRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const auditRoutes = require("./routes/auditRoutes");
 const productionDrossRoutes = require("./routes/productionDrossRoutes");
-
-// 1. ADDED INDUCTOR REMARKS ROUTE IMPORT
 const inductorRoutes = require("./routes/inductorRoutes");
 
 const app = express();
@@ -28,8 +26,6 @@ const app = express();
 app.set("trust proxy", 1);
 
 // DYNAMIC CORS CONFIGURATION
-// Localhost ke kisi bhi port ko allow karega (e.g. 5173, 3000, 5174, etc.)
-// aur process.env.CLIENT_ORIGIN se custom production domains handle honge.
 const configuredOrigins = (process.env.CLIENT_ORIGIN || "")
   .split(",")
   .map((s) => s.trim())
@@ -38,12 +34,8 @@ const configuredOrigins = (process.env.CLIENT_ORIGIN || "")
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, curl, Postman, backend-to-backend)
       if (!origin) return callback(null, true);
-
-      // Check if origin is localhost or 127.0.0.1 on ANY port
       const isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
-
       if (isLocalhost || configuredOrigins.includes(origin)) {
         return callback(null, true);
       } else {
@@ -56,7 +48,11 @@ app.use(
 
 app.use(helmet());
 app.use(compression());
-app.use(express.json({ limit: "5mb" }));
+
+// ✅ FIXED: Increased body limits to 20mb for heavy Excel JSON payloads
+app.use(express.json({ limit: "20mb" }));
+app.use(express.urlencoded({ limit: "20mb", extended: true }));
+
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(auditLogger);
 
@@ -83,8 +79,6 @@ app.use("/api/power", powerRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/audit-logs", auditRoutes);
 app.use("/api/production-dross", productionDrossRoutes);
-
-// 2. MOUNTED INDUCTOR REMARKS ROUTE
 app.use("/api/inductors", inductorRoutes);
 
 app.use(notFound);
