@@ -473,18 +473,18 @@ export default function ProductionDrossPage() {
   };
 
   return (
-    <div className="p-6 space-y-8 text-slate-100 max-w-[1600px] mx-auto">
+    <div className="p-6 space-y-8 bg-white text-slate-800 min-h-screen max-w-[1600px] mx-auto">
       {/* HEADER SECTION */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-900/90 to-cyan-950/40 p-5 rounded-2xl border border-cyan-500/20 shadow-lg shadow-cyan-950/20 backdrop-blur-md">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-900 p-5 rounded-2xl border border-slate-200 shadow-md text-white">
         <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-cyan-500/10 rounded-xl border border-cyan-500/30 text-cyan-400">
+          <div className="p-3 bg-white/10 rounded-xl border border-white/20 text-cyan-400">
             <Flame size={24} />
           </div>
           <div>
             <h1 className="text-xl font-black text-white tracking-wide flex items-center gap-2">
               INDUCTOR PRODUCTION & DROSS REPORT
             </h1>
-            <p className="text-xs text-slate-400 font-medium">
+            <p className="text-xs text-slate-300 font-medium">
               Data Entry, Custom Range Reports & Print Exports
             </p>
           </div>
@@ -492,7 +492,7 @@ export default function ProductionDrossPage() {
       </div>
 
       {loading && (
-        <div className="text-center text-xs font-semibold text-cyan-400 animate-pulse">
+        <div className="text-center text-xs font-semibold text-cyan-600 animate-pulse">
           Fetching system records...
         </div>
       )}
@@ -500,32 +500,32 @@ export default function ProductionDrossPage() {
       {/* ================================================= */}
       {/* 1. ENTRY SECTION WITH INTERACTIVE MONTH/YEAR SELECTOR */}
       {/* ================================================= */}
-      <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-md">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-slate-800/80 pb-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-slate-100 pb-4">
           <div>
-            <h2 className="text-base font-black text-cyan-400 uppercase tracking-wide flex items-center gap-2">
+            <h2 className="text-base font-black text-cyan-700 uppercase tracking-wide flex items-center gap-2">
               <TrendingUp size={18} /> Production Entry Form
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Select Month and Year to enter or update readings
             </p>
           </div>
 
           {/* CHANGEABLE MONTH & YEAR SELECTOR FOR ENTRY */}
-          <div className="flex items-center gap-3 bg-slate-950 px-4 py-2 rounded-xl border border-cyan-500/30">
-            <Calendar size={16} className="text-cyan-400" />
-            <label className="text-xs font-bold text-slate-300 uppercase">
+          <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
+            <Calendar size={16} className="text-cyan-600" />
+            <label className="text-xs font-bold text-slate-600 uppercase">
               Select Month/Year:
             </label>
             <input
               type="month"
               value={entryMonth}
               onChange={(e) => setEntryMonth(e.target.value)}
-              className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-400 outline-none cursor-pointer focus:border-cyan-500"
+              className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-700 outline-none cursor-pointer focus:border-cyan-500"
             />
             <button
               onClick={handleSaveMonthly}
-              className="flex items-center gap-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 text-xs font-extrabold px-4 py-1.5 rounded-lg shadow-md transition-all active:scale-95 ml-2"
+              className="flex items-center gap-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-extrabold px-4 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 ml-2"
             >
               <Save size={14} /> Save Data
             </button>
@@ -534,8 +534,8 @@ export default function ProductionDrossPage() {
 
         {/* INPUT GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 focus-within:border-cyan-500/50 transition-all">
-            <label className="text-[11px] font-semibold text-slate-400 uppercase">
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-cyan-500 transition-all">
+            <label className="text-[11px] font-semibold text-slate-500 uppercase">
               Production (MT)
             </label>
             <input
@@ -545,12 +545,12 @@ export default function ProductionDrossPage() {
                 setMonthlyData({ ...monthlyData, productionMT: e.target.value })
               }
               placeholder="0.00"
-              className="w-full mt-1.5 bg-transparent font-bold text-sm text-white outline-none"
+              className="w-full mt-1.5 bg-transparent font-bold text-sm text-slate-800 outline-none"
             />
           </div>
 
-          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 focus-within:border-cyan-500/50 transition-all">
-            <label className="text-[11px] font-semibold text-slate-400 uppercase">
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-cyan-500 transition-all">
+            <label className="text-[11px] font-semibold text-slate-500 uppercase">
               Metal Charged (MT)
             </label>
             <input
@@ -563,12 +563,12 @@ export default function ProductionDrossPage() {
                 })
               }
               placeholder="0.00"
-              className="w-full mt-1.5 bg-transparent font-bold text-sm text-white outline-none"
+              className="w-full mt-1.5 bg-transparent font-bold text-sm text-slate-800 outline-none"
             />
           </div>
 
-          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 focus-within:border-cyan-500/50 transition-all">
-            <label className="text-[11px] font-semibold text-slate-400 uppercase">
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-cyan-500 transition-all">
+            <label className="text-[11px] font-semibold text-slate-500 uppercase">
               Total Dross (MT)
             </label>
             <input
@@ -578,12 +578,12 @@ export default function ProductionDrossPage() {
                 setMonthlyData({ ...monthlyData, totalDrossMT: e.target.value })
               }
               placeholder="0.00"
-              className="w-full mt-1.5 bg-transparent font-bold text-sm text-amber-400 outline-none"
+              className="w-full mt-1.5 bg-transparent font-bold text-sm text-amber-600 outline-none"
             />
           </div>
 
-          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 focus-within:border-cyan-500/50 transition-all">
-            <label className="text-[11px] font-semibold text-slate-400 uppercase">
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-cyan-500 transition-all">
+            <label className="text-[11px] font-semibold text-slate-500 uppercase">
               Remarks
             </label>
             <input
@@ -593,40 +593,40 @@ export default function ProductionDrossPage() {
                 setMonthlyData({ ...monthlyData, remarks: e.target.value })
               }
               placeholder="Monthly remarks..."
-              className="w-full mt-1.5 bg-transparent text-xs text-white outline-none"
+              className="w-full mt-1.5 bg-transparent text-xs text-slate-800 outline-none"
             />
           </div>
         </div>
 
         {/* CALCULATED KPI CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-          <div className="bg-gradient-to-br from-amber-950/30 via-slate-950 to-slate-950 border border-amber-500/30 rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
             <div>
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">
                 Dross Percentage ({entryMonth})
               </span>
-              <div className="text-2xl font-black text-amber-300 mt-1">
+              <div className="text-2xl font-black text-amber-600 mt-1">
                 {drossPct}%
               </div>
             </div>
-            <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-400">
+            <div className="p-3 bg-amber-100 rounded-xl border border-amber-200 text-amber-600">
               <Award size={22} />
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-emerald-950/30 via-slate-950 to-slate-950 border border-emerald-500/30 rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-emerald-50/80 border border-emerald-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
             <div>
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
                 Dross Kg/MT Production ({entryMonth})
               </span>
-              <div className="text-2xl font-black text-emerald-300 mt-1">
+              <div className="text-2xl font-black text-emerald-600 mt-1">
                 {drossKgMT}{" "}
-                <span className="text-xs font-normal text-slate-400">
+                <span className="text-xs font-normal text-slate-500">
                   Kg/MT
                 </span>
               </div>
             </div>
-            <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-emerald-400">
+            <div className="p-3 bg-emerald-100 rounded-xl border border-emerald-200 text-emerald-600">
               <TrendingUp size={22} />
             </div>
           </div>
@@ -636,50 +636,50 @@ export default function ProductionDrossPage() {
       {/* ================================================= */}
       {/* 2. PRINT / EXPORT RANGE SECTION WITH EDITABLE FROM & TO */}
       {/* ================================================= */}
-      <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-md">
-        <div className="flex flex-wrap justify-between items-center gap-4 mb-6 border-b border-slate-800/80 pb-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div className="flex flex-wrap justify-between items-center gap-4 mb-6 border-b border-slate-100 pb-4">
           <div>
-            <h3 className="flex items-center gap-2 text-sm font-black text-cyan-400 uppercase tracking-wider">
+            <h3 className="flex items-center gap-2 text-sm font-black text-cyan-700 uppercase tracking-wider">
               <History size={16} /> Print & Consolidated Report Section
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Change 'From' and 'To' Month/Year to dynamically render row-by-row printable report
             </p>
           </div>
 
           {/* EDITABLE RANGE SELECTOR (FROM MONTH/YEAR -> TO MONTH/YEAR) */}
-          <div className="flex flex-wrap items-center gap-3 bg-slate-950 px-4 py-2 rounded-xl border border-slate-800">
+          <div className="flex flex-wrap items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
             <div className="flex items-center gap-1.5 text-xs">
-              <label className="font-semibold text-slate-400 uppercase">From:</label>
+              <label className="font-semibold text-slate-500 uppercase">From:</label>
               <input
                 type="month"
                 value={printStartMonth}
                 onChange={(e) => setPrintStartMonth(e.target.value)}
-                className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-400 outline-none cursor-pointer focus:border-cyan-500"
+                className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-700 outline-none cursor-pointer focus:border-cyan-500"
               />
             </div>
 
-            <span className="text-slate-500 font-bold">→</span>
+            <span className="text-slate-400 font-bold">→</span>
 
             <div className="flex items-center gap-1.5 text-xs">
-              <label className="font-semibold text-slate-400 uppercase">To:</label>
+              <label className="font-semibold text-slate-500 uppercase">To:</label>
               <input
                 type="month"
                 value={printEndMonth}
                 onChange={(e) => setPrintEndMonth(e.target.value)}
-                className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-400 outline-none cursor-pointer focus:border-cyan-500"
+                className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-700 outline-none cursor-pointer focus:border-cyan-500"
               />
             </div>
 
             <button
               onClick={exportRangeProductionExcel}
-              className="flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ml-2"
+              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ml-2"
             >
               <FileSpreadsheet size={14} /> Export Excel
             </button>
             <button
               onClick={printRangeProductionReport}
-              className="flex items-center gap-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+              className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
             >
               <Printer size={14} /> Print PDF
             </button>
@@ -687,9 +687,9 @@ export default function ProductionDrossPage() {
         </div>
 
         {/* CONSOLIDATED DYNAMIC REPORT TABLE */}
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full text-xs text-left">
-            <thead className="bg-slate-950 text-slate-400 font-bold uppercase tracking-wider">
+            <thead className="bg-slate-100 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
               <tr>
                 <th className="p-3.5">Month / Year</th>
                 <th className="p-3.5 text-center">Production (MT)</th>
@@ -699,29 +699,29 @@ export default function ProductionDrossPage() {
                 <th className="p-3.5 text-center">Kg/MT</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-slate-100">
               {rangeFilteredData.length > 0 ? (
                 rangeFilteredData.map((item) => (
                   <tr
                     key={item._id || item.monthYear}
-                    className="hover:bg-slate-800/40 transition-colors"
+                    className="hover:bg-slate-50/80 transition-colors"
                   >
-                    <td className="p-3.5 font-bold text-cyan-300">
+                    <td className="p-3.5 font-bold text-cyan-700">
                       {item.monthYear}
                     </td>
-                    <td className="p-3.5 text-center font-medium text-white">
+                    <td className="p-3.5 text-center font-medium text-slate-800">
                       {Number(item.productionMT || 0).toFixed(2)}
                     </td>
-                    <td className="p-3.5 text-center font-medium text-white">
+                    <td className="p-3.5 text-center font-medium text-slate-800">
                       {Number(item.metalChargedMT || 0).toFixed(2)}
                     </td>
-                    <td className="p-3.5 text-center font-bold text-amber-400">
+                    <td className="p-3.5 text-center font-bold text-amber-600">
                       {Number(item.totalDrossMT || 0).toFixed(2)}
                     </td>
-                    <td className="p-3.5 text-center font-bold text-orange-400">
+                    <td className="p-3.5 text-center font-bold text-orange-600">
                       {Number(item.drossPercent || 0).toFixed(2)}%
                     </td>
-                    <td className="p-3.5 text-center font-bold text-emerald-400">
+                    <td className="p-3.5 text-center font-bold text-emerald-600">
                       {Number(item.drossKgPerMT || 0).toFixed(2)}
                     </td>
                   </tr>
@@ -730,7 +730,7 @@ export default function ProductionDrossPage() {
                 <tr>
                   <td
                     colSpan="6"
-                    className="p-6 text-center text-slate-500 font-medium"
+                    className="p-6 text-center text-slate-400 font-medium"
                   >
                     No production history records found from {printStartMonth} to{" "}
                     {printEndMonth}.
@@ -740,21 +740,21 @@ export default function ProductionDrossPage() {
 
               {/* SUMMARY ROW FOR SELECTED RANGE */}
               {rangeFilteredData.length > 0 && (
-                <tr className="bg-cyan-950/40 font-extrabold text-cyan-200 border-t-2 border-cyan-500/40">
+                <tr className="bg-cyan-50/80 font-extrabold text-cyan-900 border-t-2 border-cyan-200">
                   <td className="p-3.5">TOTAL / AVERAGE</td>
-                  <td className="p-3.5 text-center text-white">
+                  <td className="p-3.5 text-center text-slate-900">
                     {rangeTotals.totalProd.toFixed(2)}
                   </td>
-                  <td className="p-3.5 text-center text-white">
+                  <td className="p-3.5 text-center text-slate-900">
                     {rangeTotals.totalMetal.toFixed(2)}
                   </td>
-                  <td className="p-3.5 text-center text-amber-300">
+                  <td className="p-3.5 text-center text-amber-700">
                     {rangeTotals.totalDross.toFixed(2)}
                   </td>
-                  <td className="p-3.5 text-center text-orange-300">
+                  <td className="p-3.5 text-center text-orange-700">
                     {rangeTotals.avgPct}%
                   </td>
-                  <td className="p-3.5 text-center text-emerald-300">
+                  <td className="p-3.5 text-center text-emerald-700">
                     {rangeTotals.avgKgMT}
                   </td>
                 </tr>
@@ -767,13 +767,13 @@ export default function ProductionDrossPage() {
       {/* ================================================= */}
       {/* 3. BOTTOM DROSS ENTRY FORM */}
       {/* ================================================= */}
-      <div className="bg-slate-900/70 border border-purple-900/40 rounded-2xl p-6 shadow-xl backdrop-blur-md">
-        <div className="flex flex-wrap justify-between items-center gap-3 mb-6 border-b border-purple-900/30 pb-4">
+      <div className="bg-white border border-purple-200 rounded-2xl p-6 shadow-sm">
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-6 border-b border-purple-100 pb-4">
           <div>
-            <h2 className="text-base font-black text-purple-400 uppercase tracking-wide">
+            <h2 className="text-base font-black text-purple-700 uppercase tracking-wide">
               Bottom Dross Logging
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Record individual day-wise bottom dross quantities
             </p>
           </div>
@@ -781,19 +781,19 @@ export default function ProductionDrossPage() {
           <div className="flex flex-wrap gap-2.5">
             <button
               onClick={handleAddBottomDross}
-              className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition-all active:scale-95"
+              className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all active:scale-95"
             >
               <PlusCircle size={14} /> Add Entry
             </button>
             <button
               onClick={exportBottomDrossExcel}
-              className="flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold px-3.5 py-2 rounded-xl transition-all"
+              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold px-3.5 py-2 rounded-xl transition-all"
             >
               <FileSpreadsheet size={14} /> Excel ({entryMonth})
             </button>
             <button
               onClick={printBottomDrossReport}
-              className="flex items-center gap-1.5 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/40 text-xs font-bold px-3.5 py-2 rounded-xl transition-all"
+              className="flex items-center gap-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-300 text-xs font-bold px-3.5 py-2 rounded-xl transition-all"
             >
               <Printer size={14} /> Print PDF ({entryMonth})
             </button>
@@ -801,8 +801,8 @@ export default function ProductionDrossPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 focus-within:border-purple-500/50 transition-all">
-            <label className="text-[11px] font-semibold text-slate-400 uppercase">
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-purple-500 transition-all">
+            <label className="text-[11px] font-semibold text-slate-500 uppercase">
               Log Date
             </label>
             <input
@@ -811,12 +811,12 @@ export default function ProductionDrossPage() {
               onChange={(e) =>
                 setBottomEntry({ ...bottomEntry, date: e.target.value })
               }
-              className="w-full mt-1.5 bg-transparent font-bold text-xs text-white outline-none"
+              className="w-full mt-1.5 bg-transparent font-bold text-xs text-slate-800 outline-none"
             />
           </div>
 
-          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 focus-within:border-purple-500/50 transition-all">
-            <label className="text-[11px] font-semibold text-slate-400 uppercase">
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-purple-500 transition-all">
+            <label className="text-[11px] font-semibold text-slate-500 uppercase">
               Quantity (MT)
             </label>
             <input
@@ -826,12 +826,12 @@ export default function ProductionDrossPage() {
                 setBottomEntry({ ...bottomEntry, quantityMT: e.target.value })
               }
               placeholder="0.00"
-              className="w-full mt-1.5 bg-transparent font-bold text-sm text-purple-300 outline-none"
+              className="w-full mt-1.5 bg-transparent font-bold text-sm text-purple-700 outline-none"
             />
           </div>
 
-          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 focus-within:border-purple-500/50 transition-all">
-            <label className="text-[11px] font-semibold text-slate-400 uppercase">
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-purple-500 transition-all">
+            <label className="text-[11px] font-semibold text-slate-500 uppercase">
               Line Remarks
             </label>
             <input
@@ -841,7 +841,7 @@ export default function ProductionDrossPage() {
                 setBottomEntry({ ...bottomEntry, lineRemarks: e.target.value })
               }
               placeholder="Line status / observation"
-              className="w-full mt-1.5 bg-transparent text-xs text-white outline-none"
+              className="w-full mt-1.5 bg-transparent text-xs text-slate-800 outline-none"
             />
           </div>
         </div>
@@ -850,43 +850,43 @@ export default function ProductionDrossPage() {
       {/* ================================================= */}
       {/* 4. BOTTOM DROSS HISTORY TABLE */}
       {/* ================================================= */}
-      <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-md">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
-          <h3 className="flex items-center gap-2 text-sm font-black text-purple-400 uppercase tracking-wider">
+          <h3 className="flex items-center gap-2 text-sm font-black text-purple-700 uppercase tracking-wider">
             <History size={16} /> Bottom Dross Logs ({entryMonth})
           </h3>
 
-          <div className="text-xs font-bold text-purple-300 bg-purple-950/60 border border-purple-500/30 px-3 py-1.5 rounded-xl">
+          <div className="text-xs font-bold text-purple-800 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-xl">
             Total Monthly:{" "}
-            <span className="text-white font-extrabold">
+            <span className="text-purple-950 font-extrabold">
               {Number(currentReport?.totalBottomDrossMT || 0).toFixed(2)} MT
             </span>
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full text-xs text-left">
-            <thead className="bg-slate-950 text-slate-400 font-bold uppercase tracking-wider">
+            <thead className="bg-purple-50 text-purple-900 font-bold uppercase tracking-wider border-b border-purple-100">
               <tr>
                 <th className="p-3.5">Date</th>
                 <th className="p-3.5">Quantity (MT)</th>
                 <th className="p-3.5">Remarks / Line Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-slate-100">
               {currentReport?.bottomDrossLogs?.length > 0 ? (
                 currentReport.bottomDrossLogs.map((log, index) => (
                   <tr
                     key={log._id || index}
-                    className="hover:bg-slate-800/40 transition-colors"
+                    className="hover:bg-purple-50/40 transition-colors"
                   >
-                    <td className="p-3.5 font-bold text-cyan-300">
+                    <td className="p-3.5 font-bold text-cyan-700">
                       {log.date}
                     </td>
-                    <td className="p-3.5 font-extrabold text-purple-300">
+                    <td className="p-3.5 font-extrabold text-purple-700">
                       {Number(log.quantityMT || 0).toFixed(2)}
                     </td>
-                    <td className="p-3.5 text-slate-400">
+                    <td className="p-3.5 text-slate-600">
                       {log.lineRemarks || "Line Active"}
                     </td>
                   </tr>
@@ -895,7 +895,7 @@ export default function ProductionDrossPage() {
                 <tr>
                   <td
                     colSpan="3"
-                    className="p-6 text-center text-slate-500 font-medium"
+                    className="p-6 text-center text-slate-400 font-medium"
                   >
                     No Bottom Dross log entries found for {entryMonth}.
                   </td>
