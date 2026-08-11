@@ -75,8 +75,12 @@ export default function BalancingKvarPage() {
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
-              <Calculator className="text-blue-600" size={26} /> Balancing KVAR Calculator
+            {/* WORDWISE DIFFERENT COLORS FOR TITLE */}
+            <h1 className="text-2xl font-black uppercase tracking-tight flex items-center gap-2">
+              <Calculator className="text-pink-600" size={26} />
+              <span className="text-pink-600">Balancing</span>
+              <span className="text-blue-600">KVAR</span>
+              <span className="text-purple-600">Calculator</span>
             </h1>
             <p className="text-xs text-slate-500 font-medium">
               Calculate &amp; maintain historical record for Initial, Removed, and Added KVAR readings
@@ -100,18 +104,18 @@ export default function BalancingKvarPage() {
       <form onSubmit={handleSave} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           
-          {/* BLOCK 1: INITIAL KVAR */}
-          <div className="bg-slate-50 border-2 border-slate-200 p-5 rounded-2xl shadow-sm space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wide text-slate-500">1. Initial KVAR</span>
+          {/* BLOCK 1: INITIAL KVAR (PINK THEME) */}
+          <div className="bg-pink-50/50 border-2 border-pink-200 p-5 rounded-2xl shadow-sm space-y-2">
+            <span className="text-xs font-bold uppercase tracking-wide text-pink-600">1. Initial KVAR</span>
             <input
               type="number"
               step="any"
               value={initialKvar}
               onChange={(e) => setInitialKvar(e.target.value)}
               placeholder="0.00"
-              className="w-full text-2xl font-black text-slate-900 bg-white border border-slate-300 rounded-xl p-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all"
+              className="w-full text-2xl font-black text-pink-700 bg-white border border-pink-300 rounded-xl p-3 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100 transition-all"
             />
-            <p className="text-[11px] text-slate-400">Baseline capacity starting point</p>
+            <p className="text-[11px] text-pink-400">Baseline capacity starting point</p>
           </div>
 
           {/* BLOCK 2: REMOVED KVAR */}
@@ -143,7 +147,7 @@ export default function BalancingKvarPage() {
           </div>
 
           {/* BLOCK 4: ACTUAL KVAR (CALCULATED) */}
-          <div className="bg-blue-60 border-2 border-blue-400 p-5 rounded-2xl shadow-md space-y-2 bg-blue-50/60">
+          <div className="bg-blue-50/60 border-2 border-blue-400 p-5 rounded-2xl shadow-md space-y-2">
             <span className="text-xs font-extrabold uppercase tracking-wide text-blue-700">4. Actual KVAR (Net)</span>
             <div className="text-3xl font-black text-blue-900 bg-white border border-blue-300 rounded-xl p-3 flex items-center justify-between">
               <span>{actualKvar.toFixed(2)}</span>
@@ -159,7 +163,7 @@ export default function BalancingKvarPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer"
           >
             <Save size={16} /> {saving ? "Saving Record..." : "Save Balancing Record"}
           </button>
@@ -177,7 +181,7 @@ export default function BalancingKvarPage() {
             <thead className="bg-slate-100 border-b border-slate-200 text-slate-700 uppercase text-[11px] font-extrabold">
               <tr>
                 <th className="p-4">Date</th>
-                <th className="p-4">Initial KVAR</th>
+                <th className="p-4 text-pink-600">Initial KVAR</th>
                 <th className="p-4 text-red-600">Removed KVAR</th>
                 <th className="p-4 text-emerald-600">Add KVAR</th>
                 <th className="p-4 text-blue-700">Actual KVAR</th>
@@ -189,7 +193,7 @@ export default function BalancingKvarPage() {
                 historyList.map((row, idx) => (
                   <tr key={idx} className="hover:bg-slate-50 transition-colors">
                     <td className="p-4 font-bold text-slate-900">{row.date}</td>
-                    <td className="p-4 font-medium">{row.initialKvar}</td>
+                    <td className="p-4 font-medium text-pink-600">{row.initialKvar}</td>
                     <td className="p-4 font-medium text-red-600">-{row.removedKvar}</td>
                     <td className="p-4 font-medium text-emerald-600">+{row.addKvar}</td>
                     <td className="p-4 font-extrabold text-blue-700">{row.actualKvar}</td>
