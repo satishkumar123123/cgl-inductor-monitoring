@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import * as XLSX from "xlsx";
 import { FileText, FileSpreadsheet, Printer, PlayCircle, Loader2, Sparkles, Calendar } from "lucide-react";
 import ReportHeader from "./ReportHeader.jsx";
@@ -128,6 +128,16 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [report]);
 
+  // Filter entries to only include HIGH level inductors for Telemetry Visual Charts
+  const highOnlyEntries = useMemo(() => {
+    if (!report?.entries) return [];
+    return report.entries.filter((e) => {
+      const label = e.label || e.name || "";
+      // Exclude intermediate entries if present
+      return !label.toLowerCase().includes("intermediate");
+    });
+  }, [report]);
+
   return (
     <div className="flex flex-col gap-6 p-3 md:p-8 max-w-[1600px] mx-auto text-slate-900 bg-slate-100/60 min-h-screen font-sans">
       
@@ -229,16 +239,18 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
             </div>
           </div>
 
-          {/* Telemetry Visual Trend Analysis */}
+          {/* Telemetry Visual Trend Analysis (High Level Only) */}
           <div className="my-8">
             <h3 className="text-sm font-black uppercase tracking-wider text-slate-950 mb-4 flex items-center gap-2 border-b-2 border-slate-300 pb-2">
-              <span className="text-cyan-600">▍</span> TELEMETRY VISUAL TREND ANALYSIS
+              <span className="text-cyan-600">▍</span> TELEMETRY VISUAL TREND ANALYSIS (HIGH LEVEL)
             </h3>
 
             <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              
+              {/* 1. POWER */}
               <ChartCard title={<span className="font-black text-slate-950 uppercase text-xs">Power Comparison (kW)</span>}>
                 <ResponsiveContainer width="100%" height={230}>
-                  <BarChart data={report.entries}>
+                  <BarChart data={highOnlyEntries}>
                     <CartesianGrid stroke="#94a3b8" strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="label" tick={{ fill: "#020617", fontSize: 11, fontWeight: 900 }} interval={0} angle={-15} textAnchor="end" height={45} />
                     <YAxis tick={{ fill: "#020617", fontSize: 11, fontWeight: 900 }} />
@@ -248,9 +260,10 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
                 </ResponsiveContainer>
               </ChartCard>
 
+              {/* 2. VOLTAGE */}
               <ChartCard title={<span className="font-black text-slate-950 uppercase text-xs">Voltage Comparison (V)</span>}>
                 <ResponsiveContainer width="100%" height={230}>
-                  <BarChart data={report.entries}>
+                  <BarChart data={highOnlyEntries}>
                     <CartesianGrid stroke="#94a3b8" strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="label" tick={{ fill: "#020617", fontSize: 11, fontWeight: 900 }} interval={0} angle={-15} textAnchor="end" height={45} />
                     <YAxis tick={{ fill: "#020617", fontSize: 11, fontWeight: 900 }} />
@@ -260,9 +273,10 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
                 </ResponsiveContainer>
               </ChartCard>
 
+              {/* 3. PHASE CURRENT */}
               <ChartCard title={<span className="font-black text-slate-950 uppercase text-xs">Phase Current Comparison (A)</span>}>
                 <ResponsiveContainer width="100%" height={230}>
-                  <BarChart data={report.entries}>
+                  <BarChart data={highOnlyEntries}>
                     <CartesianGrid stroke="#94a3b8" strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="label" tick={{ fill: "#020617", fontSize: 11, fontWeight: 900 }} interval={0} angle={-15} textAnchor="end" height={45} />
                     <YAxis tick={{ fill: "#020617", fontSize: 11, fontWeight: 900 }} />
@@ -275,9 +289,10 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
                 </ResponsiveContainer>
               </ChartCard>
 
+              {/* 4. POWER FACTOR */}
               <ChartCard title={<span className="font-black text-slate-950 uppercase text-xs">Power Factor (PF)</span>}>
                 <ResponsiveContainer width="100%" height={230}>
-                  <BarChart data={report.entries}>
+                  <BarChart data={highOnlyEntries}>
                     <CartesianGrid stroke="#94a3b8" strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="label" tick={{ fill: "#020617", fontSize: 11, fontWeight: 900 }} interval={0} angle={-15} textAnchor="end" height={45} />
                     <YAxis tick={{ fill: "#020617", fontSize: 11, fontWeight: 900 }} domain={[0, 1]} />
@@ -287,17 +302,19 @@ export default function AnalysisReportView({ title, reportType, elementId, fetch
                 </ResponsiveContainer>
               </ChartCard>
 
-              <ChartCard title={<span className="font-black text-slate-950 uppercase text-xs">Inductor Apparent Power (KVA)</span>}>
+              {/* 5. CONDUCTANCE RATIO (REPLACED INDUCTOR KVA) */}
+              <ChartCard title={<span className="font-black text-slate-950 uppercase text-xs">Conductance Ratio</span>}>
                 <ResponsiveContainer width="100%" height={230}>
-                  <BarChart data={report.entries}>
+                  <LineChart data={highOnlyEntries}>
                     <CartesianGrid stroke="#94a3b8" strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="label" tick={{ fill: "#020617", fontSize: 11, fontWeight: 900 }} interval={0} angle={-15} textAnchor="end" height={45} />
                     <YAxis tick={{ fill: "#020617", fontSize: 11, fontWeight: 900 }} />
                     <Tooltip contentStyle={{ backgroundColor: "#020617", color: "#ffffff", borderRadius: "8px", fontWeight: "bold" }} />
-                    <Bar dataKey="inductorKVA" name="Inductor KVA" fill="#4f46e5" radius={[6, 6, 0, 0]} />
-                  </BarChart>
+                    <Line type="monotone" dataKey="conductanceRatio" name="Conductance Ratio" stroke="#EA580C" strokeWidth={3} dot={{ r: 5, fill: "#EA580C" }} />
+                  </LineChart>
                 </ResponsiveContainer>
               </ChartCard>
+
             </div>
           </div>
 
