@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, ResponsiveContainer
 } from "recharts";
 import {
   Save, RefreshCcw, Trash2, FileSpreadsheet, FileText, UploadCloud, Download,
-  Clock, Zap, Activity, Gauge
+  Clock, Zap, Activity, Gauge, Calendar
 } from "lucide-react";
 import ChartCard, { chartTheme } from "../components/ChartCard.jsx";
 import DataTable from "../components/DataTable.jsx";
@@ -74,6 +74,8 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const auth = useAuth();
   const user = auth?.user || null;
+
+  const dateInputRef = useRef(null);
 
   let toast = null;
   try {
@@ -383,15 +385,22 @@ export default function DashboardPage() {
       {/* TOOLBAR WITH VIBRANT COLORS */}
       <div className="no-print flex flex-wrap items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-2xl p-3.5 shadow-sm">
         
-        {/* DATE PICKER BLOCK (CYAN THEME) */}
+        {/* DATE PICKER BLOCK WITH CALENDAR ICON ON RIGHT */}
         <div className="flex flex-col gap-1 bg-cyan-50/80 border border-cyan-200 px-3 py-1 rounded-xl shadow-xs">
           <span className="text-[10px] uppercase font-black text-cyan-800">Select Date</span>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value || todayStr())}
-            className="bg-white border border-cyan-300 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 cursor-pointer"
-          />
+          <div 
+            onClick={() => dateInputRef.current?.showPicker?.() || dateInputRef.current?.focus()}
+            className="flex items-center gap-2 bg-white border border-cyan-300 rounded-lg px-2.5 py-1 cursor-pointer hover:border-cyan-500 transition-colors"
+          >
+            <input
+              ref={dateInputRef}
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value || todayStr())}
+              className="bg-transparent text-xs font-bold text-cyan-900 focus:outline-none cursor-pointer w-full"
+            />
+            <Calendar size={15} className="text-cyan-700 flex-shrink-0" />
+          </div>
         </div>
 
         {/* UPLOAD EXCEL (EMERALD GREEN) */}
