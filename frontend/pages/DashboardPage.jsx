@@ -4,8 +4,8 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, ResponsiveContainer
 } from "recharts";
 import {
-  Save, RefreshCcw, Trash2, FileSpreadsheet, FileText, UploadCloud, Download,
-  Clock, Zap, Activity, Gauge, Calendar
+  Save, FileSpreadsheet, FileText, UploadCloud, Download,
+  Zap, Activity, Gauge, Calendar
 } from "lucide-react";
 import ChartCard, { chartTheme } from "../components/ChartCard.jsx";
 import DataTable from "../components/DataTable.jsx";
@@ -16,7 +16,7 @@ import useAuth from "../hooks/useAuth.js";
 import useToast from "../hooks/useToast.js";
 import { ROWS, POTS, emptyRecord, todayStr, fmtDateLong } from "../utils/rowsConfig.js";
 import { parseExcelFile, downloadSampleTemplate, exportRecordToExcel } from "../utils/excelMapper.js";
-import { fetchDataByDate, createData, updateData, deleteData } from "../services/dataService.js";
+import { fetchDataByDate, createData, updateData } from "../services/dataService.js";
 
 // 6 Custom Colors with User Specified Hex Codes
 const BLOCK_STYLES = [
@@ -182,30 +182,6 @@ export default function DashboardPage() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleUpdate = () => handleSave();
-
-  const handleDelete = () => {
-    if (!existsOnServer) {
-      notify("Nothing saved yet for this date", "error");
-      return;
-    }
-    setConfirmDialog({
-      title: "Delete this record?",
-      message: `This permanently deletes all readings for ${fmtDateLong ? fmtDateLong(selectedDate) : selectedDate}. This cannot be undone.`,
-      confirmLabel: "Delete",
-      onConfirm: async () => {
-        try {
-          await deleteData(selectedDate);
-          setRecord(emptyRecord(selectedDate));
-          setExistsOnServer(false);
-          notify("Record deleted successfully");
-        } catch (err) {
-          notify(err?.response?.data?.message || "Delete failed (Admin role required)", "error");
-        }
-      },
-    });
   };
 
   const handleFile = async (file) => {
@@ -431,25 +407,6 @@ export default function DashboardPage() {
         >
           <Save size={15} /> {saving ? "Saving…" : "Save"}
         </button>
-
-        {/* UPDATE BUTTON (AMBER / ORANGE) */}
-        <button 
-          onClick={handleUpdate} 
-          disabled={saving} 
-          className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
-        >
-          <RefreshCcw size={15} /> Update
-        </button>
-
-        {/* DELETE BUTTON (ADMIN - RED THEME) */}
-        {user?.role === "Admin" && (
-          <button 
-            onClick={handleDelete} 
-            className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
-          >
-            <Trash2 size={15} /> Delete
-          </button>
-        )}
 
         {/* EXPORT EXCEL (TEAL / DARK GREEN) */}
         <button 
