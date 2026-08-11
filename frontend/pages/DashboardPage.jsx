@@ -383,13 +383,13 @@ export default function DashboardPage() {
       {/* TOOLBAR WITH VIBRANT COLORS */}
       <div className="no-print flex flex-wrap items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-2xl p-3.5 shadow-sm">
         
-        {/* DATE INPUT BLOCK (CYAN THEME) */}
+        {/* DATE PICKER BLOCK (CYAN THEME) */}
         <div className="flex flex-col gap-1 bg-cyan-50/80 border border-cyan-200 px-3 py-1 rounded-xl shadow-xs">
           <span className="text-[10px] uppercase font-black text-cyan-800">Select Date</span>
           <input
             type="date"
             value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
+            onChange={(e) => setSelectedDate(e.target.value || todayStr())}
             className="bg-white border border-cyan-300 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 cursor-pointer"
           />
         </div>
@@ -454,13 +454,6 @@ export default function DashboardPage() {
           <FileText size={15} /> Export PDF / Print
         </button>
 
-      </div>
-
-      <div className="text-xs text-slate-600 flex items-center gap-2 flex-wrap">
-        Showing <b className="text-cyan-700">{fmtDateLong ? fmtDateLong(selectedDate) : selectedDate}</b>
-        {record?.lastUpdated && <>· Last updated {new Date(record.lastUpdated).toLocaleString()}</>}
-        {record?.source === "excel" && record?.uploadedFileName && <>· Source: Excel ({record.uploadedFileName})</>}
-        {!existsOnServer && <span className="flex items-center gap-1 text-amber-600 font-medium"><Clock size={11} /> Not yet saved</span>}
       </div>
 
       {uploadOpen && (
