@@ -293,18 +293,22 @@ export default function DashboardPage() {
       return 0;
     };
 
-    Object.values(POTS).forEach((pot) => {
-      pot.inductors.forEach((ind) => {
-        const name = pot.key === "mainPot" ? ind : `PM-${ind}`;
-        const lvlData = record?.[pot.key]?.[ind]?.high || {};
-        const row = { name };
+    // Explicitly iterate through defined pots and inductors so XAxis always retains all keys (e.g. PM-A, PM-B)
+    Object.keys(POTS).forEach((potKey) => {
+      const pot = POTS[potKey];
+      if (pot && pot.inductors) {
+        pot.inductors.forEach((ind) => {
+          const name = potKey === "mainPot" ? ind : `PM-${ind}`;
+          const lvlData = record?.[potKey]?.[ind]?.high || record?.[potKey]?.[ind] || {};
+          const row = { name };
 
-        ROWS.forEach((r) => {
-          row[r.id] = resolveChartVal(lvlData, r.id);
+          ROWS.forEach((r) => {
+            row[r.id] = resolveChartVal(lvlData, r.id);
+          });
+
+          out.push(row);
         });
-
-        out.push(row);
-      });
+      }
     });
 
     return out;
@@ -595,7 +599,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
+                <XAxis dataKey="name" interval={0} tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="rPhase" name="R Phase" fill="#EF4444" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="yPhase" name="Y Phase" fill="#EAB308" radius={[4, 4, 0, 0]} />
@@ -609,7 +613,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
+                <XAxis dataKey="name" interval={0} tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
                 <Bar dataKey="power" name="Power (kW)" fill="#D97706" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -620,7 +624,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} domain={["auto", "auto"]} /><Tooltip />
+                <XAxis dataKey="name" interval={0} tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} domain={["auto", "auto"]} /><Tooltip />
                 <Line type="monotone" dataKey="inductorVoltage" name="Voltage (V)" stroke="#0284C7" strokeWidth={3} dot={{ r: 4, fill: "#0284C7" }} />
               </LineChart>
             </ResponsiveContainer>
@@ -631,7 +635,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
+                <XAxis dataKey="name" interval={0} tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
                 <Line type="monotone" dataKey="lineCurrent" name="Line Current (A)" stroke="#1D4ED8" strokeWidth={3} dot={{ r: 4, fill: "#1D4ED8" }} />
               </LineChart>
             </ResponsiveContainer>
@@ -642,7 +646,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} domain={[0, 1]} /><Tooltip /><Legend wrapperStyle={{ fontSize: 11 }} />
+                <XAxis dataKey="name" interval={0} tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} domain={[0, 1]} /><Tooltip /><Legend wrapperStyle={{ fontSize: 11 }} />
                 <Line type="monotone" dataKey="linePF" name="Line PF" stroke="#7C3AED" strokeWidth={3} dot={{ r: 4 }} />
                 <Line type="monotone" dataKey="inductorPF" name="Inductor PF" stroke="#EC4899" strokeWidth={3} dot={{ r: 4 }} />
               </LineChart>
@@ -654,7 +658,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
+                <XAxis dataKey="name" interval={0} tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
                 <Bar dataKey="inductorCurrent" name="Inductor Current (A)" fill="#059669" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -665,7 +669,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={260}>
               <ComposedChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip /><Legend wrapperStyle={{ fontSize: 11 }} />
+                <XAxis dataKey="name" interval={0} tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip /><Legend wrapperStyle={{ fontSize: 11 }} />
                 <Line type="monotone" dataKey="impedanceZ" name="Impedance" stroke="#0284C7" strokeWidth={2.5} dot={{ r: 3 }} />
                 <Line type="monotone" dataKey="resistanceR" name="Resistance" stroke="#EA580C" strokeWidth={2.5} dot={{ r: 3 }} />
                 <Line type="monotone" dataKey="reactanceX" name="Reactance" stroke="#16A34A" strokeWidth={2.5} dot={{ r: 3 }} />
@@ -678,7 +682,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
+                <XAxis dataKey="name" interval={0} tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
                 <Line type="monotone" dataKey="conductanceRatio" name="Conductance Ratio" stroke="#EA580C" strokeWidth={3} dot={{ r: 4, fill: "#EA580C" }} />
               </LineChart>
             </ResponsiveContainer>
@@ -689,19 +693,8 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={allInductorRows}>
                 <CartesianGrid stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
+                <XAxis dataKey="name" interval={0} tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
                 <Bar dataKey="kvarConnected" name="KVAR Connected" fill="#0891B2" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
-
-          {/* 10. BALANCING KVAR */}
-          <ChartCard title={<span className="text-teal-600 font-extrabold uppercase">Balancing KVAR</span>}>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={allInductorRows}>
-                <CartesianGrid stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#475569" }} /><YAxis tick={{ fill: "#475569" }} /><Tooltip />
-                <Bar dataKey="balancingKvar" name="Balancing KVAR" fill="#0D9488" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
