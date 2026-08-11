@@ -72,45 +72,45 @@ function generateObservations(entries, stats, previousStats) {
   const push = (id, message, severity) => obs.push({ id, message, severity });
 
   // --- Power ---
-  if (stats.avgPower > 0) push("powerNormal", `Power consumption normal — average ${stats.avgPower.toFixed(1)} kW across all readings.`, SEVERITY.GOOD);
+  if (stats.avgPower > 0) push("powerNormal", `Power consumption normal — average <b>${stats.avgPower.toFixed(1)} kW</b> across all readings.`, SEVERITY.GOOD);
 
   if (previousStats && previousStats.totalPower > 0 && stats.totalPower > 0) {
     const change = (stats.totalPower - previousStats.totalPower) / previousStats.totalPower;
-    if (change > POWER_TREND_THRESHOLD) push("powerIncreasing", `Power increasing — total power up ${(change * 100).toFixed(1)}% vs the previous saved reading.`, SEVERITY.WARNING);
-    else if (change < -POWER_TREND_THRESHOLD) push("powerDecreasing", `Power decreasing — total power down ${(Math.abs(change) * 100).toFixed(1)}% vs the previous saved reading.`, SEVERITY.INFO);
+    if (change > POWER_TREND_THRESHOLD) push("powerIncreasing", `Power increasing — total power up <b>${(change * 100).toFixed(1)}%</b> vs the previous saved reading.`, SEVERITY.WARNING);
+    else if (change < -POWER_TREND_THRESHOLD) push("powerDecreasing", `Power decreasing — total power down <b>${(Math.abs(change) * 100).toFixed(1)}%</b> vs the previous saved reading.`, SEVERITY.INFO);
   }
 
   // --- Current imbalance ---
-  if (stats.currentBalancePercent < 80) push("currentImbalanceCritical", `Critical current imbalance — balance at only ${stats.currentBalancePercent}%.`, SEVERITY.CRITICAL);
-  else if (stats.currentBalancePercent < 90) push("currentImbalance", `Current imbalance observed — balance at ${stats.currentBalancePercent}%.`, SEVERITY.WARNING);
-  else push("currentBalanced", `Current well balanced across inductors (${stats.currentBalancePercent}%).`, SEVERITY.GOOD);
+  if (stats.currentBalancePercent < 80) push("currentImbalanceCritical", `Critical current imbalance — balance at only <b>${stats.currentBalancePercent}%</b>.`, SEVERITY.CRITICAL);
+  else if (stats.currentBalancePercent < 90) push("currentImbalance", `Current imbalance observed — balance at <b>${stats.currentBalancePercent}%</b>.`, SEVERITY.WARNING);
+  else push("currentBalanced", `Current well balanced across inductors (<b>${stats.currentBalancePercent}%</b>).`, SEVERITY.GOOD);
 
   // --- Voltage imbalance ---
-  if (stats.voltageBalancePercent < 90) push("voltageImbalance", `Voltage imbalance observed — balance at ${stats.voltageBalancePercent}%.`, SEVERITY.WARNING);
-  else push("voltageStable", `Voltage stable across all inductors (balance ${stats.voltageBalancePercent}%).`, SEVERITY.GOOD);
+  if (stats.voltageBalancePercent < 90) push("voltageImbalance", `Voltage imbalance observed — balance at <b>${stats.voltageBalancePercent}%</b>.`, SEVERITY.WARNING);
+  else push("voltageStable", `Voltage stable across all inductors (balance <b>${stats.voltageBalancePercent}%</b>).`, SEVERITY.GOOD);
 
   // --- Power Factor ---
-  if (stats.avgPF >= 0.99) push("pfExcellent", `PF excellent (avg ${stats.avgPF.toFixed(3)}).`, SEVERITY.GOOD);
-  else if (stats.avgPF >= 0.95) push("pfAcceptable", `PF acceptable but below optimal (avg ${stats.avgPF.toFixed(3)}).`, SEVERITY.INFO);
-  else if (stats.avgPF > 0) push("pfLow", `PF low (avg ${stats.avgPF.toFixed(3)}) — corrective action recommended.`, SEVERITY.CRITICAL);
+  if (stats.avgPF >= 0.99) push("pfExcellent", `PF excellent (avg <b>${stats.avgPF.toFixed(3)}</b>).`, SEVERITY.GOOD);
+  else if (stats.avgPF >= 0.95) push("pfAcceptable", `PF acceptable but below optimal (avg <b>${stats.avgPF.toFixed(3)}</b>).`, SEVERITY.INFO);
+  else if (stats.avgPF > 0) push("pfLow", `PF low (avg <b>${stats.avgPF.toFixed(3)}</b>) — corrective action recommended.`, SEVERITY.CRITICAL);
 
   // --- Highest current / power callouts ---
-  if (stats.maxCurrent) push("highestCurrent", `Inductor ${stats.maxCurrent.label} drawing the highest current (${stats.maxCurrent.value.toFixed(1)} A).`, SEVERITY.INFO);
-  if (stats.highestPowerInductor) push("highestPower", `Inductor ${stats.highestPowerInductor.label} consuming the most power (${stats.highestPowerInductor.value.toFixed(1)} kW).`, SEVERITY.INFO);
+  if (stats.maxCurrent) push("highestCurrent", `Inductor <b>${stats.maxCurrent.label}</b> drawing the highest current (<b>${stats.maxCurrent.value.toFixed(1)} A</b>).`, SEVERITY.INFO);
+  if (stats.highestPowerInductor) push("highestPower", `Inductor <b>${stats.highestPowerInductor.label}</b> consuming the most power (<b>${stats.highestPowerInductor.value.toFixed(1)} kW</b>).`, SEVERITY.INFO);
 
   // --- Per-inductor overload / underload (relative to the group average) ---
   if (stats.avgCurrent > 0) {
     entries.forEach((e) => {
       if (!e.inductorCurrent) return;
       const ratio = e.inductorCurrent / stats.avgCurrent;
-      if (ratio >= OVERLOAD_RATIO) push(`overload:${e.label}`, `Inductor ${e.label} overloaded — running at ${(ratio * 100).toFixed(0)}% of the average current.`, SEVERITY.CRITICAL);
-      else if (ratio <= UNDERLOAD_RATIO) push(`underload:${e.label}`, `Inductor ${e.label} underloaded — running at ${(ratio * 100).toFixed(0)}% of the average current.`, SEVERITY.WARNING);
+      if (ratio >= OVERLOAD_RATIO) push(`overload:${e.label}`, `Inductor <b>${e.label}</b> overloaded — running at <b>${(ratio * 100).toFixed(0)}%</b> of average current.`, SEVERITY.CRITICAL);
+      else if (ratio <= UNDERLOAD_RATIO) push(`underload:${e.label}`, `Inductor <b>${e.label}</b> underloaded — running at <b>${(ratio * 100).toFixed(0)}%</b> of average current.`, SEVERITY.WARNING);
     });
   }
 
   // --- Impedance ---
   const highImpedance = entries.filter((e) => e.impedanceZ >= IMPEDANCE_HIGH_THRESHOLD);
-  highImpedance.forEach((e) => push(`impedance:${e.label}`, `Impedance high on Inductor ${e.label} (${e.impedanceZ.toFixed(2)} Ω) — inspect winding/insulation.`, SEVERITY.WARNING));
+  highImpedance.forEach((e) => push(`impedance:${e.label}`, `Impedance high on Inductor <b>${e.label}</b> (<b>${e.impedanceZ.toFixed(2)} Ω</b>) — inspect winding/insulation.`, SEVERITY.WARNING));
 
   // --- Resistance variation ---
   const resistances = entries.filter((e) => e.resistanceR).map((e) => e.resistanceR);
@@ -118,7 +118,7 @@ function generateObservations(entries, stats, previousStats) {
     const avgR = resistances.reduce((a, b) => a + b, 0) / resistances.length;
     const spreadR = Math.max(...resistances) - Math.min(...resistances);
     if (avgR > 0 && spreadR / avgR > RESISTANCE_VARIATION_THRESHOLD) {
-      push("resistanceVariation", `Resistance variation observed across inductors (spread ${((spreadR / avgR) * 100).toFixed(0)}% of average) — check for uneven winding wear.`, SEVERITY.WARNING);
+      push("resistanceVariation", `Resistance variation observed across inductors (spread <b>${((spreadR / avgR) * 100).toFixed(0)}%</b> of average) — check for uneven winding wear.`, SEVERITY.WARNING);
     }
   }
 
@@ -127,21 +127,21 @@ function generateObservations(entries, stats, previousStats) {
   if (kvarEntries.length) {
     const totalConnected = kvarEntries.reduce((a, e) => a + (e.kvarConnected || 0), 0);
     const totalBalancing = kvarEntries.reduce((a, e) => a + (e.balancingKvar || 0), 0);
-    if (totalConnected > 0 && totalBalancing / totalConnected < 0.1) push("kvarSufficient", "Balancing KVAR sufficient relative to connected KVAR.", SEVERITY.GOOD);
-    else if (totalConnected > 0) push("kvarWatch", "Balancing KVAR is a notable proportion of connected KVAR — monitor capacitor bank health.", SEVERITY.WARNING);
+    if (totalConnected > 0 && totalBalancing / totalConnected < 0.1) push("kvarSufficient", "Balancing KVAR <b>sufficient</b> relative to connected KVAR.", SEVERITY.GOOD);
+    else if (totalConnected > 0) push("kvarWatch", "Balancing KVAR is a <b>notable proportion</b> of connected KVAR — monitor capacitor bank health.", SEVERITY.WARNING);
   }
 
   const ratioEntries = entries.filter((e) => e.conductanceRatio);
   if (ratioEntries.length) {
     const avgRatio = ratioEntries.reduce((a, e) => a + e.conductanceRatio, 0) / ratioEntries.length;
-    if (avgRatio >= 0.9 && avgRatio <= 1.1) push("conductanceNormal", `Conductance ratio within acceptable range (avg ${avgRatio.toFixed(2)}).`, SEVERITY.GOOD);
-    else push("conductanceAbnormal", `Conductance abnormal (avg ratio ${avgRatio.toFixed(2)}) — inspect winding/insulation condition.`, SEVERITY.CRITICAL);
+    if (avgRatio >= 0.9 && avgRatio <= 1.1) push("conductanceNormal", `Conductance ratio within acceptable range (avg <b>${avgRatio.toFixed(2)}</b>).`, SEVERITY.GOOD);
+    else push("conductanceAbnormal", `Conductance <b>abnormal</b> (avg ratio <b>${avgRatio.toFixed(2)}</b>) — inspect winding/insulation condition.`, SEVERITY.CRITICAL);
   }
 
   // --- Hard safety-limit flags ---
   entries.forEach((e) => {
-    if (e.inductorCurrent >= 500) push(`currentLimit:${e.label}`, `Inductor ${e.label} current above safe limit (${e.inductorCurrent.toFixed(1)} A).`, SEVERITY.CRITICAL);
-    if (e.inductorVoltage && (e.inductorVoltage > 450 || e.inductorVoltage < 350)) push(`voltageLimit:${e.label}`, `Inductor ${e.label} voltage out of normal band (${e.inductorVoltage.toFixed(0)} V).`, SEVERITY.CRITICAL);
+    if (e.inductorCurrent >= 500) push(`currentLimit:${e.label}`, `Inductor <b>${e.label}</b> current above safe limit (<b>${e.inductorCurrent.toFixed(1)} A</b>).`, SEVERITY.CRITICAL);
+    if (e.inductorVoltage && (e.inductorVoltage > 450 || e.inductorVoltage < 350)) push(`voltageLimit:${e.label}`, `Inductor <b>${e.label}</b> voltage out of normal band (<b>${e.inductorVoltage.toFixed(0)} V</b>).`, SEVERITY.CRITICAL);
   });
 
   return obs;
@@ -181,15 +181,15 @@ function computeHealthScore(stats, observations) {
 
 /* ---------------------------- recommendations ------------------------------- */
 const RECOMMENDATION_MAP = {
-  currentImbalanceCritical: "Investigate phase loading immediately — redistribute load across inductors to correct the severe current imbalance.",
-  currentImbalance: "Review phase connections and load distribution to improve current balance.",
-  voltageImbalance: "Check transformer taps and supply voltage stability; inspect for loose connections.",
-  pfLow: "Inspect power-factor correction capacitors; consider adding or servicing capacitor banks.",
-  resistanceVariation: "Schedule a winding insulation check on the inductors showing resistance drift.",
-  kvarWatch: "Monitor the capacitor bank — a high balancing-to-connected KVAR ratio can indicate early degradation.",
-  conductanceAbnormal: "Inspect winding and insulation condition; conductance ratio outside the normal band can precede failure.",
-  powerIncreasing: "Confirm the production schedule matches the rise in power draw; rule out a developing fault if output hasn't changed.",
-  powerDecreasing: "Verify this drop aligns with reduced production; if not, check for a supply or control issue.",
+  currentImbalanceCritical: "Investigate <b>phase loading</b> immediately — redistribute load across inductors to correct severe current imbalance.",
+  currentImbalance: "Review <b>phase connections</b> and load distribution to improve current balance.",
+  voltageImbalance: "Check <b>transformer taps</b> and supply voltage stability; inspect for loose connections.",
+  pfLow: "Inspect <b>power-factor correction capacitors</b>; consider adding or servicing capacitor banks.",
+  resistanceVariation: "Schedule a <b>winding insulation check</b> on inductors showing resistance drift.",
+  kvarWatch: "Monitor the <b>capacitor bank</b> — high balancing-to-connected KVAR ratio can indicate early degradation.",
+  conductanceAbnormal: "Inspect <b>winding and insulation condition</b>; conductance ratio outside normal band can precede failure.",
+  powerIncreasing: "Confirm <b>production schedule</b> matches rise in power draw; rule out a developing fault.",
+  powerDecreasing: "Verify this drop aligns with reduced production; if not, check supply or control system.",
 };
 
 function generateRecommendations(observations) {
@@ -197,9 +197,12 @@ function generateRecommendations(observations) {
   observations.forEach((o) => {
     const baseId = o.id.split(":")[0];
     if (RECOMMENDATION_MAP[baseId]) recs.add(RECOMMENDATION_MAP[baseId]);
-    if (baseId === "overload") recs.add(`Redistribute load away from the overloaded inductor(s), or inspect for coil damage: ${o.message.match(/Inductor (\S+)/)?.[1] || ""}`);
-    if (baseId === "impedance") recs.add("High impedance readings can indicate winding or insulation degradation — schedule an inspection.");
-    if (baseId === "currentLimit" || baseId === "voltageLimit") recs.add("A safety limit was exceeded — action this reading before the next shift.");
+    if (baseId === "overload") {
+      const matchLabel = o.message.match(/Inductor (?:<b>)?(\S+?)(?:<\/b>)? /)?.[1] || "";
+      recs.add(`Redistribute load away from overloaded inductor(s) <b>${matchLabel}</b>, or inspect for coil damage.`);
+    }
+    if (baseId === "impedance") recs.add("High impedance readings can indicate <b>winding/insulation degradation</b> — schedule inspection.");
+    if (baseId === "currentLimit" || baseId === "voltageLimit") recs.add("A <b>safety limit</b> was exceeded — action this reading before next shift.");
   });
   if (recs.size === 0) recs.add("No corrective action needed — all parameters within normal industrial operating range.");
   return Array.from(recs);
