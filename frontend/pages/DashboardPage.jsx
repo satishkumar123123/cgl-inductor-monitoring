@@ -467,6 +467,14 @@ export default function DashboardPage() {
           <FileText size={15} /> Export PDF / Print
         </button>
 
+        {/* BALANCING KVAR (PINK THEME) */}
+        <button 
+          onClick={() => navigate("/balancing-kvar")} 
+          className="flex items-center gap-1.5 bg-pink-600 hover:bg-pink-700 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+        >
+          <Zap size={15} /> Balancing KVAR
+        </button>
+
       </div>
 
       {uploadOpen && (

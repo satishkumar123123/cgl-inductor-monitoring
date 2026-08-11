@@ -20,8 +20,10 @@ const PowerConsumptionPage = lazy(() => import("./pages/power/PowerConsumptionPa
 const MonthlyAnalysisPage = lazy(() => import("./pages/power/MonthlyAnalysisPage.jsx"));
 const YearlyAnalysisPage = lazy(() => import("./pages/power/YearlyAnalysisPage.jsx"));
 const ProductionDrossPage = lazy(() => import("./pages/ProductionDrossPage.jsx"));
-// 1. ADDED INDUCTOR DETAIL PAGE (LAZY LOADED)
 const InductorDetailPage = lazy(() => import("./pages/InductorDetailPage.jsx"));
+
+// BALANCING KVAR PAGE (LAZY LOADED)
+const BalancingKvarPage = lazy(() => import("./pages/BalancingKvarPage.jsx"));
 
 const page = (Component) => (
   <Suspense fallback={<LoadingSpinner fullScreen label="Loading page…" />}>
@@ -47,12 +49,22 @@ export default function App() {
           }
         />
 
-        {/* 2. DEDICATED INDUCTOR ANALYTICS ROUTE */}
+        {/* DEDICATED INDUCTOR ANALYTICS ROUTE */}
         <Route
           path="/inductor/:inductorKey"
           element={
             <ProtectedRoute>
               <MainLayout>{page(InductorDetailPage)}</MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* BALANCING KVAR ROUTE */}
+        <Route
+          path="/balancing-kvar"
+          element={
+            <ProtectedRoute>
+              <MainLayout>{page(BalancingKvarPage)}</MainLayout>
             </ProtectedRoute>
           }
         />
