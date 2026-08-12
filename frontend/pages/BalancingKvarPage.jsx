@@ -3,34 +3,34 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, History, Calendar, Trash2, Zap, CheckCircle2 } from "lucide-react";
 import axios from "axios";
 
-// 6 Inductors with 6 Different Rainbow Theme Colors
+// 6 Inductors with User-Specified Border Colors
 const INDUCTORS = [
   { 
     key: "MAIN_A", 
     title: "Main Pot Inductor A", 
     tag: "Main Pot",
-    bg: "bg-red-50 hover:bg-red-100/80",
-    border: "border-red-300",
-    selectedBg: "bg-red-100 border-red-600 shadow-md shadow-red-200",
-    text: "text-red-800",
-    tagBg: "bg-red-200 text-red-900 border-red-300"
+    bg: "bg-blue-50/80 hover:bg-blue-100/80",
+    border: "border-blue-600",
+    selectedBg: "bg-blue-100 border-blue-700 shadow-md shadow-blue-200",
+    text: "text-blue-900",
+    tagBg: "bg-blue-200 text-blue-900 border-blue-300"
   },
   { 
     key: "MAIN_B", 
     title: "Main Pot Inductor B", 
     tag: "Main Pot",
-    bg: "bg-orange-50 hover:bg-orange-100/80",
-    border: "border-orange-300",
-    selectedBg: "bg-orange-100 border-orange-600 shadow-md shadow-orange-200",
-    text: "text-orange-800",
-    tagBg: "bg-orange-200 text-orange-900 border-orange-300"
+    bg: "bg-emerald-50/80 hover:bg-emerald-100/80",
+    border: "border-emerald-600",
+    selectedBg: "bg-emerald-100 border-emerald-700 shadow-md shadow-emerald-200",
+    text: "text-emerald-900",
+    tagBg: "bg-emerald-200 text-emerald-900 border-emerald-300"
   },
   { 
     key: "MAIN_C", 
     title: "Main Pot Inductor C", 
     tag: "Main Pot",
-    bg: "bg-amber-50 hover:bg-amber-100/80",
-    border: "border-amber-300",
+    bg: "bg-amber-50/80 hover:bg-amber-100/80",
+    border: "border-amber-500",
     selectedBg: "bg-amber-100 border-amber-600 shadow-md shadow-amber-200",
     text: "text-amber-900",
     tagBg: "bg-amber-200 text-amber-900 border-amber-300"
@@ -39,31 +39,31 @@ const INDUCTORS = [
     key: "MAIN_D", 
     title: "Main Pot Inductor D", 
     tag: "Main Pot",
-    bg: "bg-emerald-50 hover:bg-emerald-100/80",
-    border: "border-emerald-300",
-    selectedBg: "bg-emerald-100 border-emerald-600 shadow-md shadow-emerald-200",
-    text: "text-emerald-900",
-    tagBg: "bg-emerald-200 text-emerald-900 border-emerald-300"
+    bg: "bg-red-50/80 hover:bg-red-100/80",
+    border: "border-red-600",
+    selectedBg: "bg-red-100 border-red-700 shadow-md shadow-red-200",
+    text: "text-red-900",
+    tagBg: "bg-red-200 text-red-900 border-red-300"
   },
   { 
     key: "PM_A", 
     title: "PM Pot Inductor A", 
     tag: "PM Pot",
-    bg: "bg-blue-50 hover:bg-blue-100/80",
-    border: "border-blue-300",
-    selectedBg: "bg-blue-100 border-blue-600 shadow-md shadow-blue-200",
-    text: "text-blue-900",
-    tagBg: "bg-blue-200 text-blue-900 border-blue-300"
+    bg: "bg-purple-50/80 hover:bg-purple-100/80",
+    border: "border-purple-700",
+    selectedBg: "bg-purple-100 border-purple-800 shadow-md shadow-purple-200",
+    text: "text-purple-900",
+    tagBg: "bg-purple-200 text-purple-900 border-purple-300"
   },
   { 
     key: "PM_B", 
     title: "PM Pot Inductor B", 
     tag: "PM Pot",
-    bg: "bg-purple-50 hover:bg-purple-100/80",
-    border: "border-purple-300",
-    selectedBg: "bg-purple-100 border-purple-600 shadow-md shadow-purple-200",
-    text: "text-purple-900",
-    tagBg: "bg-purple-200 text-purple-900 border-purple-300"
+    bg: "bg-slate-100/80 hover:bg-slate-200/80",
+    border: "border-slate-700",
+    selectedBg: "bg-slate-200 border-slate-800 shadow-md shadow-slate-300",
+    text: "text-slate-900",
+    tagBg: "bg-slate-300 text-slate-900 border-slate-400"
   },
 ];
 
@@ -187,7 +187,7 @@ export default function BalancingKvarPage() {
         </div>
       </div>
 
-      {/* 1. TOP SECTION: 6 INDUCTOR CARDS GRID (6 RAINBOW COLORS) */}
+      {/* 1. TOP SECTION: 6 INDUCTOR CARDS GRID (SPECIFIED BORDER COLORS) */}
       <div>
         {/* WORDWISE DIFFERENT COLORS FOR STEP 1 */}
         <h2 className="text-xs font-black uppercase tracking-wider mb-3 flex gap-1.5">
