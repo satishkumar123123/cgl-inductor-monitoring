@@ -20,6 +20,9 @@ const auditRoutes = require("./routes/auditRoutes");
 const productionDrossRoutes = require("./routes/productionDrossRoutes");
 const inductorRoutes = require("./routes/inductorRoutes");
 
+// 1. ADDED BALANCING KVAR ROUTE IMPORT
+const balancingKvarRoutes = require("./routes/balancingKvarRoutes");
+
 const app = express();
 
 // Trust proxy for IP rate limiting & proxy setups
@@ -49,7 +52,7 @@ app.use(
 app.use(helmet());
 app.use(compression());
 
-// ✅ FIXED: Increased body limits to 20mb for heavy Excel JSON payloads
+// Increased body limits to 20mb for heavy Excel JSON payloads
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
@@ -80,6 +83,9 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/audit-logs", auditRoutes);
 app.use("/api/production-dross", productionDrossRoutes);
 app.use("/api/inductors", inductorRoutes);
+
+// 2. MOUNTED BALANCING KVAR ROUTE
+app.use("/api/balancing-kvar", balancingKvarRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
