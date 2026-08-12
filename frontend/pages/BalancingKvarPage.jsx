@@ -1,19 +1,75 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, History, Calendar, Trash2, Zap, CheckCircle2 } from "lucide-react";
 import axios from "axios";
 
+// 6 Inductors with 6 Different Rainbow Theme Colors
 const INDUCTORS = [
-  { key: "MAIN_A", title: "Main Pot Inductor A", tag: "Main Pot" },
-  { key: "MAIN_B", title: "Main Pot Inductor B", tag: "Main Pot" },
-  { key: "MAIN_C", title: "Main Pot Inductor C", tag: "Main Pot" },
-  { key: "MAIN_D", title: "Main Pot Inductor D", tag: "Main Pot" },
-  { key: "PM_A", title: "PM Pot Inductor A", tag: "PM Pot" },
-  { key: "PM_B", title: "PM Pot Inductor B", tag: "PM Pot" },
+  { 
+    key: "MAIN_A", 
+    title: "Main Pot Inductor A", 
+    tag: "Main Pot",
+    bg: "bg-red-50 hover:bg-red-100/80",
+    border: "border-red-300",
+    selectedBg: "bg-red-100 border-red-600 shadow-md shadow-red-200",
+    text: "text-red-800",
+    tagBg: "bg-red-200 text-red-900 border-red-300"
+  },
+  { 
+    key: "MAIN_B", 
+    title: "Main Pot Inductor B", 
+    tag: "Main Pot",
+    bg: "bg-orange-50 hover:bg-orange-100/80",
+    border: "border-orange-300",
+    selectedBg: "bg-orange-100 border-orange-600 shadow-md shadow-orange-200",
+    text: "text-orange-800",
+    tagBg: "bg-orange-200 text-orange-900 border-orange-300"
+  },
+  { 
+    key: "MAIN_C", 
+    title: "Main Pot Inductor C", 
+    tag: "Main Pot",
+    bg: "bg-amber-50 hover:bg-amber-100/80",
+    border: "border-amber-300",
+    selectedBg: "bg-amber-100 border-amber-600 shadow-md shadow-amber-200",
+    text: "text-amber-900",
+    tagBg: "bg-amber-200 text-amber-900 border-amber-300"
+  },
+  { 
+    key: "MAIN_D", 
+    title: "Main Pot Inductor D", 
+    tag: "Main Pot",
+    bg: "bg-emerald-50 hover:bg-emerald-100/80",
+    border: "border-emerald-300",
+    selectedBg: "bg-emerald-100 border-emerald-600 shadow-md shadow-emerald-200",
+    text: "text-emerald-900",
+    tagBg: "bg-emerald-200 text-emerald-900 border-emerald-300"
+  },
+  { 
+    key: "PM_A", 
+    title: "PM Pot Inductor A", 
+    tag: "PM Pot",
+    bg: "bg-blue-50 hover:bg-blue-100/80",
+    border: "border-blue-300",
+    selectedBg: "bg-blue-100 border-blue-600 shadow-md shadow-blue-200",
+    text: "text-blue-900",
+    tagBg: "bg-blue-200 text-blue-900 border-blue-300"
+  },
+  { 
+    key: "PM_B", 
+    title: "PM Pot Inductor B", 
+    tag: "PM Pot",
+    bg: "bg-purple-50 hover:bg-purple-100/80",
+    border: "border-purple-300",
+    selectedBg: "bg-purple-100 border-purple-600 shadow-md shadow-purple-200",
+    text: "text-purple-900",
+    tagBg: "bg-purple-200 text-purple-900 border-purple-300"
+  },
 ];
 
 export default function BalancingKvarPage() {
   const navigate = useNavigate();
+  const dateInputRef = useRef(null);
 
   const [selectedInductor, setSelectedInductor] = useState(INDUCTORS[0]);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -96,13 +152,17 @@ export default function BalancingKvarPage() {
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate("/dashboard")}
-            className="p-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl text-slate-700 transition-colors"
+            className="p-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl text-slate-700 transition-colors cursor-pointer"
           >
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
-              <Zap className="text-blue-600 fill-blue-600" size={24} /> Balancing KVAR Management
+            {/* WORDWISE DIFFERENT COLORS FOR MAIN HEADING */}
+            <h1 className="text-2xl font-black uppercase tracking-tight flex items-center gap-2">
+              <Zap className="text-yellow-500 fill-yellow-500" size={26} />
+              <span className="text-pink-600">Balancing</span>
+              <span className="text-blue-600">KVAR</span>
+              <span className="text-purple-600">Management</span>
             </h1>
             <p className="text-xs text-slate-500 font-medium">
               Select an inductor block to calculate and store historical Initial, Removed, and Added KVAR logs
@@ -110,24 +170,34 @@ export default function BalancingKvarPage() {
           </div>
         </div>
 
-        {/* DATE SELECTOR */}
-        <div className="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2">
-          <Calendar size={16} className="text-slate-500" />
-          <span className="text-xs font-bold text-slate-500 uppercase">Entry Date:</span>
+        {/* DATE SELECTOR WITH CALENDAR ICON */}
+        <div 
+          onClick={() => dateInputRef.current?.showPicker?.() || dateInputRef.current?.focus()}
+          className="flex items-center gap-2 bg-pink-50/80 border border-pink-300 rounded-xl px-3.5 py-2 cursor-pointer hover:border-pink-500 transition-colors shadow-xs"
+        >
+          <Calendar size={18} className="text-pink-600 flex-shrink-0 animate-bounce" />
+          <span className="text-xs font-black text-pink-700 uppercase">Entry Date:</span>
           <input
+            ref={dateInputRef}
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="bg-transparent text-xs font-bold text-slate-900 outline-none cursor-pointer"
+            className="bg-transparent text-xs font-extrabold text-slate-900 outline-none cursor-pointer"
           />
         </div>
       </div>
 
-      {/* 1. TOP SECTION: 6 INDUCTOR CARDS GRID */}
+      {/* 1. TOP SECTION: 6 INDUCTOR CARDS GRID (6 RAINBOW COLORS) */}
       <div>
-        <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3">
-          Step 1: Select Inductor Block
+        {/* WORDWISE DIFFERENT COLORS FOR STEP 1 */}
+        <h2 className="text-xs font-black uppercase tracking-wider mb-3 flex gap-1.5">
+          <span className="text-rose-600">Step</span>
+          <span className="text-orange-600">1:</span>
+          <span className="text-amber-600">Select</span>
+          <span className="text-emerald-600">Inductor</span>
+          <span className="text-cyan-600">Block</span>
         </h2>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {INDUCTORS.map((item) => {
             const isSelected = selectedInductor.key === item.key;
@@ -136,18 +206,16 @@ export default function BalancingKvarPage() {
                 key={item.key}
                 onClick={() => setSelectedInductor(item)}
                 className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex flex-col justify-between relative ${
-                  isSelected
-                    ? "bg-blue-50/80 border-blue-600 shadow-lg shadow-blue-500/10 scale-[1.02]"
-                    : "bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100/60"
+                  isSelected ? `${item.selectedBg} scale-[1.03]` : `${item.bg} ${item.border}`
                 }`}
               >
                 {isSelected && (
-                  <CheckCircle2 size={16} className="absolute top-3 right-3 text-blue-600" />
+                  <CheckCircle2 size={18} className="absolute top-3 right-3 text-slate-900" />
                 )}
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 w-fit mb-2">
+                <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border w-fit mb-2 ${item.tagBg}`}>
                   {item.tag}
                 </span>
-                <h3 className={`text-xs font-black ${isSelected ? "text-blue-900" : "text-slate-800"}`}>
+                <h3 className={`text-xs font-black ${item.text}`}>
                   {item.title}
                 </h3>
               </div>
@@ -157,57 +225,80 @@ export default function BalancingKvarPage() {
       </div>
 
       {/* 2. MIDDLE SECTION: 4 KVAR INPUT BLOCKS */}
-      <form onSubmit={handleSave} className="bg-slate-50/60 border border-slate-200 p-6 rounded-3xl space-y-6">
+      <form onSubmit={handleSave} className="bg-slate-50/70 border border-slate-200 p-6 rounded-3xl space-y-6">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-          <h2 className="text-sm font-black text-blue-700 uppercase tracking-wide">
-            Step 2: Enter Readings for [{selectedInductor.title}]
+          {/* WORDWISE DIFFERENT COLORS FOR STEP 2 */}
+          <h2 className="text-sm font-black uppercase tracking-wide flex gap-1.5">
+            <span className="text-indigo-600">Step</span>
+            <span className="text-purple-600">2:</span>
+            <span className="text-pink-600">Enter</span>
+            <span className="text-rose-600">Readings</span>
+            <span className="text-teal-600">for</span>
+            <span className="text-slate-800">[{selectedInductor.title}]</span>
           </h2>
-          <span className="text-xs text-slate-400 font-medium">Selected Date: {date}</span>
+          <span className="text-xs text-slate-500 font-bold">
+            <span className="text-pink-600">Selected</span> <span className="text-blue-600">Date:</span> {date}
+          </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* BLOCK 1: INITIAL */}
-          <div className="bg-white border-2 border-slate-200 p-4 rounded-2xl space-y-2 shadow-sm">
-            <span className="text-xs font-extrabold uppercase text-slate-500">1. Initial KVAR</span>
+          {/* BLOCK 1: INITIAL KVAR (PINK THEME) */}
+          <div className="bg-pink-50/60 border-2 border-pink-200 p-4 rounded-2xl space-y-2 shadow-xs">
+            <span className="text-xs font-black uppercase tracking-wide flex gap-1">
+              <span className="text-pink-600">1. Initial</span>
+              <span className="text-purple-600">KVAR</span>
+            </span>
             <input
               type="number"
               step="any"
               value={initialKvar}
               onChange={(e) => setInitialKvar(e.target.value)}
-              className="w-full text-2xl font-black text-slate-900 bg-slate-50 border border-slate-300 rounded-xl p-2.5 outline-none focus:border-blue-600 focus:bg-white transition-all"
+              className="w-full text-2xl font-black text-pink-700 bg-white border border-pink-300 rounded-xl p-2.5 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100 transition-all"
             />
           </div>
 
-          {/* BLOCK 2: REMOVED */}
-          <div className="bg-white border-2 border-red-200 p-4 rounded-2xl space-y-2 shadow-sm">
-            <span className="text-xs font-extrabold uppercase text-red-600">2. Removed KVAR (-)</span>
+          {/* BLOCK 2: REMOVED KVAR */}
+          <div className="bg-red-50/60 border-2 border-red-200 p-4 rounded-2xl space-y-2 shadow-xs">
+            <span className="text-xs font-black uppercase tracking-wide flex gap-1">
+              <span className="text-red-600">2. Removed</span>
+              <span className="text-orange-600">KVAR</span>
+              <span className="text-rose-600">(-)</span>
+            </span>
             <input
               type="number"
               step="any"
               value={removedKvar}
               onChange={(e) => setRemovedKvar(e.target.value)}
-              className="w-full text-2xl font-black text-red-700 bg-red-50/40 border border-red-300 rounded-xl p-2.5 outline-none focus:border-red-500 focus:bg-white transition-all"
+              className="w-full text-2xl font-black text-red-700 bg-white border border-red-300 rounded-xl p-2.5 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all"
             />
           </div>
 
-          {/* BLOCK 3: ADD */}
-          <div className="bg-white border-2 border-emerald-200 p-4 rounded-2xl space-y-2 shadow-sm">
-            <span className="text-xs font-extrabold uppercase text-emerald-600">3. Add KVAR (+)</span>
+          {/* BLOCK 3: ADD KVAR */}
+          <div className="bg-emerald-50/60 border-2 border-emerald-200 p-4 rounded-2xl space-y-2 shadow-xs">
+            <span className="text-xs font-black uppercase tracking-wide flex gap-1">
+              <span className="text-emerald-600">3. Add</span>
+              <span className="text-teal-600">KVAR</span>
+              <span className="text-green-600">(+)</span>
+            </span>
             <input
               type="number"
               step="any"
               value={addKvar}
               onChange={(e) => setAddKvar(e.target.value)}
-              className="w-full text-2xl font-black text-emerald-700 bg-emerald-50/40 border border-emerald-300 rounded-xl p-2.5 outline-none focus:border-emerald-500 focus:bg-white transition-all"
+              className="w-full text-2xl font-black text-emerald-700 bg-white border border-emerald-300 rounded-xl p-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
             />
           </div>
 
-          {/* BLOCK 4: ACTUAL (CALCULATED) */}
-          <div className="bg-blue-600 border-2 border-blue-700 p-4 rounded-2xl space-y-2 shadow-md text-white">
-            <span className="text-xs font-extrabold uppercase text-blue-100">4. Actual KVAR (Net)</span>
-            <div className="text-2xl font-black bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-2.5 flex items-center justify-between">
+          {/* BLOCK 4: ACTUAL KVAR (NET - BLUE THEME) */}
+          <div className="bg-blue-50/80 border-2 border-blue-400 p-4 rounded-2xl space-y-2 shadow-md">
+            <span className="text-xs font-black uppercase tracking-wide flex gap-1">
+              <span className="text-blue-700">4. Actual</span>
+              <span className="text-indigo-700">KVAR</span>
+              <span className="text-cyan-700">(Net)</span>
+            </span>
+            <div className="text-2xl font-black text-blue-900 bg-white border border-blue-300 rounded-xl p-2.5 flex items-center justify-between">
               <span>{actualKvar.toFixed(2)}</span>
-              <span className="text-[10px] font-bold bg-white text-blue-900 px-2 py-0.5 rounded-md">AUTO</span>
+              <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md">AUTO</span>
             </div>
           </div>
         </div>
@@ -216,31 +307,37 @@ export default function BalancingKvarPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs px-6 py-3 rounded-xl shadow-md transition-all uppercase tracking-wider"
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:opacity-90 text-white font-black text-xs px-6 py-3 rounded-xl shadow-md transition-all uppercase tracking-wider cursor-pointer active:scale-95"
           >
             <Save size={15} /> {saving ? "Saving Record..." : `Save Log for ${selectedInductor.title}`}
           </button>
         </div>
       </form>
 
-      {/* 3. BOTTOM SECTION: HISTORY TABLE FOR SELECTED INDUCTOR */}
+      {/* 3. BOTTOM SECTION: HISTORY TABLE */}
       <div className="space-y-4">
-        <h2 className="text-sm font-black text-slate-800 uppercase tracking-wide flex items-center gap-2">
-          <History size={18} className="text-blue-600" />
-          History Logs for [{selectedInductor.title}] ({historyList.length})
+        {/* WORDWISE DIFFERENT COLORS FOR HISTORY HEADING */}
+        <h2 className="text-sm font-black uppercase tracking-wide flex items-center gap-2">
+          <History size={18} className="text-purple-600" />
+          <span className="text-purple-600">History</span>
+          <span className="text-pink-600">Logs</span>
+          <span className="text-indigo-600">for</span>
+          <span className="text-slate-800">[{selectedInductor.title}]</span>
+          <span className="text-emerald-600">({historyList.length})</span>
         </h2>
 
         <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm bg-white">
           <table className="w-full text-left text-xs text-slate-700">
-            <thead className="bg-slate-100 border-b border-slate-200 text-slate-700 uppercase text-[10px] font-black tracking-wider">
+            {/* WORDWISE DIFFERENT COLORS FOR TABLE HEADERS */}
+            <thead className="bg-slate-100 border-b border-slate-200 text-slate-800 uppercase text-[10px] font-black tracking-wider">
               <tr>
-                <th className="p-3.5">Date</th>
-                <th className="p-3.5">Initial KVAR</th>
-                <th className="p-3.5 text-red-600">Removed KVAR</th>
-                <th className="p-3.5 text-emerald-600">Add KVAR</th>
-                <th className="p-3.5 text-blue-700">Actual KVAR</th>
-                <th className="p-3.5">Saved Time</th>
-                <th className="p-3.5 text-center">Action</th>
+                <th className="p-3.5"><span className="text-rose-600">Date</span></th>
+                <th className="p-3.5"><span className="text-pink-600">Initial</span> <span className="text-purple-600">KVAR</span></th>
+                <th className="p-3.5"><span className="text-red-600">Removed</span> <span className="text-orange-600">KVAR</span></th>
+                <th className="p-3.5"><span className="text-emerald-600">Add</span> <span className="text-teal-600">KVAR</span></th>
+                <th className="p-3.5"><span className="text-blue-600">Actual</span> <span className="text-indigo-600">KVAR</span></th>
+                <th className="p-3.5"><span className="text-cyan-600">Saved</span> <span className="text-sky-600">Time</span></th>
+                <th className="p-3.5 text-center"><span className="text-amber-600">Action</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -252,7 +349,7 @@ export default function BalancingKvarPage() {
                 historyList.map((row) => (
                   <tr key={row._id} className="hover:bg-slate-50 transition-colors">
                     <td className="p-3.5 font-bold text-slate-900">{row.date}</td>
-                    <td className="p-3.5 font-semibold">{row.initialKvar}</td>
+                    <td className="p-3.5 font-semibold text-pink-600">{row.initialKvar}</td>
                     <td className="p-3.5 font-semibold text-red-600">-{row.removedKvar}</td>
                     <td className="p-3.5 font-semibold text-emerald-600">+{row.addKvar}</td>
                     <td className="p-3.5 font-black text-blue-700">{row.actualKvar}</td>
@@ -260,7 +357,7 @@ export default function BalancingKvarPage() {
                     <td className="p-3.5 text-center">
                       <button
                         onClick={() => handleDelete(row._id)}
-                        className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
                       >
                         <Trash2 size={14} />
                       </button>
