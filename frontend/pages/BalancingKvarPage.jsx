@@ -3,67 +3,49 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, History, Calendar, Trash2, Zap, CheckCircle2 } from "lucide-react";
 import axios from "axios";
 
-// 6 Inductors with Specified Vibrant Border Colors
+// 6 Inductors with Exact Custom Hex Backgrounds and Light Text/Border Codes
 const INDUCTORS = [
   { 
     key: "MAIN_A", 
     title: "Main Pot Inductor A", 
     tag: "Main Pot",
-    bg: "bg-white hover:bg-blue-50/80",
-    border: "border-blue-600",
-    selectedBg: "bg-blue-100 border-blue-700 shadow-md ring-2 ring-blue-500/50",
-    text: "text-blue-900",
-    tagBg: "bg-blue-100 text-blue-900 border-blue-300"
+    hexBg: "#3F51B5",
+    hexLight: "#C5CAE9",
   },
   { 
     key: "MAIN_B", 
     title: "Main Pot Inductor B", 
     tag: "Main Pot",
-    bg: "bg-white hover:bg-emerald-50/80",
-    border: "border-emerald-600",
-    selectedBg: "bg-emerald-100 border-emerald-700 shadow-md ring-2 ring-emerald-500/50",
-    text: "text-emerald-900",
-    tagBg: "bg-emerald-100 text-emerald-900 border-emerald-300"
+    hexBg: "#009688",
+    hexLight: "#B2DFDB",
   },
   { 
     key: "MAIN_C", 
     title: "Main Pot Inductor C", 
     tag: "Main Pot",
-    bg: "bg-white hover:bg-amber-50/80",
-    border: "border-amber-500",
-    selectedBg: "bg-amber-100 border-amber-600 shadow-md ring-2 ring-amber-500/50",
-    text: "text-amber-900",
-    tagBg: "bg-amber-100 text-amber-900 border-amber-300"
+    hexBg: "#FF5722",
+    hexLight: "#FFE0B2",
   },
   { 
     key: "MAIN_D", 
     title: "Main Pot Inductor D", 
     tag: "Main Pot",
-    bg: "bg-white hover:bg-red-50/80",
-    border: "border-red-600",
-    selectedBg: "bg-red-100 border-red-700 shadow-md ring-2 ring-red-500/50",
-    text: "text-red-900",
-    tagBg: "bg-red-100 text-red-900 border-red-300"
+    hexBg: "#8BC34A",
+    hexLight: "#DCEDC8",
   },
   { 
     key: "PM_A", 
     title: "PM Pot Inductor A", 
     tag: "PM Pot",
-    bg: "bg-white hover:bg-purple-50/80",
-    border: "border-purple-700",
-    selectedBg: "bg-purple-100 border-purple-800 shadow-md ring-2 ring-purple-500/50",
-    text: "text-purple-900",
-    tagBg: "bg-purple-100 text-purple-900 border-purple-300"
+    hexBg: "#FFC107",
+    hexLight: "#FFF8E1",
   },
   { 
     key: "PM_B", 
     title: "PM Pot Inductor B", 
     tag: "PM Pot",
-    bg: "bg-white hover:bg-slate-100/80",
-    border: "border-slate-700",
-    selectedBg: "bg-slate-200 border-slate-800 shadow-md ring-2 ring-slate-500/50",
-    text: "text-slate-900",
-    tagBg: "bg-slate-200 text-slate-900 border-slate-400"
+    hexBg: "#00BCD4",
+    hexLight: "#E0F7FA",
   },
 ];
 
@@ -145,15 +127,15 @@ export default function BalancingKvarPage() {
   };
 
   return (
-    /* VIBRANT BLUE GRADIENT BACKGROUND */
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-700 to-slate-900 text-slate-900 p-6 sm:p-8 space-y-8 font-sans">
+    /* PURE WHITE PAGE BACKGROUND */
+    <div className="min-h-screen bg-white text-slate-900 p-6 sm:p-8 space-y-8 font-sans">
       
-      {/* HEADER CARD SECTION */}
-      <div className="bg-white/95 backdrop-blur-md border border-white/20 p-5 rounded-3xl shadow-xl flex flex-wrap items-center justify-between gap-4">
+      {/* HEADER SECTION */}
+      <div className="bg-slate-50 border border-slate-200 p-5 rounded-3xl shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate("/dashboard")}
-            className="p-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl text-slate-700 transition-colors cursor-pointer"
+            className="p-2.5 bg-white hover:bg-slate-100 border border-slate-300 rounded-xl text-slate-700 transition-colors cursor-pointer shadow-xs"
           >
             <ArrowLeft size={20} />
           </button>
@@ -188,8 +170,8 @@ export default function BalancingKvarPage() {
         </div>
       </div>
 
-      {/* 1. TOP SECTION: LIGHT YELLOW / PEACH CARD BACKGROUND WITH 6 VIBRANT BORDER CARDS */}
-      <div className="bg-amber-50/95 border-2 border-amber-200/90 p-6 rounded-3xl shadow-xl space-y-4">
+      {/* 1. TOP SECTION: LIGHT YELLOW / PEACH CARD BACKGROUND WITH 6 CUSTOM HEX COLOR CARDS */}
+      <div className="bg-amber-50/90 border-2 border-amber-200 p-6 rounded-3xl shadow-sm space-y-4">
         {/* WORDWISE DIFFERENT COLORS FOR STEP 1 */}
         <h2 className="text-xs font-black uppercase tracking-wider flex gap-1.5">
           <span className="text-rose-600">Step</span>
@@ -206,17 +188,31 @@ export default function BalancingKvarPage() {
               <div
                 key={item.key}
                 onClick={() => setSelectedInductor(item)}
-                className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex flex-col justify-between relative ${
-                  isSelected ? `${item.selectedBg} scale-[1.03]` : `${item.bg} ${item.border}`
+                style={{
+                  backgroundColor: item.hexBg,
+                  borderColor: item.hexLight,
+                }}
+                className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex flex-col justify-between relative shadow-sm hover:scale-[1.03] ${
+                  isSelected ? "ring-4 ring-offset-2 ring-slate-800 scale-[1.03] shadow-md" : ""
                 }`}
               >
                 {isSelected && (
-                  <CheckCircle2 size={18} className="absolute top-3 right-3 text-slate-900" />
+                  <CheckCircle2 size={18} className="absolute top-3 right-3 text-white drop-shadow-sm" />
                 )}
-                <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border w-fit mb-2 ${item.tagBg}`}>
+                <span 
+                  style={{
+                    backgroundColor: "rgba(255, 255, 255, 0.25)",
+                    color: item.hexLight,
+                    borderColor: item.hexLight,
+                  }}
+                  className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md border w-fit mb-2 backdrop-blur-xs"
+                >
                   {item.tag}
                 </span>
-                <h3 className={`text-xs font-black ${item.text}`}>
+                <h3 
+                  style={{ color: item.hexLight }}
+                  className="text-xs font-black uppercase tracking-wide drop-shadow-xs"
+                >
                   {item.title}
                 </h3>
               </div>
@@ -226,7 +222,7 @@ export default function BalancingKvarPage() {
       </div>
 
       {/* 2. MIDDLE SECTION: 4 KVAR INPUT BLOCKS */}
-      <form onSubmit={handleSave} className="bg-white/95 border border-slate-200 p-6 rounded-3xl space-y-6 shadow-xl">
+      <form onSubmit={handleSave} className="bg-slate-50/80 border border-slate-200 p-6 rounded-3xl space-y-6 shadow-xs">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           {/* WORDWISE DIFFERENT COLORS FOR STEP 2 */}
           <h2 className="text-sm font-black uppercase tracking-wide flex gap-1.5">
@@ -316,7 +312,7 @@ export default function BalancingKvarPage() {
       </form>
 
       {/* 3. BOTTOM SECTION: HISTORY TABLE */}
-      <div className="bg-white/95 border border-slate-200 p-6 rounded-3xl space-y-4 shadow-xl">
+      <div className="bg-white border border-slate-200 p-6 rounded-3xl space-y-4 shadow-xs">
         {/* WORDWISE DIFFERENT COLORS FOR HISTORY HEADING */}
         <h2 className="text-sm font-black uppercase tracking-wide flex items-center gap-2">
           <History size={18} className="text-purple-600" />
@@ -327,7 +323,7 @@ export default function BalancingKvarPage() {
           <span className="text-emerald-600">({historyList.length})</span>
         </h2>
 
-        <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm bg-white">
+        <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs bg-white">
           <table className="w-full text-left text-xs text-slate-700">
             {/* WORDWISE DIFFERENT COLORS FOR TABLE HEADERS */}
             <thead className="bg-slate-100 border-b border-slate-200 text-slate-800 uppercase text-[10px] font-black tracking-wider">
