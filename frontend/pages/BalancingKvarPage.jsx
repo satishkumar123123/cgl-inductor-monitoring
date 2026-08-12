@@ -3,67 +3,67 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, History, Calendar, Trash2, Zap, CheckCircle2 } from "lucide-react";
 import axios from "axios";
 
-// 6 Inductors with User-Specified Border Colors
+// 6 Inductors with Specified Vibrant Border Colors
 const INDUCTORS = [
   { 
     key: "MAIN_A", 
     title: "Main Pot Inductor A", 
     tag: "Main Pot",
-    bg: "bg-blue-50/80 hover:bg-blue-100/80",
+    bg: "bg-white hover:bg-blue-50/80",
     border: "border-blue-600",
-    selectedBg: "bg-blue-100 border-blue-700 shadow-md shadow-blue-200",
+    selectedBg: "bg-blue-100 border-blue-700 shadow-md ring-2 ring-blue-500/50",
     text: "text-blue-900",
-    tagBg: "bg-blue-200 text-blue-900 border-blue-300"
+    tagBg: "bg-blue-100 text-blue-900 border-blue-300"
   },
   { 
     key: "MAIN_B", 
     title: "Main Pot Inductor B", 
     tag: "Main Pot",
-    bg: "bg-emerald-50/80 hover:bg-emerald-100/80",
+    bg: "bg-white hover:bg-emerald-50/80",
     border: "border-emerald-600",
-    selectedBg: "bg-emerald-100 border-emerald-700 shadow-md shadow-emerald-200",
+    selectedBg: "bg-emerald-100 border-emerald-700 shadow-md ring-2 ring-emerald-500/50",
     text: "text-emerald-900",
-    tagBg: "bg-emerald-200 text-emerald-900 border-emerald-300"
+    tagBg: "bg-emerald-100 text-emerald-900 border-emerald-300"
   },
   { 
     key: "MAIN_C", 
     title: "Main Pot Inductor C", 
     tag: "Main Pot",
-    bg: "bg-amber-50/80 hover:bg-amber-100/80",
+    bg: "bg-white hover:bg-amber-50/80",
     border: "border-amber-500",
-    selectedBg: "bg-amber-100 border-amber-600 shadow-md shadow-amber-200",
+    selectedBg: "bg-amber-100 border-amber-600 shadow-md ring-2 ring-amber-500/50",
     text: "text-amber-900",
-    tagBg: "bg-amber-200 text-amber-900 border-amber-300"
+    tagBg: "bg-amber-100 text-amber-900 border-amber-300"
   },
   { 
     key: "MAIN_D", 
     title: "Main Pot Inductor D", 
     tag: "Main Pot",
-    bg: "bg-red-50/80 hover:bg-red-100/80",
+    bg: "bg-white hover:bg-red-50/80",
     border: "border-red-600",
-    selectedBg: "bg-red-100 border-red-700 shadow-md shadow-red-200",
+    selectedBg: "bg-red-100 border-red-700 shadow-md ring-2 ring-red-500/50",
     text: "text-red-900",
-    tagBg: "bg-red-200 text-red-900 border-red-300"
+    tagBg: "bg-red-100 text-red-900 border-red-300"
   },
   { 
     key: "PM_A", 
     title: "PM Pot Inductor A", 
     tag: "PM Pot",
-    bg: "bg-purple-50/80 hover:bg-purple-100/80",
+    bg: "bg-white hover:bg-purple-50/80",
     border: "border-purple-700",
-    selectedBg: "bg-purple-100 border-purple-800 shadow-md shadow-purple-200",
+    selectedBg: "bg-purple-100 border-purple-800 shadow-md ring-2 ring-purple-500/50",
     text: "text-purple-900",
-    tagBg: "bg-purple-200 text-purple-900 border-purple-300"
+    tagBg: "bg-purple-100 text-purple-900 border-purple-300"
   },
   { 
     key: "PM_B", 
     title: "PM Pot Inductor B", 
     tag: "PM Pot",
-    bg: "bg-slate-100/80 hover:bg-slate-200/80",
+    bg: "bg-white hover:bg-slate-100/80",
     border: "border-slate-700",
-    selectedBg: "bg-slate-200 border-slate-800 shadow-md shadow-slate-300",
+    selectedBg: "bg-slate-200 border-slate-800 shadow-md ring-2 ring-slate-500/50",
     text: "text-slate-900",
-    tagBg: "bg-slate-300 text-slate-900 border-slate-400"
+    tagBg: "bg-slate-200 text-slate-900 border-slate-400"
   },
 ];
 
@@ -145,10 +145,11 @@ export default function BalancingKvarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 p-6 sm:p-8 space-y-8 font-sans">
+    /* VIBRANT BLUE GRADIENT BACKGROUND */
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-700 to-slate-900 text-slate-900 p-6 sm:p-8 space-y-8 font-sans">
       
-      {/* HEADER SECTION */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      {/* HEADER CARD SECTION */}
+      <div className="bg-white/95 backdrop-blur-md border border-white/20 p-5 rounded-3xl shadow-xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate("/dashboard")}
@@ -173,7 +174,7 @@ export default function BalancingKvarPage() {
         {/* DATE SELECTOR WITH CALENDAR ICON */}
         <div 
           onClick={() => dateInputRef.current?.showPicker?.() || dateInputRef.current?.focus()}
-          className="flex items-center gap-2 bg-pink-50/80 border border-pink-300 rounded-xl px-3.5 py-2 cursor-pointer hover:border-pink-500 transition-colors shadow-xs"
+          className="flex items-center gap-2 bg-pink-50 border border-pink-300 rounded-xl px-3.5 py-2 cursor-pointer hover:border-pink-500 transition-colors shadow-xs"
         >
           <Calendar size={18} className="text-pink-600 flex-shrink-0 animate-bounce" />
           <span className="text-xs font-black text-pink-700 uppercase">Entry Date:</span>
@@ -187,15 +188,15 @@ export default function BalancingKvarPage() {
         </div>
       </div>
 
-      {/* 1. TOP SECTION: 6 INDUCTOR CARDS GRID (SPECIFIED BORDER COLORS) */}
-      <div>
+      {/* 1. TOP SECTION: LIGHT YELLOW / PEACH CARD BACKGROUND WITH 6 VIBRANT BORDER CARDS */}
+      <div className="bg-amber-50/95 border-2 border-amber-200/90 p-6 rounded-3xl shadow-xl space-y-4">
         {/* WORDWISE DIFFERENT COLORS FOR STEP 1 */}
-        <h2 className="text-xs font-black uppercase tracking-wider mb-3 flex gap-1.5">
+        <h2 className="text-xs font-black uppercase tracking-wider flex gap-1.5">
           <span className="text-rose-600">Step</span>
           <span className="text-orange-600">1:</span>
-          <span className="text-amber-600">Select</span>
-          <span className="text-emerald-600">Inductor</span>
-          <span className="text-cyan-600">Block</span>
+          <span className="text-amber-700">Select</span>
+          <span className="text-emerald-700">Inductor</span>
+          <span className="text-cyan-700">Block</span>
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
@@ -225,7 +226,7 @@ export default function BalancingKvarPage() {
       </div>
 
       {/* 2. MIDDLE SECTION: 4 KVAR INPUT BLOCKS */}
-      <form onSubmit={handleSave} className="bg-slate-50/70 border border-slate-200 p-6 rounded-3xl space-y-6">
+      <form onSubmit={handleSave} className="bg-white/95 border border-slate-200 p-6 rounded-3xl space-y-6 shadow-xl">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           {/* WORDWISE DIFFERENT COLORS FOR STEP 2 */}
           <h2 className="text-sm font-black uppercase tracking-wide flex gap-1.5">
@@ -315,7 +316,7 @@ export default function BalancingKvarPage() {
       </form>
 
       {/* 3. BOTTOM SECTION: HISTORY TABLE */}
-      <div className="space-y-4">
+      <div className="bg-white/95 border border-slate-200 p-6 rounded-3xl space-y-4 shadow-xl">
         {/* WORDWISE DIFFERENT COLORS FOR HISTORY HEADING */}
         <h2 className="text-sm font-black uppercase tracking-wide flex items-center gap-2">
           <History size={18} className="text-purple-600" />
