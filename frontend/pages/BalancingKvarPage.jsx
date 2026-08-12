@@ -181,8 +181,7 @@ export default function BalancingKvarPage() {
           <span className="text-cyan-700">Block</span>
         </h2>
 
-        {/* UPDATED GRID: Laptop and Desktop pe 2 Rows me 3-3 Blocks */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {INDUCTORS.map((item) => {
             const isSelected = selectedInductor.key === item.key;
             return (
@@ -193,12 +192,12 @@ export default function BalancingKvarPage() {
                   backgroundColor: item.hexBg,
                   borderColor: item.hexLight,
                 }}
-                className={`p-4.5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex flex-col justify-between relative shadow-sm hover:scale-[1.02] ${
-                  isSelected ? "ring-4 ring-offset-2 ring-slate-800 scale-[1.02] shadow-md" : ""
+                className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex flex-col justify-between relative shadow-sm hover:scale-[1.03] ${
+                  isSelected ? "ring-4 ring-offset-2 ring-slate-800 scale-[1.03] shadow-md" : ""
                 }`}
               >
                 {isSelected && (
-                  <CheckCircle2 size={18} className="absolute top-3.5 right-3.5 text-white drop-shadow-sm" />
+                  <CheckCircle2 size={18} className="absolute top-3 right-3 text-white drop-shadow-sm" />
                 )}
                 <span 
                   style={{
@@ -206,13 +205,13 @@ export default function BalancingKvarPage() {
                     color: item.hexLight,
                     borderColor: item.hexLight,
                   }}
-                  className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md border w-fit mb-3 backdrop-blur-xs"
+                  className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md border w-fit mb-2 backdrop-blur-xs"
                 >
                   {item.tag}
                 </span>
                 <h3 
                   style={{ color: item.hexLight }}
-                  className="text-sm font-black uppercase tracking-wide drop-shadow-xs"
+                  className="text-xs font-black uppercase tracking-wide drop-shadow-xs"
                 >
                   {item.title}
                 </h3>
