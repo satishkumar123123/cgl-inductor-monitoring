@@ -37,7 +37,7 @@ const INDUCTORS = [
     key: "PM_A", 
     title: "PM Pot Inductor A", 
     tag: "PM Pot",
-    hexBg: "#FFC107",
+    hexBg: "#ff0755",
     hexLight: "#FFF8E1",
   },
   { 
