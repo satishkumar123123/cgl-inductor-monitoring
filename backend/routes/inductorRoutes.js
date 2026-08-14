@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const InductorRemark = require("../models/InductorRemark");
-const DailyInductorData = require("../models/DailyInductorData");
 
 // 1. GET REMARKS
 router.get("/remarks/:inductorKey", async (req, res) => {
@@ -32,13 +32,12 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. GET ANALYTICS - DEEP INTROSPECTION QUERY
+// 3. GET ANALYTICS WITH UNIVERSAL MONGO DRIVER SEARCH
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
     const rawKey = String(req.params.inductorKey || "").toUpperCase();
     const range = req.query.range || "5d";
 
-    // 1. Pot & Inductor Detection
     const isPm = rawKey.includes("PM");
     const potKey = isPm ? "pmPot" : "mainPot";
 
@@ -47,15 +46,32 @@ router.get("/analytics/:inductorKey", async (req, res) => {
     else if (rawKey.includes("C")) letter = "C";
     else if (rawKey.includes("D")) letter = "D";
 
-    // 2. Fetch all records from DailyInductorData
-    let records = await DailyInductorData.find().sort({ date: -1 }).lean();
+    // 1. Try finding records across all possible collection names in DB
+    const db = mongoose.connection.db;
+    const possibleCollections = [
+      "daily_inductor_data",
+      "dailyinductordatas",
+      "dailydatas",
+      "daily_data",
+      "inductor_data",
+      "records"
+    ];
 
-    if (!records || records.length === 0) {
-      // Fallback check if stored without lean
-      records = await DailyInductorData.find().sort({ createdAt: -1 }).lean();
+    let records = [];
+
+    for (const collName of possibleCollections) {
+      try {
+        const found = await db.collection(collName).find({}).sort({ date: -1, createdAt: -1 }).toArray();
+        if (found && found.length > 0) {
+          records = found;
+          break;
+        }
+      } catch (e) {
+        // Continue to next collection
+      }
     }
 
-    if (!records || records.length === 0) {
+    if (records.length === 0) {
       return res.json({ success: true, data: [] });
     }
 
@@ -65,7 +81,6 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       return isNaN(n) ? null : n;
     };
 
-    // Helper: Deep Search inside an object for key aliases
     const findInObj = (obj, aliases) => {
       if (!obj || typeof obj !== "object") return null;
       for (const k of Object.keys(obj)) {
@@ -81,43 +96,18 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       return null;
     };
 
+    const ratioAliases = ["conductanceRatio", "condRatio", "conductance_ratio", "conductanceCurrentRatio", "ratio"];
+    const currentAliases = ["inductorCurrent", "current", "lineCurrent", "indCurrent", "i", "inductor_current"];
+
     const extractPoint = (doc) => {
       const pot = doc[potKey] || doc[potKey.toLowerCase()] || {};
       const ind = pot[letter] || pot[letter.toLowerCase()] || pot[`inductor${letter}`] || {};
       const high = ind.high || ind.High || {};
       const inter = ind.intermediate || ind.Intermediate || {};
 
-      const ratioAliases = [
-        "conductanceRatio",
-        "condRatio",
-        "conductance_ratio",
-        "conductanceCurrentRatio",
-        "ratio",
-        "conductance"
-      ];
+      let cr = findInObj(high, ratioAliases) ?? findInObj(inter, ratioAliases) ?? findInObj(ind, ratioAliases) ?? 0;
+      let cur = findInObj(high, currentAliases) ?? findInObj(inter, currentAliases) ?? findInObj(ind, currentAliases) ?? 0;
 
-      const currentAliases = [
-        "inductorCurrent",
-        "current",
-        "lineCurrent",
-        "indCurrent",
-        "i",
-        "inductor_current"
-      ];
-
-      // Priority 1: High level
-      let cr = findInObj(high, ratioAliases);
-      let cur = findInObj(high, currentAliases);
-
-      // Priority 2: Intermediate level
-      if (cr === null) cr = findInObj(inter, ratioAliases);
-      if (cur === null) cur = findInObj(inter, currentAliases);
-
-      // Priority 3: Root of Inductor
-      if (cr === null) cr = findInObj(ind, ratioAliases);
-      if (cur === null) cur = findInObj(ind, currentAliases);
-
-      // Format clean readable date
       let rawDate = doc.date || (doc.createdAt ? new Date(doc.createdAt).toISOString().split("T")[0] : "N/A");
       let displayDate = rawDate;
       if (rawDate.includes("-")) {
@@ -131,8 +121,8 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       return {
         date: displayDate,
         fullDate: rawDate,
-        conductanceRatio: cr !== null ? Number(cr.toFixed(4)) : 0,
-        current: cur !== null ? Number(cur.toFixed(2)) : 0,
+        conductanceRatio: Number(cr.toFixed(4)),
+        current: Number(cur.toFixed(2)),
       };
     };
 
