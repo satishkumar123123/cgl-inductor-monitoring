@@ -12,7 +12,6 @@ import {
   Sparkles,
   Layers,
   Calendar,
-  CheckCircle2,
   Table,
 } from "lucide-react";
 import {
@@ -59,13 +58,13 @@ export default function InductorDetailPage() {
   const { inductorKey } = useParams();
   const navigate = useNavigate();
 
-  // Remarks States
+  // Remark States
   const [remarkText, setRemarkText] = useState("");
   const [category, setCategory] = useState("General");
   const [remarksList, setRemarksList] = useState([]);
   const [savingRemark, setSavingRemark] = useState(false);
 
-  // Chart States (Default range is now 5d)
+  // Chart States
   const [metric, setMetric] = useState("conductanceRatio");
   const [timeRange, setTimeRange] = useState("5d");
   const [chartType, setChartType] = useState("line");
@@ -94,8 +93,8 @@ export default function InductorDetailPage() {
       const res = await axios.get(
         `/api/inductors/analytics/${inductorKey}?range=${timeRange}`
       );
-      const list = Array.isArray(res.data) ? res.data : (res.data?.data || []);
-      setChartData(list);
+      const incoming = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+      setChartData(incoming);
     } catch (err) {
       console.error("Chart Fetch Error:", err);
       setChartData([]);
@@ -136,7 +135,7 @@ export default function InductorDetailPage() {
   return (
     <div className="p-6 space-y-8 bg-slate-50/50 min-h-screen max-w-[1600px] mx-auto font-sans">
       
-      {/* 0. HEADER */}
+      {/* HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-cyan-900 p-5 rounded-2xl border border-indigo-200 shadow-md text-white">
         <div className="flex items-center gap-3.5">
           <button
@@ -166,7 +165,7 @@ export default function InductorDetailPage() {
         </div>
       </div>
 
-      {/* 1. GRAPHICAL ANALYTICS SECTION */}
+      {/* GRAPHICAL SECTION */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
@@ -189,14 +188,14 @@ export default function InductorDetailPage() {
               <select
                 value={metric}
                 onChange={(e) => setMetric(e.target.value)}
-                className="bg-white border border-cyan-300 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-800 outline-none focus:border-cyan-500 shadow-xs cursor-pointer"
+                className="bg-white border border-cyan-300 rounded-lg px-2.5 py-1 text-xs font-bold text-cyan-800 outline-none cursor-pointer"
               >
                 <option value="conductanceRatio">Conductance Ratio</option>
                 <option value="current">Inductor Current (A)</option>
               </select>
             </div>
 
-            {/* Time Range Selector: Added 5 Data button */}
+            {/* Time Range Selector */}
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-xs flex-wrap gap-1">
               {[
                 { key: "5d", label: "Recent 5 Data" },
@@ -313,7 +312,7 @@ export default function InductorDetailPage() {
           )}
         </div>
 
-        {/* 1.1 READABLE DATA SUMMARY TABLE */}
+        {/* SUMMARY TABLE */}
         {chartData.length > 0 && (
           <div className="mt-4 pt-4 border-t border-slate-100">
             <h3 className="text-xs font-black text-slate-600 uppercase mb-2 flex items-center gap-1.5">
@@ -343,7 +342,7 @@ export default function InductorDetailPage() {
         )}
       </div>
 
-      {/* 2. OPERATIONAL REMARK SECTION */}
+      {/* OPERATIONAL REMARK FORM */}
       <div className="bg-white border border-purple-200 rounded-2xl p-6 shadow-sm">
         <form onSubmit={handleSaveRemark} className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-purple-100 pb-4">
@@ -390,7 +389,7 @@ export default function InductorDetailPage() {
         </form>
       </div>
 
-      {/* 3. REMARK HISTORY */}
+      {/* REMARK HISTORY TIMELINE */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <h3 className="text-sm font-black uppercase tracking-wider flex items-center gap-1.5 mb-4">
           <History size={18} className="text-blue-600" />
