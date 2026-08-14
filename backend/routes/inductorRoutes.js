@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const InductorRemark = require("../models/InductorRemark");
+const DailyInductorData = require("../models/DailyInductorData");
 
-// अगर आपके पास इंडक्टर डेटा का मॉडल है तो उसे यहाँ अनकमेंट/इम्पोर्ट कर सकते हैं:
-// const InductorData = require("../models/InductorData");
-
-// 1. Get Remarks
+// 1. GET REMARKS
 router.get("/remarks/:inductorKey", async (req, res) => {
   try {
     const { inductorKey } = req.params;
@@ -16,7 +14,7 @@ router.get("/remarks/:inductorKey", async (req, res) => {
   }
 });
 
-// 2. Post Remark
+// 2. SAVE REMARK
 router.post("/remarks", async (req, res) => {
   try {
     const { inductorKey, inductorName, remark, category, createdBy } = req.body;
@@ -34,57 +32,97 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. Analytics Chart Data Route (RECENT 20 DATA POINTS)
+// 3. GET REAL ANALYTICS (Recent 30 Days / 1 Year / 2 Years)
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
-    const { inductorKey } = req.params;
+    const { inductorKey } = req.params; // e.g. "MAIN_A", "MAIN_B", "PM_A"
+    const range = req.query.range || "30d";
 
-    // --- CASE A: अगर DB से Real Data लाना हो तो यह इस्तेमाल करें ---
-    /*
-    if (typeof InductorData !== "undefined") {
-      const records = await InductorData.find({ inductorKey })
-        .sort({ date: -1 }) // सबसे नए पहले
-        .limit(20)          // सिर्फ Recent 20 रिकॉर्ड्स
-        .lean();
+    // Extract pot and inductor letter: MAIN_A -> mainPot, A | PM_B -> pmPot, B
+    let potKey = "mainPot";
+    let indLetter = "A";
 
-      // ग्राफ पर Left-to-Right (Old to New) दिखाने के लिए रिवर्स करें
-      return res.json({
-        success: true,
-        data: records.reverse()
-      });
+    if (inductorKey.startsWith("PM_")) {
+      potKey = "pmPot";
+      indLetter = inductorKey.replace("PM_", "");
+    } else if (inductorKey.startsWith("MAIN_")) {
+      potKey = "mainPot";
+      indLetter = inductorKey.replace("MAIN_", "");
     }
-    */
 
-    // --- CASE B: RECENT 20 SAMPLE / FALLBACK DATA ---
-    const sampleRecent20Data = [
-      { date: "Day 01", conductanceRatio: 0.81, current: 405 },
-      { date: "Day 02", conductanceRatio: 0.82, current: 410 },
-      { date: "Day 03", conductanceRatio: 0.80, current: 408 },
-      { date: "Day 04", conductanceRatio: 0.83, current: 412 },
-      { date: "Day 05", conductanceRatio: 0.85, current: 420 },
-      { date: "Day 06", conductanceRatio: 0.84, current: 418 },
-      { date: "Day 07", conductanceRatio: 0.82, current: 415 },
-      { date: "Day 08", conductanceRatio: 0.81, current: 411 },
-      { date: "Day 09", conductanceRatio: 0.83, current: 416 },
-      { date: "Day 10", conductanceRatio: 0.86, current: 422 },
-      { date: "Day 11", conductanceRatio: 0.85, current: 421 },
-      { date: "Day 12", conductanceRatio: 0.84, current: 419 },
-      { date: "Day 13", conductanceRatio: 0.82, current: 414 },
-      { date: "Day 14", conductanceRatio: 0.80, current: 409 },
-      { date: "Day 15", conductanceRatio: 0.83, current: 417 },
-      { date: "Day 16", conductanceRatio: 0.85, current: 423 },
-      { date: "Day 17", conductanceRatio: 0.84, current: 420 },
-      { date: "Day 18", conductanceRatio: 0.86, current: 425 },
-      { date: "Day 19", conductanceRatio: 0.85, current: 422 },
-      { date: "Day 20", conductanceRatio: 0.87, current: 428 }
-    ];
+    // Fetch records sorted by date
+    let records = await DailyInductorData.find().sort({ date: -1 });
 
-    res.json({ 
-      success: true, 
-      data: sampleRecent20Data 
-    });
+    const parseNum = (val) => {
+      if (val === undefined || val === null || val === "" || val === "-") return 0;
+      return parseFloat(val) || 0;
+    };
 
+    let chartList = [];
+
+    if (range === "30d") {
+      // Recent 30 records
+      const sliceRecords = records.slice(0, 30).reverse();
+
+      chartList = sliceRecords.map((r) => {
+        const indObj = r[potKey]?.[indLetter] || {};
+        const highObj = indObj.high || {};
+
+        const condRatio =
+          parseNum(highObj.conductanceRatio) ||
+          parseNum(highObj.condRatio) ||
+          parseNum(indObj.conductanceRatio) ||
+          parseNum(indObj.condRatio);
+
+        const curr =
+          parseNum(highObj.inductorCurrent) ||
+          parseNum(highObj.current) ||
+          parseNum(indObj.inductorCurrent) ||
+          parseNum(indObj.current);
+
+        return {
+          date: r.date ? r.date.slice(5) : "—", // e.g. "08-14"
+          conductanceRatio: condRatio,
+          current: curr,
+        };
+      });
+    } else {
+      // 1 Year or 2 Years: Take 1st entry of each month
+      const limitMonths = range === "2y" ? 24 : 12;
+      const monthMap = new Map();
+
+      records.forEach((r) => {
+        if (!r.date) return;
+        const monthKey = r.date.slice(0, 7); // "YYYY-MM"
+
+        if (!monthMap.has(monthKey)) {
+          const indObj = r[potKey]?.[indLetter] || {};
+          const highObj = indObj.high || {};
+
+          const condRatio =
+            parseNum(highObj.conductanceRatio) ||
+            parseNum(highObj.condRatio) ||
+            parseNum(indObj.conductanceRatio);
+
+          const curr =
+            parseNum(highObj.inductorCurrent) ||
+            parseNum(highObj.current) ||
+            parseNum(indObj.inductorCurrent);
+
+          monthMap.set(monthKey, {
+            date: monthKey,
+            conductanceRatio: condRatio,
+            current: curr,
+          });
+        }
+      });
+
+      chartList = Array.from(monthMap.values()).slice(0, limitMonths).reverse();
+    }
+
+    res.json({ success: true, data: chartList });
   } catch (err) {
+    console.error("Analytics fetch error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
