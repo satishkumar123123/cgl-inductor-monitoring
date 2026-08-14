@@ -3,6 +3,14 @@ const router = express.Router();
 const DailyInductorData = require("../models/DailyInductorData");
 const InductorRemark = require("../models/InductorRemark");
 
+// Disable ETag / 304 Caching for all inductor analytics routes
+router.use((req, res, next) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
+
 // 1. GET REMARKS
 router.get("/remarks/:inductorKey", async (req, res) => {
   try {
@@ -32,20 +40,18 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// Helper for Case-Insensitive Key Matching
-const getFieldInsensitive = (obj, targetKey) => {
+// Case-Insensitive Helper
+const getValInsensitive = (obj, targetKey) => {
   if (!obj || typeof obj !== "object") return null;
   const cleanTarget = String(targetKey).toLowerCase().replace(/[^a-z0-9]/g, "");
   for (const key of Object.keys(obj)) {
-    const cleanKey = key.toLowerCase().replace(/[^a-z0-9]/g, "");
-    if (cleanKey === cleanTarget) {
-      return obj[key];
-    }
+    const cleanK = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (cleanK === cleanTarget) return obj[key];
   }
   return null;
 };
 
-// 3. GET ANALYTICS (Case-Insensitive for MAINPOT, MainPot, mainPot, etc.)
+// 3. GET ANALYTICS
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
     const rawKey = String(req.params.inductorKey || "").toUpperCase();
@@ -59,6 +65,7 @@ router.get("/analytics/:inductorKey", async (req, res) => {
     else if (rawKey.includes("C")) targetLetter = "c";
     else if (rawKey.includes("D")) targetLetter = "d";
 
+    // Direct MongoDB fetch without cached lean projection
     const records = await DailyInductorData.find({})
       .sort({ date: -1, createdAt: -1 })
       .lean();
@@ -74,35 +81,28 @@ router.get("/analytics/:inductorKey", async (req, res) => {
     };
 
     const extractPoint = (doc) => {
-      // 1. Find Pot (mainPot, MAINPOT, main_pot, MAIN_POT)
-      const pot = getFieldInsensitive(doc, targetPot) || doc[isPm ? "pmPot" : "mainPot"] || {};
-      
-      // 2. Find Inductor (A, B, C, D, inductorA, INDUCTOR_A)
-      const ind = getFieldInsensitive(pot, targetLetter) || getFieldInsensitive(pot, `inductor${targetLetter}`) || pot;
-      
-      // 3. Find Levels (HIGH, High, high, INTERMEDIATE, Interm)
-      const high = getFieldInsensitive(ind, "high") || ind;
-      const inter = getFieldInsensitive(ind, "intermediate") || getFieldInsensitive(ind, "interm") || {};
+      const pot = getValInsensitive(doc, targetPot) || doc[isPm ? "pmPot" : "mainPot"] || {};
+      const ind = getValInsensitive(pot, targetLetter) || getValInsensitive(pot, `inductor${targetLetter}`) || pot;
+      const high = getValInsensitive(ind, "high") || ind;
+      const inter = getValInsensitive(ind, "intermediate") || getValInsensitive(ind, "interm") || {};
 
-      // 4. Find Conductance Ratio
       const crVal =
-        getFieldInsensitive(high, "conductanceRatio") ??
-        getFieldInsensitive(high, "condRatio") ??
-        getFieldInsensitive(high, "conductanceratio") ??
-        getFieldInsensitive(high, "ratio") ??
-        getFieldInsensitive(inter, "conductanceRatio") ??
-        getFieldInsensitive(inter, "condRatio") ??
-        getFieldInsensitive(ind, "conductanceRatio") ??
+        getValInsensitive(high, "conductanceRatio") ??
+        getValInsensitive(high, "condRatio") ??
+        getValInsensitive(high, "conductanceratio") ??
+        getValInsensitive(high, "ratio") ??
+        getValInsensitive(inter, "conductanceRatio") ??
+        getValInsensitive(inter, "condRatio") ??
+        getValInsensitive(ind, "conductanceRatio") ??
         0;
 
-      // 5. Find Inductor Current
       const curVal =
-        getFieldInsensitive(high, "inductorCurrent") ??
-        getFieldInsensitive(high, "current") ??
-        getFieldInsensitive(high, "lineCurrent") ??
-        getFieldInsensitive(inter, "inductorCurrent") ??
-        getFieldInsensitive(inter, "current") ??
-        getFieldInsensitive(ind, "inductorCurrent") ??
+        getValInsensitive(high, "inductorCurrent") ??
+        getValInsensitive(high, "current") ??
+        getValInsensitive(high, "lineCurrent") ??
+        getValInsensitive(inter, "inductorCurrent") ??
+        getValInsensitive(inter, "current") ??
+        getValInsensitive(ind, "inductorCurrent") ??
         0;
 
       const cr = parseNum(crVal) || 0;
