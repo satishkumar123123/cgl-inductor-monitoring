@@ -32,23 +32,23 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. GET ANALYTICS (GUARANTEED DATA EXTRACTOR - LAST 5 / 20 / 30 DATA)
+// 3. GET ANALYTICS FOR SELECTED INDUCTOR (MAIN_A, MAIN_B, PM_A, etc.)
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
     const rawKey = String(req.params.inductorKey || "").toUpperCase();
-    const range = req.query.range || "5d"; // Default 5 data
+    const range = req.query.range || "5d";
 
-    // Determine Pot
+    // Detect Pot
     const isPm = rawKey.includes("PM");
     const potKey = isPm ? "pmPot" : "mainPot";
 
-    // Determine Inductor Letter
+    // Detect Letter
     let letter = "A";
     if (rawKey.includes("B")) letter = "B";
     else if (rawKey.includes("C")) letter = "C";
     else if (rawKey.includes("D")) letter = "D";
 
-    // Fetch from MongoDB
+    // Fetch all records sorted by date descending
     const records = await DailyInductorData.find().sort({ date: -1 }).lean();
 
     if (!records || records.length === 0) {
@@ -72,20 +72,24 @@ router.get("/analytics/:inductorKey", async (req, res) => {
         parseNum(inter.conductanceRatio) ||
         parseNum(ind.conductanceRatio) ||
         parseNum(high.condRatio) ||
-        parseNum(inter.condRatio);
+        parseNum(inter.condRatio) ||
+        parseNum(high.ratio) ||
+        0;
 
       let cur =
         parseNum(high.inductorCurrent) ||
         parseNum(inter.inductorCurrent) ||
         parseNum(high.current) ||
         parseNum(high.lineCurrent) ||
-        parseNum(ind.inductorCurrent);
+        parseNum(ind.inductorCurrent) ||
+        0;
 
-      // Date formatting for X-Axis
+      // Clean X-Axis Date (e.g., "2026-08-14" -> "08/14")
       let displayDate = doc.date || "N/A";
       if (displayDate.includes("-")) {
         const parts = displayDate.split("-");
         if (parts.length === 3) displayDate = `${parts[1]}/${parts[2]}`;
+        else if (parts.length === 2) displayDate = parts[1];
       }
 
       return {
@@ -96,7 +100,6 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       };
     };
 
-    // Determine limit count
     let limit = 5;
     if (range === "20d") limit = 20;
     else if (range === "30d") limit = 30;
@@ -121,7 +124,7 @@ router.get("/analytics/:inductorKey", async (req, res) => {
 
     return res.json({ success: true, data: chartData });
   } catch (err) {
-    console.error("Inductor Analytics Error:", err);
+    console.error("Inductor Analytics Route Error:", err);
     return res.status(500).json({ success: false, error: err.message });
   }
 });
