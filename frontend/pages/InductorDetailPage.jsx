@@ -98,9 +98,18 @@ export default function InductorDetailPage() {
       const res = await axios.get(
         `/api/inductors/analytics/${inductorKey}?range=${timeRange}`
       );
-      if (res.data.success) setChartData(res.data.data || []);
+      
+      let incomingData = [];
+      if (Array.isArray(res.data)) {
+        incomingData = res.data;
+      } else if (res.data?.data && Array.isArray(res.data.data)) {
+        incomingData = res.data.data;
+      }
+
+      setChartData(incomingData);
     } catch (err) {
       console.error("Chart Fetch Error:", err);
+      setChartData([]);
     } finally {
       setLoadingChart(false);
     }
