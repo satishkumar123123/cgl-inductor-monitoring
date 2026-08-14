@@ -3,14 +3,6 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const InductorRemark = require("../models/InductorRemark");
 
-// Disable 304 Cache
-router.use((req, res, next) => {
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-  res.setHeader("Pragma", "no-cache");
-  res.setHeader("Expires", "0");
-  next();
-});
-
 // 1. GET REMARKS
 router.get("/remarks/:inductorKey", async (req, res) => {
   try {
@@ -40,7 +32,7 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. GET ANALYTICS FROM EXACT "daily_inductor_data"
+// 3. GET ANALYTICS
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
     const rawKey = String(req.params.inductorKey || "").toUpperCase();
@@ -54,16 +46,24 @@ router.get("/analytics/:inductorKey", async (req, res) => {
     else if (rawKey.includes("C")) letter = "C";
     else if (rawKey.includes("D")) letter = "D";
 
-    // Direct fetch from exact collection "daily_inductor_data"
+    // Direct MongoDB connection fetch
     const db = mongoose.connection.db;
-    const records = await db
-      .collection("daily_inductor_data")
-      .find({})
-      .sort({ date: -1, createdAt: -1 })
-      .toArray();
+    let records = [];
+
+    if (db) {
+      records = await db.collection("daily_inductor_data").find({}).sort({ date: -1, createdAt: -1 }).toArray();
+    }
+
+    // Agar direct db se nahi mila toh mongoose models se try karo
+    if (!records || records.length === 0) {
+      const DailyInductorData = mongoose.models.DailyInductorData || require("../models/DailyInductorData");
+      records = await DailyInductorData.find({}).sort({ date: -1, createdAt: -1 }).lean();
+    }
+
+    console.log(`[Inductor Analytics] Fetched ${records.length} docs for key: ${rawKey}`);
 
     if (!records || records.length === 0) {
-      return res.json({ success: true, data: [] });
+      return res.json({ success: true, count: 0, data: [] });
     }
 
     const parseNum = (val) => {
@@ -82,6 +82,7 @@ router.get("/analytics/:inductorKey", async (req, res) => {
         parseNum(high.conductanceRatio) ??
         parseNum(high.condRatio) ??
         parseNum(high.conductance_ratio) ??
+        parseNum(high.ratio) ??
         parseNum(inter.conductanceRatio) ??
         parseNum(inter.condRatio) ??
         parseNum(ind.conductanceRatio) ??
@@ -137,7 +138,7 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       chartData = records.slice(0, limit).reverse().map(extractPoint);
     }
 
-    return res.json({ success: true, data: chartData });
+    return res.json({ success: true, count: chartData.length, data: chartData });
   } catch (err) {
     console.error("Inductor Analytics Route Error:", err);
     return res.status(500).json({ success: false, error: err.message });
