@@ -95,70 +95,9 @@ export default function InductorDetailPage() {
         </div>
       </div>
 
-      {/* SECTION 1: REMARK ENTRY & HISTORY TIMELINE */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <form onSubmit={handleSaveRemark} className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-cyan-700">Add Operational Remark</h2>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="bg-white border border-slate-300 rounded-lg px-3 py-1 text-xs text-slate-800 outline-none focus:border-cyan-600"
-            >
-              <option value="General">General</option>
-              <option value="Maintenance">Maintenance</option>
-              <option value="Greasing">Greasing</option>
-              <option value="Inspection">Inspection</option>
-            </select>
-          </div>
-
-          <textarea
-            rows="3"
-            value={remarkText}
-            onChange={(e) => setRemarkText(e.target.value)}
-            placeholder={`Enter detailed log or remark for ${formattedTitle}...`}
-            className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs text-slate-800 outline-none focus:border-cyan-600 resize-none"
-          ></textarea>
-
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm"
-            >
-              <Send size={14} /> Save Remark
-            </button>
-          </div>
-        </form>
-
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 max-h-[300px] overflow-y-auto shadow-sm">
-          <h2 className="text-sm font-bold text-slate-800 uppercase mb-4 flex items-center gap-2">
-            <History size={16} className="text-cyan-600" /> Remark History Logs ({remarksList.length})
-          </h2>
-
-          {remarksList.length > 0 ? (
-            <div className="space-y-3 relative border-l-2 border-slate-200 ml-3 pl-4">
-              {remarksList.map((item) => (
-                <div key={item._id} className="bg-white border border-slate-200 rounded-xl p-3 relative shadow-sm">
-                  <div className="absolute -left-[23px] top-4 w-3 h-3 rounded-full bg-cyan-600 border-2 border-white"></div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category] || CATEGORY_COLORS.General}`}>
-                      {item.category}
-                    </span>
-                    <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                      <Clock size={10} /> {new Date(item.createdAt).toLocaleString()}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-800 mt-1">{item.remark}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-10 text-xs text-slate-500">No remarks logged yet.</div>
-          )}
-        </div>
-      </div>
-
-      {/* SECTION 2: GRAPHICAL ANALYTICS SECTION */}
+      {/* ========================================================================= */}
+      {/* 1. GRAPHICAL ANALYTICS SECTION (AB UPAR AA GAYA HAI)                       */}
+      {/* ========================================================================= */}
       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
           <h2 className="text-sm font-extrabold text-cyan-700 uppercase tracking-wide">
@@ -239,6 +178,71 @@ export default function InductorDetailPage() {
                 </BarChart>
               )}
             </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 2. REMARK ENTRY & HISTORY TIMELINE (AB NICHE AA GAYA HAI)                 */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <form onSubmit={handleSaveRemark} className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-cyan-700">Add Operational Remark</h2>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="bg-white border border-slate-300 rounded-lg px-3 py-1 text-xs text-slate-800 outline-none focus:border-cyan-600"
+            >
+              <option value="General">General</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Greasing">Greasing</option>
+              <option value="Inspection">Inspection</option>
+            </select>
+          </div>
+
+          <textarea
+            rows="3"
+            value={remarkText}
+            onChange={(e) => setRemarkText(e.target.value)}
+            placeholder={`Enter detailed log or remark for ${formattedTitle}...`}
+            className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs text-slate-800 outline-none focus:border-cyan-600 resize-none"
+          ></textarea>
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm"
+            >
+              <Send size={14} /> Save Remark
+            </button>
+          </div>
+        </form>
+
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 max-h-[300px] overflow-y-auto shadow-sm">
+          <h2 className="text-sm font-bold text-slate-800 uppercase mb-4 flex items-center gap-2">
+            <History size={16} className="text-cyan-600" /> Remark History Logs ({remarksList.length})
+          </h2>
+
+          {remarksList.length > 0 ? (
+            <div className="space-y-3 relative border-l-2 border-slate-200 ml-3 pl-4">
+              {remarksList.map((item) => (
+                <div key={item._id} className="bg-white border border-slate-200 rounded-xl p-3 relative shadow-sm">
+                  <div className="absolute -left-[23px] top-4 w-3 h-3 rounded-full bg-cyan-600 border-2 border-white"></div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category] || CATEGORY_COLORS.General}`}>
+                      {item.category}
+                    </span>
+                    <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                      <Clock size={10} /> {new Date(item.createdAt).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-800 mt-1">{item.remark}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10 text-xs text-slate-500">No remarks logged yet.</div>
           )}
         </div>
       </div>
