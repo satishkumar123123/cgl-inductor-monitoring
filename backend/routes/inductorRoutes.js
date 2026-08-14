@@ -32,102 +32,87 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. GET ANALYTICS WITH ROBUST FIELD SEARCH
+// 3. GET ANALYTICS DATA (Direct Schema Matching: mainPot / pmPot -> A,B,C,D -> high / intermediate)
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
-    const { inductorKey } = req.params; // e.g. "MAIN_A", "PM_A"
+    const rawKey = (req.params.inductorKey || "").toUpperCase().trim();
     const range = req.query.range || "20d";
 
+    // Detect Pot (mainPot vs pmPot)
     let potKey = "mainPot";
-    let indLetter = "A";
-
-    if (inductorKey.toUpperCase().includes("PM")) {
+    if (rawKey.includes("PM")) {
       potKey = "pmPot";
-      indLetter = inductorKey.replace(/PM_?/i, "").trim().toUpperCase() || "A";
-    } else {
-      potKey = "mainPot";
-      indLetter = inductorKey.replace(/MAIN_?/i, "").trim().toUpperCase() || "A";
     }
 
+    // Detect Inductor Letter (A, B, C, D)
+    let letter = "A";
+    if (rawKey.includes("B")) letter = "B";
+    else if (rawKey.includes("C")) letter = "C";
+    else if (rawKey.includes("D")) letter = "D";
+
+    // Fetch all records sorted by date descending
     const records = await DailyInductorData.find().sort({ date: -1 });
 
-    const parseNum = (val) => {
-      if (val === undefined || val === null || val === "" || val === "-") return null;
-      const parsed = parseFloat(val);
-      return isNaN(parsed) ? null : parsed;
+    const parseVal = (v) => {
+      if (v === undefined || v === null || v === "" || v === "-") return null;
+      const num = Number(v);
+      return isNaN(num) ? null : num;
     };
 
-    // Deep search function for conductanceRatio & current
-    const extractValues = (r) => {
-      const pot = r[potKey] || r[potKey.toLowerCase()] || {};
-      const ind = pot[indLetter] || pot[indLetter.toLowerCase()] || pot;
-      const high = ind.high || ind.High || ind;
-      const intermediate = ind.intermediate || ind.Intermediate || {};
+    // Helper to get Conductance Ratio & Current for the selected inductor
+    const extractPoint = (doc) => {
+      const indObj = doc[potKey]?.[letter] || {};
+      const high = indObj.high || {};
+      const inter = indObj.intermediate || {};
 
-      // Find Conductance Ratio
-      const cr =
-        parseNum(high.conductanceRatio) ??
-        parseNum(high.condRatio) ??
-        parseNum(high.conductance_ratio) ??
-        parseNum(ind.conductanceRatio) ??
-        parseNum(ind.condRatio) ??
-        parseNum(intermediate.conductanceRatio) ??
-        parseNum(r.conductanceRatio) ??
+      // Priority: High -> Intermediate -> Root of Inductor
+      const conductanceRatio =
+        parseVal(high.conductanceRatio) ??
+        parseVal(inter.conductanceRatio) ??
+        parseVal(indObj.conductanceRatio) ??
         0;
 
-      // Find Current
-      const cur =
-        parseNum(high.inductorCurrent) ??
-        parseNum(high.current) ??
-        parseNum(high.inductor_current) ??
-        parseNum(ind.inductorCurrent) ??
-        parseNum(ind.current) ??
-        parseNum(intermediate.inductorCurrent) ??
-        parseNum(r.inductorCurrent) ??
+      const current =
+        parseVal(high.inductorCurrent) ??
+        parseVal(inter.inductorCurrent) ??
+        parseVal(high.lineCurrent) ??
+        parseVal(inter.lineCurrent) ??
+        parseVal(indObj.inductorCurrent) ??
         0;
 
-      return { cr, cur };
+      return {
+        date: doc.date || "N/A",
+        conductanceRatio,
+        current,
+      };
     };
 
-    let chartList = [];
+    let chartData = [];
 
     if (range === "20d" || range === "30d") {
       const limit = range === "20d" ? 20 : 30;
-      const sliceRecords = records.slice(0, limit).reverse();
-
-      chartList = sliceRecords.map((r) => {
-        const { cr, cur } = extractValues(r);
-        return {
-          date: r.date ? (r.date.includes("-") ? r.date.split("-").slice(1).join("/") : r.date) : "N/A",
-          conductanceRatio: cr,
-          current: cur,
-        };
-      });
+      // Slice latest N entries and reverse to show chronologically (left to right)
+      chartData = records.slice(0, limit).reverse().map(extractPoint);
     } else {
+      // 1 Year or 2 Years (Monthly grouping)
       const limitMonths = range === "2y" ? 24 : 12;
       const monthMap = new Map();
 
-      records.forEach((r) => {
-        if (!r.date) return;
-        const monthKey = r.date.slice(0, 7);
-
+      records.forEach((doc) => {
+        if (!doc.date) return;
+        const monthKey = doc.date.slice(0, 7); // e.g. "2026-08"
         if (!monthMap.has(monthKey)) {
-          const { cr, cur } = extractValues(r);
-          monthMap.set(monthKey, {
-            date: monthKey,
-            conductanceRatio: cr,
-            current: cur,
-          });
+          monthMap.set(monthKey, extractPoint(doc));
         }
       });
 
-      chartList = Array.from(monthMap.values()).slice(0, limitMonths).reverse();
+      chartData = Array.from(monthMap.values()).slice(0, limitMonths).reverse();
     }
 
-    res.json({ success: true, data: chartList });
+    return res.json({ success: true, data: chartData });
   } catch (err) {
-    console.error("Analytics fetch error:", err);
-    res.status(500).json({ success: false, error: err.message });
+    console.error("Inductor Analytics Error:", err);
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
