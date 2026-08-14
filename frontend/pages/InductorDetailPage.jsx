@@ -140,7 +140,7 @@ export default function InductorDetailPage() {
   return (
     <div className="p-6 space-y-8 bg-slate-50/50 min-h-screen max-w-[1600px] mx-auto font-sans">
       {/* ========================================================================= */}
-      {/* 0. COLOURFUL TOP HEADER SECTION                                          */}
+      {/* 0. COLOURFUL TOP HEADER SECTION                                         */}
       {/* ========================================================================= */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-cyan-900 p-5 rounded-2xl border border-indigo-200 shadow-md text-white">
         <div className="flex items-center gap-3.5">
@@ -204,7 +204,7 @@ export default function InductorDetailPage() {
               </select>
             </div>
 
-            {/* Time Range Selector: Added Recent 20 Data */}
+            {/* Time Range Selector */}
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-xs flex-wrap gap-1">
               {[
                 { key: "20d", label: "Recent 20 Data" },
@@ -255,25 +255,25 @@ export default function InductorDetailPage() {
         </div>
 
         {/* Dynamic Chart Container */}
-        <div className="h-[380px] w-full pt-5">
+        <div className="w-full h-[360px] min-h-[360px] pt-4 relative">
           {loadingChart ? (
             <div className="h-full flex flex-col items-center justify-center text-xs font-bold text-cyan-600 animate-pulse gap-2">
               <Sparkles size={20} />
               Loading chart analytics...
             </div>
           ) : chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={340}>
               {chartType === "line" ? (
-                <LineChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
+                <LineChart data={chartData} margin={{ top: 15, right: 30, left: 10, bottom: 25 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} />
-                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} domain={["auto", "auto"]} />
+                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} tickLine={false} />
+                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} domain={["auto", "auto"]} tickLine={false} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#ffffff",
                       borderRadius: "12px",
                       border: "1px solid #cbd5e1",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                       color: "#0f172a",
                       fontSize: "12px",
                       fontWeight: "bold",
@@ -282,23 +282,24 @@ export default function InductorDetailPage() {
                   <Line
                     type="monotone"
                     dataKey={metric}
+                    name={metric === "conductanceRatio" ? "Conductance Ratio" : "Inductor Current (A)"}
                     stroke={metric === "conductanceRatio" ? "#0891b2" : "#9333ea"}
-                    strokeWidth={2.5}
+                    strokeWidth={3}
                     dot={{ r: 4, strokeWidth: 2, fill: "#ffffff" }}
-                    activeDot={{ r: 6, fill: metric === "conductanceRatio" ? "#0891b2" : "#9333ea" }}
+                    activeDot={{ r: 7, fill: metric === "conductanceRatio" ? "#0891b2" : "#9333ea" }}
                   />
                 </LineChart>
               ) : (
-                <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
+                <BarChart data={chartData} margin={{ top: 15, right: 30, left: 10, bottom: 25 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} />
-                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} domain={["auto", "auto"]} />
+                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} tickLine={false} />
+                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} domain={["auto", "auto"]} tickLine={false} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#ffffff",
                       borderRadius: "12px",
                       border: "1px solid #cbd5e1",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                       color: "#0f172a",
                       fontSize: "12px",
                       fontWeight: "bold",
@@ -306,6 +307,7 @@ export default function InductorDetailPage() {
                   />
                   <Bar
                     dataKey={metric}
+                    name={metric === "conductanceRatio" ? "Conductance Ratio" : "Inductor Current (A)"}
                     fill={metric === "conductanceRatio" ? "#0891b2" : "#9333ea"}
                     radius={[6, 6, 0, 0]}
                   />
@@ -313,8 +315,8 @@ export default function InductorDetailPage() {
               )}
             </ResponsiveContainer>
           ) : (
-            <div className="h-full flex items-center justify-center text-xs text-slate-400 font-medium">
-              No chart telemetry points available for selected range.
+            <div className="h-full flex items-center justify-center text-xs text-slate-400 font-medium bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+              No telemetry data found for this inductor in the database.
             </div>
           )}
         </div>
