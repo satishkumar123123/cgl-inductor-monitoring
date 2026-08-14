@@ -32,61 +32,78 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. GET ANALYTICS (Handles: 20d, 30d, 1y, 2y)
+// 3. GET ANALYTICS WITH ROBUST FIELD SEARCH
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
-    const { inductorKey } = req.params;
-    const range = req.query.range || "30d";
+    const { inductorKey } = req.params; // e.g. "MAIN_A", "PM_A"
+    const range = req.query.range || "20d";
 
     let potKey = "mainPot";
     let indLetter = "A";
 
-    if (inductorKey.startsWith("PM_")) {
+    if (inductorKey.toUpperCase().includes("PM")) {
       potKey = "pmPot";
-      indLetter = inductorKey.replace("PM_", "");
-    } else if (inductorKey.startsWith("MAIN_")) {
+      indLetter = inductorKey.replace(/PM_?/i, "").trim().toUpperCase() || "A";
+    } else {
       potKey = "mainPot";
-      indLetter = inductorKey.replace("MAIN_", "");
+      indLetter = inductorKey.replace(/MAIN_?/i, "").trim().toUpperCase() || "A";
     }
 
-    let records = await DailyInductorData.find().sort({ date: -1 });
+    const records = await DailyInductorData.find().sort({ date: -1 });
 
     const parseNum = (val) => {
-      if (val === undefined || val === null || val === "" || val === "-") return 0;
-      return parseFloat(val) || 0;
+      if (val === undefined || val === null || val === "" || val === "-") return null;
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? null : parsed;
+    };
+
+    // Deep search function for conductanceRatio & current
+    const extractValues = (r) => {
+      const pot = r[potKey] || r[potKey.toLowerCase()] || {};
+      const ind = pot[indLetter] || pot[indLetter.toLowerCase()] || pot;
+      const high = ind.high || ind.High || ind;
+      const intermediate = ind.intermediate || ind.Intermediate || {};
+
+      // Find Conductance Ratio
+      const cr =
+        parseNum(high.conductanceRatio) ??
+        parseNum(high.condRatio) ??
+        parseNum(high.conductance_ratio) ??
+        parseNum(ind.conductanceRatio) ??
+        parseNum(ind.condRatio) ??
+        parseNum(intermediate.conductanceRatio) ??
+        parseNum(r.conductanceRatio) ??
+        0;
+
+      // Find Current
+      const cur =
+        parseNum(high.inductorCurrent) ??
+        parseNum(high.current) ??
+        parseNum(high.inductor_current) ??
+        parseNum(ind.inductorCurrent) ??
+        parseNum(ind.current) ??
+        parseNum(intermediate.inductorCurrent) ??
+        parseNum(r.inductorCurrent) ??
+        0;
+
+      return { cr, cur };
     };
 
     let chartList = [];
 
-    // Handles Recent 20 Data OR Recent 30 Data
     if (range === "20d" || range === "30d") {
-      const limitCount = range === "20d" ? 20 : 30;
-      const sliceRecords = records.slice(0, limitCount).reverse();
+      const limit = range === "20d" ? 20 : 30;
+      const sliceRecords = records.slice(0, limit).reverse();
 
       chartList = sliceRecords.map((r) => {
-        const indObj = r[potKey]?.[indLetter] || {};
-        const highObj = indObj.high || {};
-
-        const condRatio =
-          parseNum(highObj.conductanceRatio) ||
-          parseNum(highObj.condRatio) ||
-          parseNum(indObj.conductanceRatio) ||
-          parseNum(indObj.condRatio);
-
-        const curr =
-          parseNum(highObj.inductorCurrent) ||
-          parseNum(highObj.current) ||
-          parseNum(indObj.inductorCurrent) ||
-          parseNum(indObj.current);
-
+        const { cr, cur } = extractValues(r);
         return {
-          date: r.date ? r.date.slice(5) : "—",
-          conductanceRatio: condRatio,
-          current: curr,
+          date: r.date ? (r.date.includes("-") ? r.date.split("-").slice(1).join("/") : r.date) : "N/A",
+          conductanceRatio: cr,
+          current: cur,
         };
       });
     } else {
-      // 1 Year or 2 Years (Monthly points)
       const limitMonths = range === "2y" ? 24 : 12;
       const monthMap = new Map();
 
@@ -95,23 +112,11 @@ router.get("/analytics/:inductorKey", async (req, res) => {
         const monthKey = r.date.slice(0, 7);
 
         if (!monthMap.has(monthKey)) {
-          const indObj = r[potKey]?.[indLetter] || {};
-          const highObj = indObj.high || {};
-
-          const condRatio =
-            parseNum(highObj.conductanceRatio) ||
-            parseNum(highObj.condRatio) ||
-            parseNum(indObj.conductanceRatio);
-
-          const curr =
-            parseNum(highObj.inductorCurrent) ||
-            parseNum(highObj.current) ||
-            parseNum(indObj.inductorCurrent);
-
+          const { cr, cur } = extractValues(r);
           monthMap.set(monthKey, {
             date: monthKey,
-            conductanceRatio: condRatio,
-            current: curr,
+            conductanceRatio: cr,
+            current: cur,
           });
         }
       });
