@@ -32,23 +32,33 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. GET ANALYTICS (Matches exact DailyInductorData schema)
+// Helper for Case-Insensitive Key Matching
+const getFieldInsensitive = (obj, targetKey) => {
+  if (!obj || typeof obj !== "object") return null;
+  const cleanTarget = String(targetKey).toLowerCase().replace(/[^a-z0-9]/g, "");
+  for (const key of Object.keys(obj)) {
+    const cleanKey = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (cleanKey === cleanTarget) {
+      return obj[key];
+    }
+  }
+  return null;
+};
+
+// 3. GET ANALYTICS (Case-Insensitive for MAINPOT, MainPot, mainPot, etc.)
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
     const rawKey = String(req.params.inductorKey || "").toUpperCase();
     const range = req.query.range || "5d";
 
-    // Pot determination
     const isPm = rawKey.includes("PM");
-    const potKey = isPm ? "pmPot" : "mainPot";
+    const targetPot = isPm ? "pmpot" : "mainpot";
 
-    // Letter determination
-    let letter = "A";
-    if (rawKey.includes("B")) letter = "B";
-    else if (rawKey.includes("C")) letter = "C";
-    else if (rawKey.includes("D")) letter = "D";
+    let targetLetter = "a";
+    if (rawKey.includes("B")) targetLetter = "b";
+    else if (rawKey.includes("C")) targetLetter = "c";
+    else if (rawKey.includes("D")) targetLetter = "d";
 
-    // Exact historyController query
     const records = await DailyInductorData.find({})
       .sort({ date: -1, createdAt: -1 })
       .lean();
@@ -64,29 +74,39 @@ router.get("/analytics/:inductorKey", async (req, res) => {
     };
 
     const extractPoint = (doc) => {
-      const pot = doc[potKey] || doc[potKey.toLowerCase()] || {};
-      const ind = pot[letter] || pot[letter.toLowerCase()] || pot[`inductor${letter}`] || {};
-      const high = ind.high || ind.High || ind;
-      const inter = ind.intermediate || ind.Intermediate || {};
+      // 1. Find Pot (mainPot, MAINPOT, main_pot, MAIN_POT)
+      const pot = getFieldInsensitive(doc, targetPot) || doc[isPm ? "pmPot" : "mainPot"] || {};
+      
+      // 2. Find Inductor (A, B, C, D, inductorA, INDUCTOR_A)
+      const ind = getFieldInsensitive(pot, targetLetter) || getFieldInsensitive(pot, `inductor${targetLetter}`) || pot;
+      
+      // 3. Find Levels (HIGH, High, high, INTERMEDIATE, Interm)
+      const high = getFieldInsensitive(ind, "high") || ind;
+      const inter = getFieldInsensitive(ind, "intermediate") || getFieldInsensitive(ind, "interm") || {};
 
-      let cr =
-        parseNum(high.conductanceRatio) ??
-        parseNum(high.condRatio) ??
-        parseNum(high.conductance_ratio) ??
-        parseNum(high.ratio) ??
-        parseNum(inter.conductanceRatio) ??
-        parseNum(inter.condRatio) ??
-        parseNum(ind.conductanceRatio) ??
+      // 4. Find Conductance Ratio
+      const crVal =
+        getFieldInsensitive(high, "conductanceRatio") ??
+        getFieldInsensitive(high, "condRatio") ??
+        getFieldInsensitive(high, "conductanceratio") ??
+        getFieldInsensitive(high, "ratio") ??
+        getFieldInsensitive(inter, "conductanceRatio") ??
+        getFieldInsensitive(inter, "condRatio") ??
+        getFieldInsensitive(ind, "conductanceRatio") ??
         0;
 
-      let cur =
-        parseNum(high.inductorCurrent) ??
-        parseNum(high.current) ??
-        parseNum(high.lineCurrent) ??
-        parseNum(inter.inductorCurrent) ??
-        parseNum(inter.current) ??
-        parseNum(ind.inductorCurrent) ??
+      // 5. Find Inductor Current
+      const curVal =
+        getFieldInsensitive(high, "inductorCurrent") ??
+        getFieldInsensitive(high, "current") ??
+        getFieldInsensitive(high, "lineCurrent") ??
+        getFieldInsensitive(inter, "inductorCurrent") ??
+        getFieldInsensitive(inter, "current") ??
+        getFieldInsensitive(ind, "inductorCurrent") ??
         0;
+
+      const cr = parseNum(crVal) || 0;
+      const cur = parseNum(curVal) || 0;
 
       let rawDate = doc.date || (doc.createdAt ? new Date(doc.createdAt).toISOString().split("T")[0] : "N/A");
       let displayDate = rawDate;
@@ -102,8 +122,8 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       return {
         date: displayDate,
         fullDate: rawDate,
-        conductanceRatio: Number(Number(cr).toFixed(4)),
-        current: Number(Number(cur).toFixed(2)),
+        conductanceRatio: Number(cr.toFixed(4)),
+        current: Number(cur.toFixed(2)),
       };
     };
 
