@@ -32,13 +32,12 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. GET REAL ANALYTICS (Recent 30 Days / 1 Year / 2 Years)
+// 3. GET ANALYTICS (Handles: 20d, 30d, 1y, 2y)
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
-    const { inductorKey } = req.params; // e.g. "MAIN_A", "MAIN_B", "PM_A"
+    const { inductorKey } = req.params;
     const range = req.query.range || "30d";
 
-    // Extract pot and inductor letter: MAIN_A -> mainPot, A | PM_B -> pmPot, B
     let potKey = "mainPot";
     let indLetter = "A";
 
@@ -50,7 +49,6 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       indLetter = inductorKey.replace("MAIN_", "");
     }
 
-    // Fetch records sorted by date
     let records = await DailyInductorData.find().sort({ date: -1 });
 
     const parseNum = (val) => {
@@ -60,9 +58,10 @@ router.get("/analytics/:inductorKey", async (req, res) => {
 
     let chartList = [];
 
-    if (range === "30d") {
-      // Recent 30 records
-      const sliceRecords = records.slice(0, 30).reverse();
+    // Handles Recent 20 Data OR Recent 30 Data
+    if (range === "20d" || range === "30d") {
+      const limitCount = range === "20d" ? 20 : 30;
+      const sliceRecords = records.slice(0, limitCount).reverse();
 
       chartList = sliceRecords.map((r) => {
         const indObj = r[potKey]?.[indLetter] || {};
@@ -81,19 +80,19 @@ router.get("/analytics/:inductorKey", async (req, res) => {
           parseNum(indObj.current);
 
         return {
-          date: r.date ? r.date.slice(5) : "—", // e.g. "08-14"
+          date: r.date ? r.date.slice(5) : "—",
           conductanceRatio: condRatio,
           current: curr,
         };
       });
     } else {
-      // 1 Year or 2 Years: Take 1st entry of each month
+      // 1 Year or 2 Years (Monthly points)
       const limitMonths = range === "2y" ? 24 : 12;
       const monthMap = new Map();
 
       records.forEach((r) => {
         if (!r.date) return;
-        const monthKey = r.date.slice(0, 7); // "YYYY-MM"
+        const monthKey = r.date.slice(0, 7);
 
         if (!monthMap.has(monthKey)) {
           const indObj = r[potKey]?.[indLetter] || {};
