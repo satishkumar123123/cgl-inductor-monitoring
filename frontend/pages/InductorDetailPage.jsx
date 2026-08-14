@@ -10,6 +10,11 @@ import {
   Table,
   BarChart2,
   RefreshCw,
+  History,
+  Calendar,
+  Clock,
+  CheckCircle2,
+  Send,
 } from "lucide-react";
 import {
   LineChart,
@@ -40,6 +45,38 @@ const BAR_COLORS = [
   "#84cc16", // Lime
 ];
 
+// रिमार्क कैटेगरीज के लिए वाइब्रेंट कलर स्टाइलिंग
+const CATEGORY_STYLES = {
+  Maintenance: {
+    badge: "bg-rose-100 text-rose-700 border-rose-300",
+    cardBg: "bg-gradient-to-r from-rose-50/90 via-pink-50/50 to-white",
+    cardBorder: "border-rose-200 hover:border-rose-400",
+    dot: "bg-rose-500 ring-rose-200",
+    textHighlight: "text-rose-900",
+  },
+  Greasing: {
+    badge: "bg-amber-100 text-amber-700 border-amber-300",
+    cardBg: "bg-gradient-to-r from-amber-50/90 via-orange-50/50 to-white",
+    cardBorder: "border-amber-200 hover:border-amber-400",
+    dot: "bg-amber-500 ring-amber-200",
+    textHighlight: "text-amber-900",
+  },
+  Inspection: {
+    badge: "bg-purple-100 text-purple-700 border-purple-300",
+    cardBg: "bg-gradient-to-r from-purple-50/90 via-indigo-50/50 to-white",
+    cardBorder: "border-purple-200 hover:border-purple-400",
+    dot: "bg-purple-500 ring-purple-200",
+    textHighlight: "text-purple-900",
+  },
+  General: {
+    badge: "bg-cyan-100 text-cyan-700 border-cyan-300",
+    cardBg: "bg-gradient-to-r from-cyan-50/90 via-sky-50/50 to-white",
+    cardBorder: "border-cyan-200 hover:border-cyan-400",
+    dot: "bg-cyan-500 ring-cyan-200",
+    textHighlight: "text-cyan-900",
+  },
+};
+
 export default function InductorDetailPage() {
   const { inductorKey } = useParams();
   const navigate = useNavigate();
@@ -50,7 +87,7 @@ export default function InductorDetailPage() {
   const [remarksList, setRemarksList] = useState([]);
   const [savingRemark, setSavingRemark] = useState(false);
 
-  // Chart & Telemetry States - डिफ़ॉल्ट 'bar' सेट किया गया
+  // Chart & Telemetry States - डिफ़ॉल्ट 'bar'
   const [metric, setMetric] = useState("conductanceRatio");
   const [timeRange, setTimeRange] = useState("5d");
   const [chartType, setChartType] = useState("bar");
@@ -204,12 +241,15 @@ export default function InductorDetailPage() {
 
   return (
     <div className="p-6 space-y-8 bg-slate-50/50 min-h-screen max-w-[1600px] mx-auto font-sans">
-      {/* TOP HEADER */}
+      {/* ========================================================================= */}
+      {/* 0. TOP HEADER SECTION                                                     */}
+      {/* ========================================================================= */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-cyan-900 p-5 rounded-2xl border border-indigo-200 shadow-md text-white">
         <div className="flex items-center gap-3.5">
           <button
             onClick={() => navigate("/dashboard")}
-            className="p-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-cyan-200 hover:text-white transition-all cursor-pointer"
+            className="p-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-cyan-200 hover:text-white transition-all cursor-pointer shadow-xs"
+            title="Back to Dashboard"
           >
             <ArrowLeft size={20} />
           </button>
@@ -220,7 +260,7 @@ export default function InductorDetailPage() {
               <span className="text-cyan-300 font-extrabold">ANALYTICAL DASHBOARD</span>
             </h1>
             <p className="text-xs text-cyan-100 font-medium mt-0.5">
-              Live Colourful Bar Telemetry &amp; Historical Operational Logger
+              Live Colourful Bar Telemetry, Operational Logger &amp; Log Timelines
             </p>
           </div>
         </div>
@@ -228,7 +268,7 @@ export default function InductorDetailPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={loadTelemetryFromHistory}
-            className="p-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-cyan-200 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold"
+            className="p-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-cyan-200 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-xs"
           >
             <RefreshCw size={14} className={loadingChart ? "animate-spin" : ""} /> Refresh Data
           </button>
@@ -242,7 +282,9 @@ export default function InductorDetailPage() {
         </div>
       </div>
 
-      {/* GRAPHICAL PERFORMANCE SECTION */}
+      {/* ========================================================================= */}
+      {/* 1. TOP: GRAPHICAL PERFORMANCE ANALYTICS SECTION                           */}
+      {/* ========================================================================= */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
@@ -301,7 +343,7 @@ export default function InductorDetailPage() {
                 onClick={() => setChartType("bar")}
                 title="Bar Chart View"
                 className={`p-2 rounded-lg transition-all cursor-pointer ${
-                  chartType === "bar" ? "bg-white text-cyan-700 shadow-sm" : "text-slate-500 hover:text-slate-800"
+                  chartType === "bar" ? "bg-white text-cyan-700 shadow-sm border border-slate-200" : "text-slate-500 hover:text-slate-800"
                 }`}
               >
                 <BarChart2 size={16} />
@@ -310,7 +352,7 @@ export default function InductorDetailPage() {
                 onClick={() => setChartType("line")}
                 title="Line Chart View"
                 className={`p-2 rounded-lg transition-all cursor-pointer ${
-                  chartType === "line" ? "bg-white text-cyan-700 shadow-sm" : "text-slate-500 hover:text-slate-800"
+                  chartType === "line" ? "bg-white text-cyan-700 shadow-sm border border-slate-200" : "text-slate-500 hover:text-slate-800"
                 }`}
               >
                 <TrendingUp size={16} />
@@ -349,7 +391,6 @@ export default function InductorDetailPage() {
                     name={metric === "conductanceRatio" ? "Conductance Ratio" : "Inductor Current (A)"}
                     radius={[8, 8, 2, 2]}
                   >
-                    {/* हर बार को अलग-अलग कलर देने के लिए Cell मैपिंग */}
                     {chartData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
@@ -423,20 +464,34 @@ export default function InductorDetailPage() {
         )}
       </div>
 
-      {/* OPERATIONAL REMARK FORM */}
+      {/* ========================================================================= */}
+      {/* 2. MIDDLE: ADD OPERATIONAL REMARK FORM                                    */}
+      {/* ========================================================================= */}
       <div className="bg-white border border-purple-200 rounded-2xl p-6 shadow-sm">
         <form onSubmit={handleSaveRemark} className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-purple-100 pb-4">
-            <h2 className="text-base font-black text-purple-800 uppercase tracking-wide flex items-center gap-2">
-              <MessageSquare size={18} className="text-purple-600" />
-              <span>Add Operational Remark &amp; Log</span>
-            </h2>
-            <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-xl border border-purple-200">
+            <div>
+              <h2 className="text-base font-black text-purple-800 uppercase tracking-wide flex items-center gap-2">
+                <MessageSquare size={18} className="text-purple-600" />
+                <span className="text-purple-700">Add</span>
+                <span className="text-indigo-600">Operational</span>
+                <span className="text-rose-600">Remark &amp; Log</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Record new maintenance, inspection, or general shift notes for this inductor
+              </p>
+            </div>
+
+            {/* Colourful Category Selector */}
+            <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-xl border border-purple-200 shadow-xs">
               <Tag size={14} className="text-purple-600" />
+              <label className="text-xs font-extrabold text-purple-900 uppercase">
+                Category:
+              </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="bg-white border border-purple-300 rounded-lg px-3 py-1 text-xs font-extrabold text-purple-800 outline-none cursor-pointer"
+                className="bg-white border border-purple-300 rounded-lg px-3 py-1 text-xs font-extrabold text-purple-800 outline-none focus:border-purple-500 shadow-xs cursor-pointer"
               >
                 <option value="General">🔵 General Log</option>
                 <option value="Maintenance">🔴 Maintenance Issue</option>
@@ -446,25 +501,127 @@ export default function InductorDetailPage() {
             </div>
           </div>
 
-          <textarea
-            rows="3"
-            value={remarkText}
-            onChange={(e) => setRemarkText(e.target.value)}
-            placeholder={`Write notes for ${formattedTitle}...`}
-            className="w-full bg-slate-50 border border-purple-200 rounded-xl p-4 text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-purple-500 transition-all resize-none"
-          ></textarea>
+          {/* Full-Width Textarea Box */}
+          <div className="relative">
+            <textarea
+              rows="3"
+              value={remarkText}
+              onChange={(e) => setRemarkText(e.target.value)}
+              placeholder={`Write your detailed shift log, inspection observation, or maintenance notes for ${formattedTitle}...`}
+              className="w-full bg-slate-50 border border-purple-200 rounded-xl p-4 text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all placeholder:text-slate-400 resize-none shadow-xs"
+            ></textarea>
+          </div>
 
-          <div className="flex justify-end">
+          {/* Action Row */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
+              <CheckCircle2 size={14} className="text-emerald-500" />
+              <span>
+                Selected Category:{" "}
+                <span className={`px-2 py-0.5 rounded-full border font-bold ${CATEGORY_STYLES[category]?.badge}`}>
+                  {category}
+                </span>
+              </span>
+            </div>
+
             <button
               type="submit"
               disabled={savingRemark}
-              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-cyan-600 text-white text-xs font-black px-6 py-2.5 rounded-xl shadow-md cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white text-xs font-black px-6 py-2.5 rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
             >
-              <MessageSquare size={14} />
-              <span>{savingRemark ? "Saving..." : "Save Remark"}</span>
+              <Send size={14} />
+              <span>{savingRemark ? "Saving Remark..." : "Save Remark to History"}</span>
             </button>
           </div>
         </form>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 3. BOTTOM: SAVED REMARK HISTORY LOGS (TIMELINE CARDS)                     */}
+      {/* ========================================================================= */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5 border-b border-slate-100 pb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-cyan-50 text-cyan-600 rounded-lg border border-cyan-200 shadow-2xs">
+              <History size={18} />
+            </div>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-wider flex items-center gap-1.5">
+                <span className="text-blue-700">Remark</span>
+                <span className="text-purple-700">History</span>
+                <span className="text-cyan-600">Logs</span>
+              </h3>
+              <p className="text-xs text-slate-400 font-medium">
+                Complete chronological timeline of saved operator observations
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 px-3.5 py-1.5 rounded-xl text-xs font-extrabold text-indigo-900 shadow-xs">
+            <span>Total Logs:</span>
+            <span className="bg-indigo-600 text-white px-2 py-0.5 rounded-md text-[11px] font-black">
+              {remarksList.length} Entries
+            </span>
+          </div>
+        </div>
+
+        {/* History Cards Container */}
+        {remarksList.length > 0 ? (
+          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+            {remarksList.map((item, idx) => {
+              const style = CATEGORY_STYLES[item.category] || CATEGORY_STYLES.General;
+              return (
+                <div
+                  key={item._id || idx}
+                  className={`p-4 rounded-xl border transition-all duration-200 shadow-xs ${style.cardBg} ${style.cardBorder}`}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2.5 h-2.5 rounded-full ${style.dot} ring-4`}></span>
+                      <span className={`text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border shadow-2xs ${style.badge}`}>
+                        {item.category || "General"}
+                      </span>
+                      <span className="text-[11px] font-bold text-slate-400">
+                        • Log #{remarksList.length - idx}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-[11px] font-bold text-slate-500">
+                      <span className="flex items-center gap-1 bg-white/80 px-2 py-1 rounded-lg border border-slate-200">
+                        <Calendar size={12} className="text-blue-500" />
+                        <span className="text-slate-700">
+                          {new Date(item.createdAt || Date.now()).toLocaleDateString()}
+                        </span>
+                      </span>
+                      <span className="flex items-center gap-1 bg-white/80 px-2 py-1 rounded-lg border border-slate-200">
+                        <Clock size={12} className="text-indigo-500" />
+                        <span className="text-slate-700">
+                          {new Date(item.createdAt || Date.now()).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Remark Message Text */}
+                  <p className="text-xs font-bold text-slate-800 leading-relaxed bg-white/80 p-3 rounded-lg border border-slate-200/70 mt-1 shadow-2xs">
+                    {item.remark}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-slate-50/50 rounded-xl border border-dashed border-slate-300">
+            <History size={32} className="mx-auto text-slate-300 mb-2" />
+            <p className="text-xs font-bold text-slate-500">No operational remarks logged yet.</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Enter a note in the form above and click &quot;Save Remark&quot; to start the history timeline.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
