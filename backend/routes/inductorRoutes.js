@@ -32,24 +32,26 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. GET ANALYTICS (EXACT HISTORY DATA PIPELINE)
+// 3. GET ANALYTICS (Matches exact DailyInductorData schema)
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
     const rawKey = String(req.params.inductorKey || "").toUpperCase();
     const range = req.query.range || "5d";
 
-    // Detect Pot (Main Pot vs PM Pot)
+    // Pot determination
     const isPm = rawKey.includes("PM");
     const potKey = isPm ? "pmPot" : "mainPot";
 
-    // Detect Inductor Letter (A, B, C, D)
+    // Letter determination
     let letter = "A";
     if (rawKey.includes("B")) letter = "B";
     else if (rawKey.includes("C")) letter = "C";
     else if (rawKey.includes("D")) letter = "D";
 
-    // Query DailyInductorData exactly like History Page
-    const records = await DailyInductorData.find({}).sort({ date: -1 }).lean();
+    // Exact historyController query
+    const records = await DailyInductorData.find({})
+      .sort({ date: -1, createdAt: -1 })
+      .lean();
 
     if (!records || records.length === 0) {
       return res.json({ success: true, data: [] });
@@ -57,8 +59,8 @@ router.get("/analytics/:inductorKey", async (req, res) => {
 
     const parseNum = (val) => {
       if (val === undefined || val === null || val === "" || val === "-" || val === "—") return null;
-      const parsed = parseFloat(val);
-      return isNaN(parsed) ? null : parsed;
+      const n = parseFloat(val);
+      return isNaN(n) ? null : n;
     };
 
     const extractPoint = (doc) => {
@@ -67,7 +69,6 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       const high = ind.high || ind.High || ind;
       const inter = ind.intermediate || ind.Intermediate || {};
 
-      // Conductance Ratio search across all possible aliases
       let cr =
         parseNum(high.conductanceRatio) ??
         parseNum(high.condRatio) ??
@@ -78,12 +79,10 @@ router.get("/analytics/:inductorKey", async (req, res) => {
         parseNum(ind.conductanceRatio) ??
         0;
 
-      // Inductor Current search across all possible aliases
       let cur =
         parseNum(high.inductorCurrent) ??
         parseNum(high.current) ??
         parseNum(high.lineCurrent) ??
-        parseNum(high.indCurrent) ??
         parseNum(inter.inductorCurrent) ??
         parseNum(inter.current) ??
         parseNum(ind.inductorCurrent) ??
@@ -132,7 +131,7 @@ router.get("/analytics/:inductorKey", async (req, res) => {
 
     return res.json({ success: true, data: chartData });
   } catch (err) {
-    console.error("Inductor Analytics Error:", err);
+    console.error("Inductor Analytics Route Error:", err);
     return res.status(500).json({ success: false, error: err.message });
   }
 });
