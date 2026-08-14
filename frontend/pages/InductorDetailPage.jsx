@@ -16,6 +16,7 @@ import {
   Line,
   BarChart,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   Tooltip,
@@ -24,6 +25,20 @@ import {
 } from "recharts";
 import { fetchHistory, fetchDataByDate } from "../services/dataService.js";
 import api from "../services/api.js";
+
+// प्रत्येक बार के लिए वाइब्रेंट कलर पैलेट
+const BAR_COLORS = [
+  "#06b6d4", // Cyan
+  "#8b5cf6", // Purple / Violet
+  "#3b82f6", // Blue
+  "#ec4899", // Pink
+  "#f59e0b", // Amber / Orange
+  "#10b981", // Emerald Green
+  "#6366f1", // Indigo
+  "#f43f5e", // Rose Red
+  "#14b8a6", // Teal
+  "#84cc16", // Lime
+];
 
 export default function InductorDetailPage() {
   const { inductorKey } = useParams();
@@ -35,10 +50,10 @@ export default function InductorDetailPage() {
   const [remarksList, setRemarksList] = useState([]);
   const [savingRemark, setSavingRemark] = useState(false);
 
-  // Chart & Telemetry States
+  // Chart & Telemetry States - डिफ़ॉल्ट 'bar' सेट किया गया
   const [metric, setMetric] = useState("conductanceRatio");
   const [timeRange, setTimeRange] = useState("5d");
-  const [chartType, setChartType] = useState("line");
+  const [chartType, setChartType] = useState("bar");
   const [chartData, setChartData] = useState([]);
   const [loadingChart, setLoadingChart] = useState(false);
 
@@ -54,14 +69,12 @@ export default function InductorDetailPage() {
   const loadTelemetryFromHistory = async () => {
     setLoadingChart(true);
     try {
-      // 1. Fetch available history entries
       const historyList = await fetchHistory();
       if (!historyList || historyList.length === 0) {
         setChartData([]);
         return;
       }
 
-      // 2. Determine slice limit according to selected range
       let limit = 5;
       if (timeRange === "20d") limit = 20;
       else if (timeRange === "30d") limit = 30;
@@ -70,7 +83,6 @@ export default function InductorDetailPage() {
 
       const targetHistory = historyList.slice(0, limit);
 
-      // 3. Identify Pot and Inductor Letter
       const rawKey = String(inductorKey || "MAIN_A").toUpperCase();
       const isPm = rawKey.includes("PM");
       const potKey = isPm ? "pmPot" : "mainPot";
@@ -80,7 +92,6 @@ export default function InductorDetailPage() {
       else if (rawKey.includes("C")) letter = "C";
       else if (rawKey.includes("D")) letter = "D";
 
-      // 4. Fetch detailed data for each date in parallel
       const detailedDocs = await Promise.all(
         targetHistory.map(async (item) => {
           try {
@@ -92,14 +103,12 @@ export default function InductorDetailPage() {
         })
       );
 
-      // Helper to parse numbers safely
       const parseNum = (val) => {
         if (val === undefined || val === null || val === "" || val === "-" || val === "—") return null;
         const n = parseFloat(val);
         return isNaN(n) ? null : n;
       };
 
-      // 5. Extract Conductance Ratio and Current
       const parsedPoints = detailedDocs
         .filter(Boolean)
         .map((doc) => {
@@ -146,7 +155,7 @@ export default function InductorDetailPage() {
             current: Number(Number(cur).toFixed(2)),
           };
         })
-        .reverse(); // Chronological order (left to right)
+        .reverse();
 
       setChartData(parsedPoints);
     } catch (err) {
@@ -195,7 +204,6 @@ export default function InductorDetailPage() {
 
   return (
     <div className="p-6 space-y-8 bg-slate-50/50 min-h-screen max-w-[1600px] mx-auto font-sans">
-      
       {/* TOP HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-cyan-900 p-5 rounded-2xl border border-indigo-200 shadow-md text-white">
         <div className="flex items-center gap-3.5">
@@ -212,7 +220,7 @@ export default function InductorDetailPage() {
               <span className="text-cyan-300 font-extrabold">ANALYTICAL DASHBOARD</span>
             </h1>
             <p className="text-xs text-cyan-100 font-medium mt-0.5">
-              Live Graphical Performance &amp; Historical Operational Logger
+              Live Colourful Bar Telemetry &amp; Historical Operational Logger
             </p>
           </div>
         </div>
@@ -239,7 +247,7 @@ export default function InductorDetailPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
             <h2 className="text-base font-black text-cyan-700 uppercase tracking-wide flex items-center gap-2">
-              <TrendingUp size={18} className="text-cyan-600" />
+              <BarChart2 size={18} className="text-cyan-600" />
               <span className="text-blue-700">Graphical</span>
               <span className="text-cyan-600">Performance</span>
               <span className="text-indigo-600">Analytics</span>
@@ -290,26 +298,28 @@ export default function InductorDetailPage() {
             {/* Chart Type Toggle */}
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-xs">
               <button
-                onClick={() => setChartType("line")}
-                className={`p-2 rounded-lg transition-all cursor-pointer ${
-                  chartType === "line" ? "bg-white text-cyan-700 shadow-sm" : "text-slate-500"
-                }`}
-              >
-                <TrendingUp size={16} />
-              </button>
-              <button
                 onClick={() => setChartType("bar")}
+                title="Bar Chart View"
                 className={`p-2 rounded-lg transition-all cursor-pointer ${
-                  chartType === "bar" ? "bg-white text-cyan-700 shadow-sm" : "text-slate-500"
+                  chartType === "bar" ? "bg-white text-cyan-700 shadow-sm" : "text-slate-500 hover:text-slate-800"
                 }`}
               >
                 <BarChart2 size={16} />
+              </button>
+              <button
+                onClick={() => setChartType("line")}
+                title="Line Chart View"
+                className={`p-2 rounded-lg transition-all cursor-pointer ${
+                  chartType === "line" ? "bg-white text-cyan-700 shadow-sm" : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                <TrendingUp size={16} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Dynamic Chart Container */}
+        {/* Colourful Dynamic Chart Container */}
         <div className="w-full h-[360px] pt-4">
           {loadingChart ? (
             <div className="h-full flex flex-col items-center justify-center text-xs font-bold text-cyan-600 animate-pulse gap-2">
@@ -317,17 +327,48 @@ export default function InductorDetailPage() {
             </div>
           ) : chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={330}>
-              {chartType === "line" ? (
+              {chartType === "bar" ? (
+                <BarChart data={chartData} margin={{ top: 15, right: 30, left: 10, bottom: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} tickLine={false} />
+                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} domain={["auto", "auto"]} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: "#f8fafc" }}
+                    contentStyle={{
+                      backgroundColor: "#ffffff",
+                      borderRadius: "12px",
+                      border: "1px solid #e2e8f0",
+                      boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+                      color: "#0f172a",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                    }}
+                  />
+                  <Bar
+                    dataKey={metric}
+                    name={metric === "conductanceRatio" ? "Conductance Ratio" : "Inductor Current (A)"}
+                    radius={[8, 8, 2, 2]}
+                  >
+                    {/* हर बार को अलग-अलग कलर देने के लिए Cell मैपिंग */}
+                    {chartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={BAR_COLORS[index % BAR_COLORS.length]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              ) : (
                 <LineChart data={chartData} margin={{ top: 15, right: 30, left: 10, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} />
-                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} domain={["auto", "auto"]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} tickLine={false} />
+                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} domain={["auto", "auto"]} tickLine={false} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#ffffff",
                       borderRadius: "12px",
-                      border: "1px solid #cbd5e1",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      border: "1px solid #e2e8f0",
+                      boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
                       color: "#0f172a",
                       fontSize: "12px",
                       fontWeight: "bold",
@@ -343,29 +384,6 @@ export default function InductorDetailPage() {
                     activeDot={{ r: 7, fill: metric === "conductanceRatio" ? "#0891b2" : "#9333ea" }}
                   />
                 </LineChart>
-              ) : (
-                <BarChart data={chartData} margin={{ top: 15, right: 30, left: 10, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} />
-                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} domain={["auto", "auto"]} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#ffffff",
-                      borderRadius: "12px",
-                      border: "1px solid #cbd5e1",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      color: "#0f172a",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                    }}
-                  />
-                  <Bar
-                    dataKey={metric}
-                    name={metric === "conductanceRatio" ? "Conductance Ratio" : "Inductor Current (A)"}
-                    fill={metric === "conductanceRatio" ? "#0891b2" : "#9333ea"}
-                    radius={[6, 6, 0, 0]}
-                  />
-                </BarChart>
               )}
             </ResponsiveContainer>
           ) : (
@@ -448,7 +466,6 @@ export default function InductorDetailPage() {
           </div>
         </form>
       </div>
-
     </div>
   );
 }
