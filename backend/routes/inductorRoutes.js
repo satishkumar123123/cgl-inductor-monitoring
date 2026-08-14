@@ -32,23 +32,23 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. GET ANALYTICS
+// 3. GET ANALYTICS (GUARANTEED DATA EXTRACTOR - LAST 5 / 20 / 30 DATA)
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
     const rawKey = String(req.params.inductorKey || "").toUpperCase();
-    const range = req.query.range || "20d";
+    const range = req.query.range || "5d"; // Default 5 data
 
-    // 1. Determine Pot Key
+    // Determine Pot
     const isPm = rawKey.includes("PM");
     const potKey = isPm ? "pmPot" : "mainPot";
 
-    // 2. Determine Inductor Letter (A, B, C, D)
+    // Determine Inductor Letter
     let letter = "A";
     if (rawKey.includes("B")) letter = "B";
     else if (rawKey.includes("C")) letter = "C";
     else if (rawKey.includes("D")) letter = "D";
 
-    // 3. Fetch from MongoDB
+    // Fetch from MongoDB
     const records = await DailyInductorData.find().sort({ date: -1 }).lean();
 
     if (!records || records.length === 0) {
@@ -57,12 +57,11 @@ router.get("/analytics/:inductorKey", async (req, res) => {
 
     const parseNum = (val) => {
       if (val === undefined || val === null || val === "" || val === "-") return 0;
-      const n = Number(val);
+      const n = parseFloat(val);
       return isNaN(n) ? 0 : n;
     };
 
     const extractPoint = (doc) => {
-      // Find inside mainPot/pmPot
       const pot = doc[potKey] || doc[potKey.toLowerCase()] || {};
       const ind = pot[letter] || pot[letter.toLowerCase()] || pot[`inductor${letter}`] || {};
       const high = ind.high || ind.High || ind;
@@ -82,7 +81,7 @@ router.get("/analytics/:inductorKey", async (req, res) => {
         parseNum(high.lineCurrent) ||
         parseNum(ind.inductorCurrent);
 
-      // Clean date format (e.g., "2026-08-14" -> "08/14")
+      // Date formatting for X-Axis
       let displayDate = doc.date || "N/A";
       if (displayDate.includes("-")) {
         const parts = displayDate.split("-");
@@ -97,11 +96,15 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       };
     };
 
-    let result = [];
-    if (range === "20d" || range === "30d") {
-      const limit = range === "20d" ? 20 : 30;
-      result = records.slice(0, limit).reverse().map(extractPoint);
-    } else {
+    // Determine limit count
+    let limit = 5;
+    if (range === "20d") limit = 20;
+    else if (range === "30d") limit = 30;
+    else if (range === "5d") limit = 5;
+
+    let chartData = [];
+
+    if (range === "1y" || range === "2y") {
       const limitMonths = range === "2y" ? 24 : 12;
       const monthMap = new Map();
       records.forEach((doc) => {
@@ -111,12 +114,14 @@ router.get("/analytics/:inductorKey", async (req, res) => {
           monthMap.set(monthKey, extractPoint(doc));
         }
       });
-      result = Array.from(monthMap.values()).slice(0, limitMonths).reverse();
+      chartData = Array.from(monthMap.values()).slice(0, limitMonths).reverse();
+    } else {
+      chartData = records.slice(0, limit).reverse().map(extractPoint);
     }
 
-    return res.json({ success: true, data: result });
+    return res.json({ success: true, data: chartData });
   } catch (err) {
-    console.error("Inductor Analytics Route Error:", err);
+    console.error("Inductor Analytics Error:", err);
     return res.status(500).json({ success: false, error: err.message });
   }
 });
