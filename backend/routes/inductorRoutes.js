@@ -32,71 +32,107 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. GET ANALYTICS FOR SELECTED INDUCTOR (MAIN_A, MAIN_B, PM_A, etc.)
+// 3. GET ANALYTICS - DEEP INTROSPECTION QUERY
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
     const rawKey = String(req.params.inductorKey || "").toUpperCase();
     const range = req.query.range || "5d";
 
-    // Detect Pot
+    // 1. Pot & Inductor Detection
     const isPm = rawKey.includes("PM");
     const potKey = isPm ? "pmPot" : "mainPot";
 
-    // Detect Letter
     let letter = "A";
     if (rawKey.includes("B")) letter = "B";
     else if (rawKey.includes("C")) letter = "C";
     else if (rawKey.includes("D")) letter = "D";
 
-    // Fetch all records sorted by date descending
-    const records = await DailyInductorData.find().sort({ date: -1 }).lean();
+    // 2. Fetch all records from DailyInductorData
+    let records = await DailyInductorData.find().sort({ date: -1 }).lean();
+
+    if (!records || records.length === 0) {
+      // Fallback check if stored without lean
+      records = await DailyInductorData.find().sort({ createdAt: -1 }).lean();
+    }
 
     if (!records || records.length === 0) {
       return res.json({ success: true, data: [] });
     }
 
     const parseNum = (val) => {
-      if (val === undefined || val === null || val === "" || val === "-") return 0;
+      if (val === undefined || val === null || val === "" || val === "-" || val === "—") return null;
       const n = parseFloat(val);
-      return isNaN(n) ? 0 : n;
+      return isNaN(n) ? null : n;
+    };
+
+    // Helper: Deep Search inside an object for key aliases
+    const findInObj = (obj, aliases) => {
+      if (!obj || typeof obj !== "object") return null;
+      for (const k of Object.keys(obj)) {
+        const cleanK = k.toLowerCase().replace(/[^a-z0-9]/g, "");
+        for (const alias of aliases) {
+          const cleanA = alias.toLowerCase().replace(/[^a-z0-9]/g, "");
+          if (cleanK === cleanA) {
+            const parsed = parseNum(obj[k]);
+            if (parsed !== null) return parsed;
+          }
+        }
+      }
+      return null;
     };
 
     const extractPoint = (doc) => {
       const pot = doc[potKey] || doc[potKey.toLowerCase()] || {};
       const ind = pot[letter] || pot[letter.toLowerCase()] || pot[`inductor${letter}`] || {};
-      const high = ind.high || ind.High || ind;
+      const high = ind.high || ind.High || {};
       const inter = ind.intermediate || ind.Intermediate || {};
 
-      let cr =
-        parseNum(high.conductanceRatio) ||
-        parseNum(inter.conductanceRatio) ||
-        parseNum(ind.conductanceRatio) ||
-        parseNum(high.condRatio) ||
-        parseNum(inter.condRatio) ||
-        parseNum(high.ratio) ||
-        0;
+      const ratioAliases = [
+        "conductanceRatio",
+        "condRatio",
+        "conductance_ratio",
+        "conductanceCurrentRatio",
+        "ratio",
+        "conductance"
+      ];
 
-      let cur =
-        parseNum(high.inductorCurrent) ||
-        parseNum(inter.inductorCurrent) ||
-        parseNum(high.current) ||
-        parseNum(high.lineCurrent) ||
-        parseNum(ind.inductorCurrent) ||
-        0;
+      const currentAliases = [
+        "inductorCurrent",
+        "current",
+        "lineCurrent",
+        "indCurrent",
+        "i",
+        "inductor_current"
+      ];
 
-      // Clean X-Axis Date (e.g., "2026-08-14" -> "08/14")
-      let displayDate = doc.date || "N/A";
-      if (displayDate.includes("-")) {
-        const parts = displayDate.split("-");
+      // Priority 1: High level
+      let cr = findInObj(high, ratioAliases);
+      let cur = findInObj(high, currentAliases);
+
+      // Priority 2: Intermediate level
+      if (cr === null) cr = findInObj(inter, ratioAliases);
+      if (cur === null) cur = findInObj(inter, currentAliases);
+
+      // Priority 3: Root of Inductor
+      if (cr === null) cr = findInObj(ind, ratioAliases);
+      if (cur === null) cur = findInObj(ind, currentAliases);
+
+      // Format clean readable date
+      let rawDate = doc.date || (doc.createdAt ? new Date(doc.createdAt).toISOString().split("T")[0] : "N/A");
+      let displayDate = rawDate;
+      if (rawDate.includes("-")) {
+        const parts = rawDate.split("-");
         if (parts.length === 3) displayDate = `${parts[1]}/${parts[2]}`;
-        else if (parts.length === 2) displayDate = parts[1];
+      } else if (rawDate.includes("/")) {
+        const parts = rawDate.split("/");
+        if (parts.length >= 2) displayDate = `${parts[0]}/${parts[1]}`;
       }
 
       return {
         date: displayDate,
-        fullDate: doc.date,
-        conductanceRatio: cr,
-        current: cur,
+        fullDate: rawDate,
+        conductanceRatio: cr !== null ? Number(cr.toFixed(4)) : 0,
+        current: cur !== null ? Number(cur.toFixed(2)) : 0,
       };
     };
 
@@ -111,8 +147,8 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       const limitMonths = range === "2y" ? 24 : 12;
       const monthMap = new Map();
       records.forEach((doc) => {
-        if (!doc.date) return;
-        const monthKey = doc.date.slice(0, 7);
+        const d = doc.date || "";
+        const monthKey = d.length >= 7 ? d.slice(0, 7) : "Monthly";
         if (!monthMap.has(monthKey)) {
           monthMap.set(monthKey, extractPoint(doc));
         }
