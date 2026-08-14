@@ -4,15 +4,13 @@ import {
   ArrowLeft,
   Send,
   History,
-  Clock,
-  BarChart2,
   TrendingUp,
   Tag,
   MessageSquare,
   Sparkles,
   Layers,
-  Calendar,
   Table,
+  BarChart2,
 } from "lucide-react";
 import {
   LineChart,
@@ -28,30 +26,10 @@ import {
 import axios from "axios";
 
 const CATEGORY_STYLES = {
-  Maintenance: {
-    badge: "bg-rose-100 text-rose-700 border-rose-300",
-    cardBg: "bg-gradient-to-r from-rose-50/90 via-pink-50/50 to-white",
-    cardBorder: "border-rose-200 hover:border-rose-400",
-    dot: "bg-rose-500 ring-rose-200",
-  },
-  Greasing: {
-    badge: "bg-amber-100 text-amber-700 border-amber-300",
-    cardBg: "bg-gradient-to-r from-amber-50/90 via-orange-50/50 to-white",
-    cardBorder: "border-amber-200 hover:border-amber-400",
-    dot: "bg-amber-500 ring-amber-200",
-  },
-  Inspection: {
-    badge: "bg-purple-100 text-purple-700 border-purple-300",
-    cardBg: "bg-gradient-to-r from-purple-50/90 via-indigo-50/50 to-white",
-    cardBorder: "border-purple-200 hover:border-purple-400",
-    dot: "bg-purple-500 ring-purple-200",
-  },
-  General: {
-    badge: "bg-cyan-100 text-cyan-700 border-cyan-300",
-    cardBg: "bg-gradient-to-r from-cyan-50/90 via-sky-50/50 to-white",
-    cardBorder: "border-cyan-200 hover:border-cyan-400",
-    dot: "bg-cyan-500 ring-cyan-200",
-  },
+  Maintenance: { badge: "bg-rose-100 text-rose-700 border-rose-300", cardBg: "bg-rose-50/50", cardBorder: "border-rose-200" },
+  Greasing: { badge: "bg-amber-100 text-amber-700 border-amber-300", cardBg: "bg-amber-50/50", cardBorder: "border-amber-200" },
+  Inspection: { badge: "bg-purple-100 text-purple-700 border-purple-300", cardBg: "bg-purple-50/50", cardBorder: "border-purple-200" },
+  General: { badge: "bg-cyan-100 text-cyan-700 border-cyan-300", cardBg: "bg-cyan-50/50", cardBorder: "border-cyan-200" },
 };
 
 export default function InductorDetailPage() {
@@ -71,6 +49,12 @@ export default function InductorDetailPage() {
   const [chartData, setChartData] = useState([]);
   const [loadingChart, setLoadingChart] = useState(false);
 
+  // Helper to get Auth Token
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("token") || localStorage.getItem("authToken");
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  };
+
   useEffect(() => {
     if (inductorKey) {
       fetchRemarks();
@@ -80,7 +64,7 @@ export default function InductorDetailPage() {
 
   const fetchRemarks = async () => {
     try {
-      const res = await axios.get(`/api/inductors/remarks/${inductorKey}`);
+      const res = await axios.get(`/api/inductors/remarks/${inductorKey}`, getAuthHeaders());
       if (res.data?.success) setRemarksList(res.data.data || []);
     } catch (err) {
       console.error("Remarks Fetch Error:", err);
@@ -91,7 +75,8 @@ export default function InductorDetailPage() {
     setLoadingChart(true);
     try {
       const res = await axios.get(
-        `/api/inductors/analytics/${inductorKey}?range=${timeRange}`
+        `/api/inductors/analytics/${inductorKey}?range=${timeRange}`,
+        getAuthHeaders()
       );
       const incoming = Array.isArray(res.data) ? res.data : (res.data?.data || []);
       setChartData(incoming);
@@ -105,18 +90,20 @@ export default function InductorDetailPage() {
 
   const handleSaveRemark = async (e) => {
     e.preventDefault();
-    if (!remarkText.trim()) {
-      alert("Please enter a remark before saving.");
-      return;
-    }
+    if (!remarkText.trim()) return alert("Please enter remark");
+
     setSavingRemark(true);
     try {
-      const res = await axios.post("/api/inductors/remarks", {
-        inductorKey,
-        inductorName: inductorKey ? inductorKey.replace("_", " ") : "Inductor",
-        remark: remarkText,
-        category,
-      });
+      const res = await axios.post(
+        "/api/inductors/remarks",
+        {
+          inductorKey,
+          inductorName: inductorKey ? inductorKey.replace("_", " ") : "Inductor",
+          remark: remarkText,
+          category,
+        },
+        getAuthHeaders()
+      );
       if (res.data?.success) {
         setRemarkText("");
         await fetchRemarks();
@@ -128,14 +115,12 @@ export default function InductorDetailPage() {
     }
   };
 
-  const formattedTitle = inductorKey
-    ? inductorKey.replace("_", " ").toUpperCase()
-    : "INDUCTOR";
+  const formattedTitle = inductorKey ? inductorKey.replace("_", " ").toUpperCase() : "INDUCTOR";
 
   return (
     <div className="p-6 space-y-8 bg-slate-50/50 min-h-screen max-w-[1600px] mx-auto font-sans">
       
-      {/* HEADER */}
+      {/* TOP HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-cyan-900 p-5 rounded-2xl border border-indigo-200 shadow-md text-white">
         <div className="flex items-center gap-3.5">
           <button
@@ -222,23 +207,13 @@ export default function InductorDetailPage() {
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-xs">
               <button
                 onClick={() => setChartType("line")}
-                title="Line Chart View"
-                className={`p-2 rounded-lg transition-all ${
-                  chartType === "line"
-                    ? "bg-white text-cyan-700 shadow-sm border border-slate-200"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
+                className={`p-2 rounded-lg transition-all ${chartType === "line" ? "bg-white text-cyan-700 shadow-sm" : "text-slate-500"}`}
               >
                 <TrendingUp size={16} />
               </button>
               <button
                 onClick={() => setChartType("bar")}
-                title="Bar Chart View"
-                className={`p-2 rounded-lg transition-all ${
-                  chartType === "bar"
-                    ? "bg-white text-cyan-700 shadow-sm border border-slate-200"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
+                className={`p-2 rounded-lg transition-all ${chartType === "bar" ? "bg-white text-cyan-700 shadow-sm" : "text-slate-500"}`}
               >
                 <BarChart2 size={16} />
               </button>
@@ -346,15 +321,12 @@ export default function InductorDetailPage() {
       <div className="bg-white border border-purple-200 rounded-2xl p-6 shadow-sm">
         <form onSubmit={handleSaveRemark} className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-purple-100 pb-4">
-            <div>
-              <h2 className="text-base font-black text-purple-800 uppercase tracking-wide flex items-center gap-2">
-                <MessageSquare size={18} className="text-purple-600" />
-                <span>Add Operational Remark &amp; Log</span>
-              </h2>
-            </div>
+            <h2 className="text-base font-black text-purple-800 uppercase tracking-wide flex items-center gap-2">
+              <MessageSquare size={18} className="text-purple-600" />
+              <span>Add Operational Remark &amp; Log</span>
+            </h2>
             <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-xl border border-purple-200">
               <Tag size={14} className="text-purple-600" />
-              <label className="text-xs font-extrabold text-purple-900 uppercase">Category:</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -380,43 +352,13 @@ export default function InductorDetailPage() {
             <button
               type="submit"
               disabled={savingRemark}
-              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white text-xs font-black px-6 py-2.5 rounded-xl shadow-md cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-cyan-600 text-white text-xs font-black px-6 py-2.5 rounded-xl shadow-md cursor-pointer disabled:opacity-50"
             >
               <Send size={14} />
               <span>{savingRemark ? "Saving..." : "Save Remark"}</span>
             </button>
           </div>
         </form>
-      </div>
-
-      {/* REMARK HISTORY TIMELINE */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <h3 className="text-sm font-black uppercase tracking-wider flex items-center gap-1.5 mb-4">
-          <History size={18} className="text-blue-600" />
-          <span>Remark History ({remarksList.length})</span>
-        </h3>
-        {remarksList.length > 0 ? (
-          <div className="space-y-3 max-h-[400px] overflow-y-auto">
-            {remarksList.map((item, idx) => {
-              const style = CATEGORY_STYLES[item.category] || CATEGORY_STYLES.General;
-              return (
-                <div key={item._id || idx} className={`p-4 rounded-xl border ${style.cardBg} ${style.cardBorder}`}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${style.badge}`}>
-                      {item.category}
-                    </span>
-                    <span className="text-[11px] text-slate-400 font-bold">
-                      {new Date(item.createdAt || Date.now()).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-xs font-bold text-slate-800 mt-1">{item.remark}</p>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-xs text-slate-400 py-4 text-center">No remarks saved yet.</p>
-        )}
       </div>
 
     </div>
