@@ -73,7 +73,7 @@ const DailyInductorDataSchema = new mongoose.Schema(
       B: { type: InductorSchema, default: () => ({}) },
     },
 
-    // NEW ADDITIONS FOR INDUCTOR REPORT & DROSS
+    // PRODUCTION & DROSS REPORTS
     productionAndDross: {
       type: ProductionAndDrossSchema,
       default: () => ({}),
@@ -87,8 +87,13 @@ const DailyInductorDataSchema = new mongoose.Schema(
     status: { type: String, enum: ["Excellent", "Normal", "Needs Attention"], default: "Normal" },
     lastUpdated: { type: Date, default: Date.now },
   },
-  { timestamps: true, collection: "daily_inductor_data" }
+  { 
+    timestamps: true, 
+    collection: "daily_inductor_data" // 👈 1. Schema Level Collection Lock
+  }
 );
 
-// Mongoose model export
-module.exports = mongoose.models.DailyInductorData || mongoose.model("DailyInductorData", DailyInductorDataSchema);
+// 👈 2. Model Level Collection Lock (3rd parameter "daily_inductor_data")
+module.exports =
+  mongoose.models.DailyInductorData ||
+  mongoose.model("DailyInductorData", DailyInductorDataSchema, "daily_inductor_data");

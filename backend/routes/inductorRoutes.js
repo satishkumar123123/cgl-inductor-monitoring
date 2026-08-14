@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const DailyInductorData = require("../models/DailyInductorData");
+const mongoose = require("mongoose");
 const InductorRemark = require("../models/InductorRemark");
 
-// Disable ETag / 304 Caching for all inductor analytics routes
+// Disable 304 Cache
 router.use((req, res, next) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.setHeader("Pragma", "no-cache");
@@ -40,35 +40,27 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// Case-Insensitive Helper
-const getValInsensitive = (obj, targetKey) => {
-  if (!obj || typeof obj !== "object") return null;
-  const cleanTarget = String(targetKey).toLowerCase().replace(/[^a-z0-9]/g, "");
-  for (const key of Object.keys(obj)) {
-    const cleanK = key.toLowerCase().replace(/[^a-z0-9]/g, "");
-    if (cleanK === cleanTarget) return obj[key];
-  }
-  return null;
-};
-
-// 3. GET ANALYTICS
+// 3. GET ANALYTICS FROM EXACT "daily_inductor_data"
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
     const rawKey = String(req.params.inductorKey || "").toUpperCase();
     const range = req.query.range || "5d";
 
     const isPm = rawKey.includes("PM");
-    const targetPot = isPm ? "pmpot" : "mainpot";
+    const potKey = isPm ? "pmPot" : "mainPot";
 
-    let targetLetter = "a";
-    if (rawKey.includes("B")) targetLetter = "b";
-    else if (rawKey.includes("C")) targetLetter = "c";
-    else if (rawKey.includes("D")) targetLetter = "d";
+    let letter = "A";
+    if (rawKey.includes("B")) letter = "B";
+    else if (rawKey.includes("C")) letter = "C";
+    else if (rawKey.includes("D")) letter = "D";
 
-    // Direct MongoDB fetch without cached lean projection
-    const records = await DailyInductorData.find({})
+    // Direct fetch from exact collection "daily_inductor_data"
+    const db = mongoose.connection.db;
+    const records = await db
+      .collection("daily_inductor_data")
+      .find({})
       .sort({ date: -1, createdAt: -1 })
-      .lean();
+      .toArray();
 
     if (!records || records.length === 0) {
       return res.json({ success: true, data: [] });
@@ -81,32 +73,28 @@ router.get("/analytics/:inductorKey", async (req, res) => {
     };
 
     const extractPoint = (doc) => {
-      const pot = getValInsensitive(doc, targetPot) || doc[isPm ? "pmPot" : "mainPot"] || {};
-      const ind = getValInsensitive(pot, targetLetter) || getValInsensitive(pot, `inductor${targetLetter}`) || pot;
-      const high = getValInsensitive(ind, "high") || ind;
-      const inter = getValInsensitive(ind, "intermediate") || getValInsensitive(ind, "interm") || {};
+      const pot = doc[potKey] || doc[potKey.toLowerCase()] || doc[isPm ? "PMPOT" : "MAINPOT"] || {};
+      const ind = pot[letter] || pot[letter.toLowerCase()] || pot[`inductor${letter}`] || {};
+      const high = ind.high || ind.High || ind.HIGH || ind;
+      const inter = ind.intermediate || ind.Intermediate || ind.INTERMEDIATE || {};
 
-      const crVal =
-        getValInsensitive(high, "conductanceRatio") ??
-        getValInsensitive(high, "condRatio") ??
-        getValInsensitive(high, "conductanceratio") ??
-        getValInsensitive(high, "ratio") ??
-        getValInsensitive(inter, "conductanceRatio") ??
-        getValInsensitive(inter, "condRatio") ??
-        getValInsensitive(ind, "conductanceRatio") ??
+      let cr =
+        parseNum(high.conductanceRatio) ??
+        parseNum(high.condRatio) ??
+        parseNum(high.conductance_ratio) ??
+        parseNum(inter.conductanceRatio) ??
+        parseNum(inter.condRatio) ??
+        parseNum(ind.conductanceRatio) ??
         0;
 
-      const curVal =
-        getValInsensitive(high, "inductorCurrent") ??
-        getValInsensitive(high, "current") ??
-        getValInsensitive(high, "lineCurrent") ??
-        getValInsensitive(inter, "inductorCurrent") ??
-        getValInsensitive(inter, "current") ??
-        getValInsensitive(ind, "inductorCurrent") ??
+      let cur =
+        parseNum(high.inductorCurrent) ??
+        parseNum(high.current) ??
+        parseNum(high.lineCurrent) ??
+        parseNum(inter.inductorCurrent) ??
+        parseNum(inter.current) ??
+        parseNum(ind.inductorCurrent) ??
         0;
-
-      const cr = parseNum(crVal) || 0;
-      const cur = parseNum(curVal) || 0;
 
       let rawDate = doc.date || (doc.createdAt ? new Date(doc.createdAt).toISOString().split("T")[0] : "N/A");
       let displayDate = rawDate;
@@ -122,8 +110,8 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       return {
         date: displayDate,
         fullDate: rawDate,
-        conductanceRatio: Number(cr.toFixed(4)),
-        current: Number(cur.toFixed(2)),
+        conductanceRatio: Number(Number(cr).toFixed(4)),
+        current: Number(Number(cur).toFixed(2)),
       };
     };
 
