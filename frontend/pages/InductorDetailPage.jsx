@@ -204,9 +204,10 @@ export default function InductorDetailPage() {
               </select>
             </div>
 
-            {/* Time Range Selector */}
-            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-xs">
+            {/* Time Range Selector: Added Recent 20 Data */}
+            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-xs flex-wrap gap-1">
               {[
+                { key: "20d", label: "Recent 20 Data" },
                 { key: "30d", label: "Recent 30 Data" },
                 { key: "1y", label: "Recent 1 Year" },
                 { key: "2y", label: "Recent 2 Years" },
@@ -265,8 +266,8 @@ export default function InductorDetailPage() {
               {chartType === "line" ? (
                 <LineChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeights={700} />
-                  <YAxis stroke="#64748b" fontSize={11} fontWeights={700} />
+                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} />
+                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} domain={["auto", "auto"]} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#ffffff",
@@ -290,8 +291,8 @@ export default function InductorDetailPage() {
               ) : (
                 <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeights={700} />
-                  <YAxis stroke="#64748b" fontSize={11} fontWeights={700} />
+                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} />
+                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} domain={["auto", "auto"]} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#ffffff",
