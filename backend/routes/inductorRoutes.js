@@ -3,6 +3,14 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const InductorRemark = require("../models/InductorRemark");
 
+// Disable 304 Caching so browser always gets fresh data
+router.use((req, res, next) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
+
 // 1. GET REMARKS
 router.get("/remarks/:inductorKey", async (req, res) => {
   try {
@@ -32,46 +40,57 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. GET ANALYTICS
+// Helper to extract any number safely
+const parseVal = (v) => {
+  if (v === undefined || v === null || v === "" || v === "-" || v === "—") return null;
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+};
+
+// 3. GET ANALYTICS (LAST 5 DAYS TESTABLE ROUTE)
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
-    const rawKey = String(req.params.inductorKey || "").toUpperCase();
+    const rawKey = String(req.params.inductorKey || "MAIN_A").toUpperCase();
     const range = req.query.range || "5d";
 
+    // Detect Pot (mainPot vs pmPot)
     const isPm = rawKey.includes("PM");
     const potKey = isPm ? "pmPot" : "mainPot";
 
+    // Detect Inductor Letter (A, B, C, D)
     let letter = "A";
     if (rawKey.includes("B")) letter = "B";
     else if (rawKey.includes("C")) letter = "C";
     else if (rawKey.includes("D")) letter = "D";
 
-    // Direct MongoDB connection fetch
+    // Direct fetch from MongoDB daily_inductor_data collection
     const db = mongoose.connection.db;
     let records = [];
 
     if (db) {
-      records = await db.collection("daily_inductor_data").find({}).sort({ date: -1, createdAt: -1 }).toArray();
+      records = await db
+        .collection("daily_inductor_data")
+        .find({})
+        .sort({ date: -1, createdAt: -1 })
+        .toArray();
     }
 
-    // Agar direct db se nahi mila toh mongoose models se try karo
+    // Fallback if db instance isn't ready
     if (!records || records.length === 0) {
       const DailyInductorData = mongoose.models.DailyInductorData || require("../models/DailyInductorData");
       records = await DailyInductorData.find({}).sort({ date: -1, createdAt: -1 }).lean();
     }
 
-    console.log(`[Inductor Analytics] Fetched ${records.length} docs for key: ${rawKey}`);
-
     if (!records || records.length === 0) {
-      return res.json({ success: true, count: 0, data: [] });
+      return res.json({
+        success: true,
+        message: "No documents found in daily_inductor_data collection",
+        totalDocsInDb: 0,
+        data: []
+      });
     }
 
-    const parseNum = (val) => {
-      if (val === undefined || val === null || val === "" || val === "-" || val === "—") return null;
-      const n = parseFloat(val);
-      return isNaN(n) ? null : n;
-    };
-
+    // Process records to extract conductanceRatio and current
     const extractPoint = (doc) => {
       const pot = doc[potKey] || doc[potKey.toLowerCase()] || doc[isPm ? "PMPOT" : "MAINPOT"] || {};
       const ind = pot[letter] || pot[letter.toLowerCase()] || pot[`inductor${letter}`] || {};
@@ -79,22 +98,23 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       const inter = ind.intermediate || ind.Intermediate || ind.INTERMEDIATE || {};
 
       let cr =
-        parseNum(high.conductanceRatio) ??
-        parseNum(high.condRatio) ??
-        parseNum(high.conductance_ratio) ??
-        parseNum(high.ratio) ??
-        parseNum(inter.conductanceRatio) ??
-        parseNum(inter.condRatio) ??
-        parseNum(ind.conductanceRatio) ??
+        parseVal(high.conductanceRatio) ??
+        parseVal(high.condRatio) ??
+        parseVal(high.conductance_ratio) ??
+        parseVal(high.ratio) ??
+        parseVal(inter.conductanceRatio) ??
+        parseVal(inter.condRatio) ??
+        parseVal(ind.conductanceRatio) ??
         0;
 
       let cur =
-        parseNum(high.inductorCurrent) ??
-        parseNum(high.current) ??
-        parseNum(high.lineCurrent) ??
-        parseNum(inter.inductorCurrent) ??
-        parseNum(inter.current) ??
-        parseNum(ind.inductorCurrent) ??
+        parseVal(high.inductorCurrent) ??
+        parseVal(high.current) ??
+        parseVal(high.lineCurrent) ??
+        parseVal(high.indCurrent) ??
+        parseVal(inter.inductorCurrent) ??
+        parseVal(inter.current) ??
+        parseVal(ind.inductorCurrent) ??
         0;
 
       let rawDate = doc.date || (doc.createdAt ? new Date(doc.createdAt).toISOString().split("T")[0] : "N/A");
@@ -116,6 +136,7 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       };
     };
 
+    // Range limit calculation (Default: Last 5 Days)
     let limit = 5;
     if (range === "20d") limit = 20;
     else if (range === "30d") limit = 30;
@@ -135,10 +156,18 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       });
       chartData = Array.from(monthMap.values()).slice(0, limitMonths).reverse();
     } else {
+      // Pick last N records and reverse for chronological left-to-right chart
       chartData = records.slice(0, limit).reverse().map(extractPoint);
     }
 
-    return res.json({ success: true, count: chartData.length, data: chartData });
+    return res.json({
+      success: true,
+      inductor: rawKey,
+      requestedRange: range,
+      totalRecordsInDb: records.length,
+      returnedCount: chartData.length,
+      data: chartData,
+    });
   } catch (err) {
     console.error("Inductor Analytics Route Error:", err);
     return res.status(500).json({ success: false, error: err.message });
