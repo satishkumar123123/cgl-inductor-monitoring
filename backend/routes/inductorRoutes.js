@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose");
+const DailyInductorData = require("../models/DailyInductorData");
 const InductorRemark = require("../models/InductorRemark");
 
 // 1. GET REMARKS
@@ -32,84 +32,66 @@ router.post("/remarks", async (req, res) => {
   }
 });
 
-// 3. GET ANALYTICS WITH UNIVERSAL MONGO DRIVER SEARCH
+// 3. GET ANALYTICS (EXACT HISTORY DATA PIPELINE)
 router.get("/analytics/:inductorKey", async (req, res) => {
   try {
     const rawKey = String(req.params.inductorKey || "").toUpperCase();
     const range = req.query.range || "5d";
 
+    // Detect Pot (Main Pot vs PM Pot)
     const isPm = rawKey.includes("PM");
     const potKey = isPm ? "pmPot" : "mainPot";
 
+    // Detect Inductor Letter (A, B, C, D)
     let letter = "A";
     if (rawKey.includes("B")) letter = "B";
     else if (rawKey.includes("C")) letter = "C";
     else if (rawKey.includes("D")) letter = "D";
 
-    // 1. Try finding records across all possible collection names in DB
-    const db = mongoose.connection.db;
-    const possibleCollections = [
-      "daily_inductor_data",
-      "dailyinductordatas",
-      "dailydatas",
-      "daily_data",
-      "inductor_data",
-      "records"
-    ];
+    // Query DailyInductorData exactly like History Page
+    const records = await DailyInductorData.find({}).sort({ date: -1 }).lean();
 
-    let records = [];
-
-    for (const collName of possibleCollections) {
-      try {
-        const found = await db.collection(collName).find({}).sort({ date: -1, createdAt: -1 }).toArray();
-        if (found && found.length > 0) {
-          records = found;
-          break;
-        }
-      } catch (e) {
-        // Continue to next collection
-      }
-    }
-
-    if (records.length === 0) {
+    if (!records || records.length === 0) {
       return res.json({ success: true, data: [] });
     }
 
     const parseNum = (val) => {
       if (val === undefined || val === null || val === "" || val === "-" || val === "—") return null;
-      const n = parseFloat(val);
-      return isNaN(n) ? null : n;
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? null : parsed;
     };
-
-    const findInObj = (obj, aliases) => {
-      if (!obj || typeof obj !== "object") return null;
-      for (const k of Object.keys(obj)) {
-        const cleanK = k.toLowerCase().replace(/[^a-z0-9]/g, "");
-        for (const alias of aliases) {
-          const cleanA = alias.toLowerCase().replace(/[^a-z0-9]/g, "");
-          if (cleanK === cleanA) {
-            const parsed = parseNum(obj[k]);
-            if (parsed !== null) return parsed;
-          }
-        }
-      }
-      return null;
-    };
-
-    const ratioAliases = ["conductanceRatio", "condRatio", "conductance_ratio", "conductanceCurrentRatio", "ratio"];
-    const currentAliases = ["inductorCurrent", "current", "lineCurrent", "indCurrent", "i", "inductor_current"];
 
     const extractPoint = (doc) => {
       const pot = doc[potKey] || doc[potKey.toLowerCase()] || {};
       const ind = pot[letter] || pot[letter.toLowerCase()] || pot[`inductor${letter}`] || {};
-      const high = ind.high || ind.High || {};
+      const high = ind.high || ind.High || ind;
       const inter = ind.intermediate || ind.Intermediate || {};
 
-      let cr = findInObj(high, ratioAliases) ?? findInObj(inter, ratioAliases) ?? findInObj(ind, ratioAliases) ?? 0;
-      let cur = findInObj(high, currentAliases) ?? findInObj(inter, currentAliases) ?? findInObj(ind, currentAliases) ?? 0;
+      // Conductance Ratio search across all possible aliases
+      let cr =
+        parseNum(high.conductanceRatio) ??
+        parseNum(high.condRatio) ??
+        parseNum(high.conductance_ratio) ??
+        parseNum(high.ratio) ??
+        parseNum(inter.conductanceRatio) ??
+        parseNum(inter.condRatio) ??
+        parseNum(ind.conductanceRatio) ??
+        0;
+
+      // Inductor Current search across all possible aliases
+      let cur =
+        parseNum(high.inductorCurrent) ??
+        parseNum(high.current) ??
+        parseNum(high.lineCurrent) ??
+        parseNum(high.indCurrent) ??
+        parseNum(inter.inductorCurrent) ??
+        parseNum(inter.current) ??
+        parseNum(ind.inductorCurrent) ??
+        0;
 
       let rawDate = doc.date || (doc.createdAt ? new Date(doc.createdAt).toISOString().split("T")[0] : "N/A");
       let displayDate = rawDate;
+
       if (rawDate.includes("-")) {
         const parts = rawDate.split("-");
         if (parts.length === 3) displayDate = `${parts[1]}/${parts[2]}`;
@@ -121,8 +103,8 @@ router.get("/analytics/:inductorKey", async (req, res) => {
       return {
         date: displayDate,
         fullDate: rawDate,
-        conductanceRatio: Number(cr.toFixed(4)),
-        current: Number(cur.toFixed(2)),
+        conductanceRatio: Number(Number(cr).toFixed(4)),
+        current: Number(Number(cur).toFixed(2)),
       };
     };
 
@@ -150,7 +132,7 @@ router.get("/analytics/:inductorKey", async (req, res) => {
 
     return res.json({ success: true, data: chartData });
   } catch (err) {
-    console.error("Inductor Analytics Route Error:", err);
+    console.error("Inductor Analytics Error:", err);
     return res.status(500).json({ success: false, error: err.message });
   }
 });
