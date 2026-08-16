@@ -146,24 +146,34 @@ export default function InductorDetailPage() {
         return isNaN(n) ? null : n;
       };
 
+      // 5. Extract Conductance Ratio and Current (Universal Deep Matcher)
       const parsedPoints = detailedDocs
         .filter(Boolean)
         .map((doc) => {
           const pot = doc[potKey] || doc[potKey.toLowerCase()] || {};
           const ind = pot[letter] || pot[letter.toLowerCase()] || pot[`inductor${letter}`] || {};
-          const high = ind.high || ind.High || ind.HIGH || ind;
+          const high = ind.high || ind.High || ind.HIGH || {};
           const inter = ind.intermediate || ind.Intermediate || ind.INTERMEDIATE || {};
 
+          // Conductance Ratio dhoondne ke liye saare possible levels check honge
           let cr =
             parseNum(high.conductanceRatio) ??
             parseNum(high.condRatio) ??
+            parseNum(high.cr) ??
             parseNum(high.conductance_ratio) ??
             parseNum(high.ratio) ??
             parseNum(inter.conductanceRatio) ??
             parseNum(inter.condRatio) ??
+            parseNum(inter.cr) ??
             parseNum(ind.conductanceRatio) ??
+            parseNum(ind.conductanceRatioPercent) ??
+            parseNum(ind.condRatio) ??
+            parseNum(ind.cr) ??
+            parseNum(ind.ratio) ??
+            parseNum(pot.conductanceRatio) ??
             0;
 
+          // Current dhoondne ke liye saare possible levels
           let cur =
             parseNum(high.inductorCurrent) ??
             parseNum(high.current) ??
@@ -172,6 +182,8 @@ export default function InductorDetailPage() {
             parseNum(inter.inductorCurrent) ??
             parseNum(inter.current) ??
             parseNum(ind.inductorCurrent) ??
+            parseNum(ind.current) ??
+            parseNum(ind.lineCurrent) ??
             0;
 
           let rawDate = doc.date || (doc.createdAt ? new Date(doc.createdAt).toISOString().split("T")[0] : "N/A");
@@ -188,7 +200,7 @@ export default function InductorDetailPage() {
           return {
             date: displayDate,
             fullDate: rawDate,
-            conductanceRatio: Number(Number(cr).toFixed(4)),
+            conductanceRatio: Number(Number(cr).toFixed(2)),
             current: Number(Number(cur).toFixed(2)),
           };
         })
@@ -241,9 +253,7 @@ export default function InductorDetailPage() {
 
   return (
     <div className="p-6 space-y-8 bg-slate-50/50 min-h-screen max-w-[1600px] mx-auto font-sans">
-      {/* ========================================================================= */}
-      {/* 0. TOP HEADER SECTION                                                     */}
-      {/* ========================================================================= */}
+      {/* 0. TOP HEADER SECTION */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-cyan-900 p-5 rounded-2xl border border-indigo-200 shadow-md text-white">
         <div className="flex items-center gap-3.5">
           <button
@@ -282,9 +292,7 @@ export default function InductorDetailPage() {
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 1. TOP: GRAPHICAL PERFORMANCE ANALYTICS SECTION                           */}
-      {/* ========================================================================= */}
+      {/* 1. TOP: GRAPHICAL PERFORMANCE ANALYTICS SECTION */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
@@ -361,7 +369,7 @@ export default function InductorDetailPage() {
           </div>
         </div>
 
-        {/* Colourful Dynamic Chart Container */}
+        {/* Dynamic Chart Container */}
         <div className="w-full h-[360px] pt-4">
           {loadingChart ? (
             <div className="h-full flex flex-col items-center justify-center text-xs font-bold text-cyan-600 animate-pulse gap-2">
@@ -464,9 +472,7 @@ export default function InductorDetailPage() {
         )}
       </div>
 
-      {/* ========================================================================= */}
-      {/* 2. MIDDLE: ADD OPERATIONAL REMARK FORM                                    */}
-      {/* ========================================================================= */}
+      {/* 2. MIDDLE: ADD OPERATIONAL REMARK FORM */}
       <div className="bg-white border border-purple-200 rounded-2xl p-6 shadow-sm">
         <form onSubmit={handleSaveRemark} className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-purple-100 pb-4">
@@ -482,7 +488,7 @@ export default function InductorDetailPage() {
               </p>
             </div>
 
-            {/* Colourful Category Selector */}
+            {/* Category Selector */}
             <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-xl border border-purple-200 shadow-xs">
               <Tag size={14} className="text-purple-600" />
               <label className="text-xs font-extrabold text-purple-900 uppercase">
@@ -501,7 +507,7 @@ export default function InductorDetailPage() {
             </div>
           </div>
 
-          {/* Full-Width Textarea Box */}
+          {/* Textarea Box */}
           <div className="relative">
             <textarea
               rows="3"
@@ -536,9 +542,7 @@ export default function InductorDetailPage() {
         </form>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 3. BOTTOM: SAVED REMARK HISTORY LOGS (TIMELINE CARDS)                     */}
-      {/* ========================================================================= */}
+      {/* 3. BOTTOM: SAVED REMARK HISTORY LOGS */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-2">
