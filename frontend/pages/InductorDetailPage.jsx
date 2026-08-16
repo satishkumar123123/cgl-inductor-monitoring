@@ -146,35 +146,51 @@ export default function InductorDetailPage() {
         return isNaN(n) ? null : n;
       };
 
-      // 5. Extract Conductance Ratio and Current (Supports Root, Nested Pot & Direct String Formats)
+      // 5. Universal Deep Matcher (Supports conductanceCurrentRatio, conductanceRatio, Root & Nested)
       const parsedPoints = detailedDocs
         .filter(Boolean)
         .map((doc) => {
-          // 1. Check inside pot wrapper or directly at root document
+          // 1. Pot wrapper or Root fallback
           const pot = doc[potKey] || doc[potKey.toLowerCase()] || doc;
 
-          // 2. Check Inductor (A, B, C, D)
+          // 2. Inductor level (A, B, C, D)
           const ind =
             pot[letter] ||
             pot[letter.toLowerCase()] ||
             pot[`inductor${letter}`] ||
-            doc[letter] || // Root level A/B/C/D check
+            doc[letter] ||
             doc[letter.toLowerCase()] ||
             {};
 
-          // 3. Check High and Intermediate Levels
+          // 3. High & Intermediate levels
           const high = ind.high || ind.High || ind.HIGH || ind;
           const inter = ind.intermediate || ind.Intermediate || ind.INTERMEDIATE || {};
 
-          // 4. Safely extract Conductance Ratio
+          // 4. Safely extract Conductance Ratio (Handles both new and old keys)
           let cr =
+            // New Key Formats
             parseNum(high.conductanceRatio) ??
-            parseNum(high.conductance_ratio) ??
             parseNum(high.condRatio) ??
+            parseNum(high.conductance_ratio) ??
             parseNum(high.cr) ??
+            parseNum(high.ratio) ??
+            // Old Key Formats (conductanceCurrentRatio / conductanceCurrentRation)
+            parseNum(high.conductanceCurrentRatio) ??
+            parseNum(high.conductanceCurrentRation) ??
+            parseNum(high.conductance_current_ratio) ??
+            parseNum(high.conductanceInitialValue) ??
+            // Intermediate Level Fallbacks
             parseNum(inter.conductanceRatio) ??
+            parseNum(inter.conductanceCurrentRatio) ??
+            parseNum(inter.condRatio) ??
+            // Inductor Level Fallbacks
             parseNum(ind.conductanceRatio) ??
+            parseNum(ind.conductanceCurrentRatio) ??
+            parseNum(ind.conductanceCurrentRation) ??
+            parseNum(ind.cr) ??
+            // Document Level Fallbacks
             parseNum(doc.conductanceRatio) ??
+            parseNum(doc.conductanceCurrentRatio) ??
             0;
 
           // 5. Safely extract Inductor Current
@@ -182,9 +198,12 @@ export default function InductorDetailPage() {
             parseNum(high.inductorCurrent) ??
             parseNum(high.current) ??
             parseNum(high.lineCurrent) ??
+            parseNum(high.indCurrent) ??
             parseNum(inter.inductorCurrent) ??
+            parseNum(inter.current) ??
             parseNum(ind.inductorCurrent) ??
             parseNum(ind.current) ??
+            parseNum(ind.lineCurrent) ??
             parseNum(doc.inductorCurrent) ??
             0;
 
