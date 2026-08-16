@@ -94,6 +94,13 @@ export default function InductorDetailPage() {
   const [chartData, setChartData] = useState([]);
   const [loadingChart, setLoadingChart] = useState(false);
 
+  // Y-Axis Ticks and Domain according to selected metric
+  const yAxisDomain = metric === "conductanceRatio" ? [0, 120] : [0, 1800];
+  const yAxisTicks =
+    metric === "conductanceRatio"
+      ? [0, 30, 60, 90, 120]
+      : [0, 450, 900, 1350, 1800];
+
   // Load telemetry data on load or when time range / inductor changes
   useEffect(() => {
     if (inductorKey) {
@@ -403,7 +410,14 @@ export default function InductorDetailPage() {
                 <BarChart data={chartData} margin={{ top: 15, right: 30, left: 10, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} tickLine={false} />
-                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} domain={["auto", "auto"]} tickLine={false} />
+                  <YAxis
+                    stroke="#64748b"
+                    fontSize={11}
+                    fontWeight={700}
+                    domain={yAxisDomain}
+                    ticks={yAxisTicks}
+                    tickLine={false}
+                  />
                   <Tooltip
                     cursor={{ fill: "#f8fafc" }}
                     contentStyle={{
@@ -433,7 +447,14 @@ export default function InductorDetailPage() {
                 <LineChart data={chartData} margin={{ top: 15, right: 30, left: 10, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} tickLine={false} />
-                  <YAxis stroke="#64748b" fontSize={11} fontWeight={700} domain={["auto", "auto"]} tickLine={false} />
+                  <YAxis
+                    stroke="#64748b"
+                    fontSize={11}
+                    fontWeight={700}
+                    domain={yAxisDomain}
+                    ticks={yAxisTicks}
+                    tickLine={false}
+                  />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#ffffff",
