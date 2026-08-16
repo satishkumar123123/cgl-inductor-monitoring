@@ -146,46 +146,49 @@ export default function InductorDetailPage() {
         return isNaN(n) ? null : n;
       };
 
-      // 5. Extract Conductance Ratio and Current (Universal Deep Matcher)
+      // 5. Extract Conductance Ratio and Current (Supports Root, Nested Pot & Direct String Formats)
       const parsedPoints = detailedDocs
         .filter(Boolean)
         .map((doc) => {
-          const pot = doc[potKey] || doc[potKey.toLowerCase()] || {};
-          const ind = pot[letter] || pot[letter.toLowerCase()] || pot[`inductor${letter}`] || {};
-          const high = ind.high || ind.High || ind.HIGH || {};
+          // 1. Check inside pot wrapper or directly at root document
+          const pot = doc[potKey] || doc[potKey.toLowerCase()] || doc;
+
+          // 2. Check Inductor (A, B, C, D)
+          const ind =
+            pot[letter] ||
+            pot[letter.toLowerCase()] ||
+            pot[`inductor${letter}`] ||
+            doc[letter] || // Root level A/B/C/D check
+            doc[letter.toLowerCase()] ||
+            {};
+
+          // 3. Check High and Intermediate Levels
+          const high = ind.high || ind.High || ind.HIGH || ind;
           const inter = ind.intermediate || ind.Intermediate || ind.INTERMEDIATE || {};
 
-          // Conductance Ratio dhoondne ke liye saare possible levels check honge
+          // 4. Safely extract Conductance Ratio
           let cr =
             parseNum(high.conductanceRatio) ??
+            parseNum(high.conductance_ratio) ??
             parseNum(high.condRatio) ??
             parseNum(high.cr) ??
-            parseNum(high.conductance_ratio) ??
-            parseNum(high.ratio) ??
             parseNum(inter.conductanceRatio) ??
-            parseNum(inter.condRatio) ??
-            parseNum(inter.cr) ??
             parseNum(ind.conductanceRatio) ??
-            parseNum(ind.conductanceRatioPercent) ??
-            parseNum(ind.condRatio) ??
-            parseNum(ind.cr) ??
-            parseNum(ind.ratio) ??
-            parseNum(pot.conductanceRatio) ??
+            parseNum(doc.conductanceRatio) ??
             0;
 
-          // Current dhoondne ke liye saare possible levels
+          // 5. Safely extract Inductor Current
           let cur =
             parseNum(high.inductorCurrent) ??
             parseNum(high.current) ??
             parseNum(high.lineCurrent) ??
-            parseNum(high.indCurrent) ??
             parseNum(inter.inductorCurrent) ??
-            parseNum(inter.current) ??
             parseNum(ind.inductorCurrent) ??
             parseNum(ind.current) ??
-            parseNum(ind.lineCurrent) ??
+            parseNum(doc.inductorCurrent) ??
             0;
 
+          // Date formatting
           let rawDate = doc.date || (doc.createdAt ? new Date(doc.createdAt).toISOString().split("T")[0] : "N/A");
           let displayDate = rawDate;
 
