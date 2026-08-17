@@ -1,23 +1,34 @@
 /**
  * ============================================================================
- * INDUSTRIAL ANALYSIS ENGINE (CUSTOM 5-POINT LOGIC)
+ * INDUSTRIAL ANALYSIS ENGINE (HIGH-ONLY & 5-POINT LOGIC)
  * ============================================================================
  * 1. Current Difference (R-Y / Spread): <= 80 A (Green) | > 80 A (Red)
  * 2. Power Factor: >= 0.90 (Green) | < 0.90 (Red)
- * 3. Inductor Voltage (PM Pot): >= 600 V (Green) | < 600 V (Red)
- * 4. Inductor Voltage (Main Pot): >= 570 V (Green) | < 570 V (Red)
- * 5. Conductance Ratio: >= 70 (Green) | < 70 (Red)
+ * 3. Inductor Voltage (PM Pot High): >= 600 V (Green) | < 600 V (Red)
+ * 4. Inductor Voltage (Main Pot High): >= 570 V (Green) | < 570 V (Red)
+ * 5. Conductance Ratio (High): >= 70 (Green) | < 70 (Red)
  * ============================================================================
  */
 
 const SEVERITY = { CRITICAL: "critical", WARNING: "warning", GOOD: "good", INFO: "info" };
 
+// Helper to filter and keep only HIGH readings (removes Intermediate)
+function getHighOnlyEntries(entries) {
+  return (entries || []).filter((e) => {
+    const tap = String(e.tap || e.level || e.type || "").toUpperCase();
+    const label = String(e.label || "").toUpperCase();
+    return !tap.includes("INTERMEDIATE") && !label.includes("INTERMEDIATE");
+  });
+}
+
 /* ------------------------------- statistics ------------------------------- */
 function computeStats(entries) {
-  const withCurrent = entries.filter((e) => e.inductorCurrent);
-  const withVoltage = entries.filter((e) => e.inductorVoltage);
-  const withPower = entries.filter((e) => e.power);
-  const withPF = entries.filter((e) => e.inductorPF);
+  const highEntries = getHighOnlyEntries(entries);
+
+  const withCurrent = highEntries.filter((e) => e.inductorCurrent);
+  const withVoltage = highEntries.filter((e) => e.inductorVoltage);
+  const withPower = highEntries.filter((e) => e.power);
+  const withPF = highEntries.filter((e) => e.inductorPF);
 
   const avg = (arr, key) => (arr.length ? arr.reduce((a, e) => a + e[key], 0) / arr.length : 0);
   const max = (arr, key) => (arr.length ? arr.reduce((a, b) => (b[key] > a[key] ? b : a)) : null);
@@ -54,6 +65,9 @@ function generateObservations(entries, stats) {
   const obs = [];
   const push = (id, message, severity) => obs.push({ id, message, severity });
 
+  // Sirf High tap entries evaluate hongi
+  const highEntries = getHighOnlyEntries(entries);
+
   // 1. Current R-Y Difference / Spread (Limit: <= 80 A)
   if (stats.currentSpread > 80) {
     push(
@@ -86,8 +100,8 @@ function generateObservations(entries, stats) {
     }
   }
 
-  // 3 & 4. Inductor Voltage Check (PM Pot >= 600V, Main Pot >= 570V)
-  entries.forEach((e) => {
+  // 3 & 4. Inductor Voltage Check (PM Pot High >= 600V, Main Pot High >= 570V)
+  highEntries.forEach((e) => {
     if (!e.inductorVoltage) return;
     const label = (e.label || "").toUpperCase();
     const isPmPot = label.includes("PM") || (e.potType && e.potType.toUpperCase().includes("PM"));
@@ -96,13 +110,13 @@ function generateObservations(entries, stats) {
       if (e.inductorVoltage < 600) {
         push(
           `pmVoltageLow:${e.label || "PM"}`,
-          `PM Pot Inductor <b>${e.label || ""}</b> Voltage is low (<b>${e.inductorVoltage.toFixed(0)} V</b> < 600 V).`,
+          `PM Pot Inductor <b>${e.label || ""} (High)</b> Voltage is low (<b>${e.inductorVoltage.toFixed(0)} V</b> < 600 V).`,
           SEVERITY.CRITICAL
         );
       } else {
         push(
           `pmVoltageNormal:${e.label || "PM"}`,
-          `PM Pot Inductor <b>${e.label || ""}</b> Voltage is healthy (<b>${e.inductorVoltage.toFixed(0)} V</b> >= 600 V).`,
+          `PM Pot Inductor <b>${e.label || ""} (High)</b> Voltage is healthy (<b>${e.inductorVoltage.toFixed(0)} V</b> >= 600 V).`,
           SEVERITY.GOOD
         );
       }
@@ -110,13 +124,13 @@ function generateObservations(entries, stats) {
       if (e.inductorVoltage < 570) {
         push(
           `mainVoltageLow:${e.label || "MAIN"}`,
-          `Main Pot Inductor <b>${e.label || ""}</b> Voltage is low (<b>${e.inductorVoltage.toFixed(0)} V</b> < 570 V).`,
+          `Main Pot Inductor <b>${e.label || ""} (High)</b> Voltage is low (<b>${e.inductorVoltage.toFixed(0)} V</b> < 570 V).`,
           SEVERITY.CRITICAL
         );
       } else {
         push(
           `mainVoltageNormal:${e.label || "MAIN"}`,
-          `Main Pot Inductor <b>${e.label || ""}</b> Voltage is healthy (<b>${e.inductorVoltage.toFixed(0)} V</b> >= 570 V).`,
+          `Main Pot Inductor <b>${e.label || ""} (High)</b> Voltage is healthy (<b>${e.inductorVoltage.toFixed(0)} V</b> >= 570 V).`,
           SEVERITY.GOOD
         );
       }
@@ -124,23 +138,23 @@ function generateObservations(entries, stats) {
   });
 
   // 5. Conductance Ratio Check (Limit: >= 70)
-  entries.forEach((e) => {
+  highEntries.forEach((e) => {
     let crVal = e.conductanceRatio ?? e.conductanceRatioPercent ?? e.condRatio ?? e.cr;
     if (crVal !== undefined && crVal !== null) {
       let numCR = parseFloat(crVal);
-      // Agar value ratio format (0.75) me ho to percentage (75) me convert karein
+      // Decimal format (e.g. 0.78) ko percentage (78) me convert karein
       if (numCR > 0 && numCR <= 1.5) numCR = numCR * 100;
 
       if (numCR < 70) {
         push(
           `conductanceLow:${e.label || "IND"}`,
-          `Inductor <b>${e.label || ""}</b> Conductance Ratio is low (<b>${numCR.toFixed(1)}%</b> < 70%).`,
+          `Inductor <b>${e.label || ""} (High)</b> Conductance Ratio is low (<b>${numCR.toFixed(1)}%</b> < 70%).`,
           SEVERITY.CRITICAL
         );
       } else {
         push(
           `conductanceNormal:${e.label || "IND"}`,
-          `Inductor <b>${e.label || ""}</b> Conductance Ratio is healthy (<b>${numCR.toFixed(1)}%</b> >= 70%).`,
+          `Inductor <b>${e.label || ""} (High)</b> Conductance Ratio is healthy (<b>${numCR.toFixed(1)}%</b> >= 70%).`,
           SEVERITY.GOOD
         );
       }
@@ -181,10 +195,10 @@ function generateRecommendations(observations) {
       recs.add("Inspect capacitor bank and power-factor correction system to restore PF >= 0.90.");
     }
     if (o.id.startsWith("pmVoltageLow")) {
-      recs.add("Check PM Pot input supply voltage and transformer tap settings (minimum 600 V required).");
+      recs.add("Check PM Pot High input supply voltage and transformer tap settings (minimum 600 V required).");
     }
     if (o.id.startsWith("mainVoltageLow")) {
-      recs.add("Check Main Pot supply lines and tap settings (minimum 570 V required).");
+      recs.add("Check Main Pot High supply lines and tap settings (minimum 570 V required).");
     }
     if (o.id.startsWith("conductanceLow")) {
       recs.add("Conductance ratio is below 70% — schedule coil insulation and winding inspection.");
