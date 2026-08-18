@@ -23,13 +23,24 @@ export default function Navbar() {
     setReportsOpen(false);
   }, [location]);
 
-  // Multi-color letters for WIDER
-  const stylishWider = [
+  // Multi-color letters for WIDER ELECTRICAL
+  const stylishWiderElectrical = [
     { char: "W", color: "text-cyan-600 font-black" },
-    { char: "i", color: "text-amber-600 font-black" },
-    { char: "d", color: "text-emerald-600 font-black" },
-    { char: "e", color: "text-purple-600 font-black" },
-    { char: "r", color: "text-rose-600 font-black" },
+    { char: "I", color: "text-amber-600 font-black" },
+    { char: "D", color: "text-emerald-600 font-black" },
+    { char: "E", color: "text-purple-600 font-black" },
+    { char: "R", color: "text-rose-600 font-black" },
+    { char: " ", color: "" },
+    { char: "E", color: "text-blue-600 font-black" },
+    { char: "L", color: "text-indigo-600 font-black" },
+    { char: "E", color: "text-pink-600 font-black" },
+    { char: "C", color: "text-teal-600 font-black" },
+    { char: "T", color: "text-amber-600 font-black" },
+    { char: "R", color: "text-cyan-600 font-black" },
+    { char: "I", color: "text-purple-600 font-black" },
+    { char: "C", color: "text-rose-600 font-black" },
+    { char: "A", color: "text-emerald-600 font-black" },
+    { char: "L", color: "text-blue-600 font-black" },
   ];
 
   // Colorful characters for DASHBOARD
@@ -137,31 +148,30 @@ export default function Navbar() {
         
         {/* LOGO & BRANDING */}
         <div className="flex items-center gap-3 shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-md">
-            <Zap size={20} className="text-white" />
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-md shrink-0">
+            <Zap size={24} className="text-white" />
           </div>
 
           <div>
-            <div className="font-black text-sm lg:text-base leading-tight tracking-wide flex items-center gap-1.5">
+            {/* BIGGER FONT: CGL INDUCTOR MONITORING */}
+            <div className="font-black text-base lg:text-lg leading-tight tracking-wide flex items-center gap-2">
               <span className="text-cyan-600">CGL</span>
               <span className="text-amber-600">INDUCTOR</span>
               <span className="text-emerald-600">MONITORING</span>
             </div>
 
-            <div className="text-[11px] font-medium hidden sm:flex items-center gap-1">
-              <span className="text-rose-600 font-semibold">APL</span>
-              <span className="text-purple-600 font-semibold">Apollo</span>
-              <span className="text-blue-600 font-semibold">Building</span>
-              <span className="text-sky-600 font-semibold">Products</span>
-              <span className="text-slate-500 font-semibold">Ltd.</span>
-              <span className="text-slate-400">·</span>
-              <span className="text-amber-600 font-bold">Electrical</span>
-              <span className="text-emerald-600 font-bold">Dept.</span>
+            {/* BIGGER FONT: APL APOLLO & REMOVED ELECTRICAL DEPT */}
+            <div className="text-xs font-bold hidden sm:flex items-center gap-1.5 mt-0.5">
+              <span className="text-rose-600">APL</span>
+              <span className="text-purple-600">Apollo</span>
+              <span className="text-blue-600">Building</span>
+              <span className="text-sky-600">Products</span>
+              <span className="text-slate-600">Ltd.</span>
             </div>
           </div>
         </div>
 
-        {/* NAVIGATION BLOCKS (FULL-WIDTH COMPATIBLE WITH DROPDOWN) */}
+        {/* NAVIGATION BLOCKS */}
         <nav className="flex items-center gap-2 lg:gap-4 overflow-x-visible py-1">
           
           {/* DASHBOARD BLOCK */}
@@ -297,10 +307,10 @@ export default function Navbar() {
 
         </nav>
 
-        {/* STYLISH MULTI-COLOR NAME 'WIDER' */}
+        {/* STYLISH BIGGER MULTI-COLOR NAME 'WIDER ELECTRICAL' */}
         <div className="flex items-center px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 shadow-sm shrink-0">
-          <span className="text-base lg:text-lg font-black tracking-widest uppercase">
-            {stylishWider.map((item, index) => (
+          <span className="text-lg lg:text-xl font-black tracking-wider uppercase">
+            {stylishWiderElectrical.map((item, index) => (
               <span key={index} className={item.color}>
                 {item.char}
               </span>
