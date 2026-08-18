@@ -119,13 +119,25 @@ export default function InductorDetailPage() {
         return;
       }
 
-      let limit = 5;
-      if (timeRange === "20d") limit = 20;
-      else if (timeRange === "30d") limit = 30;
-      else if (timeRange === "1y") limit = 12;
-      else if (timeRange === "2y") limit = 24;
+      // Determine target history according to selected range
+      let targetHistory = [];
+      const now = new Date();
 
-      const targetHistory = historyList.slice(0, limit);
+      if (timeRange === "5d") {
+        targetHistory = historyList.slice(0, 5);
+      } else if (timeRange === "20d") {
+        targetHistory = historyList.slice(0, 20);
+      } else if (timeRange === "30d") {
+        targetHistory = historyList.slice(0, 30);
+      } else if (timeRange === "1y") {
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(now.getFullYear() - 1);
+        targetHistory = historyList.filter((item) => new Date(item.date) >= oneYearAgo);
+      } else if (timeRange === "2y") {
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(now.getFullYear() - 2);
+        targetHistory = historyList.filter((item) => new Date(item.date) >= twoYearsAgo);
+      }
 
       const rawKey = String(inductorKey || "MAIN_A").toUpperCase();
       const isPm = rawKey.includes("PM");
@@ -153,7 +165,7 @@ export default function InductorDetailPage() {
         return isNaN(n) ? null : n;
       };
 
-      // 5. Universal Deep Matcher (Supports conductanceCurrentRatio, conductanceRatio, Root & Nested)
+      // Universal Deep Matcher (Supports conductanceCurrentRatio, conductanceRatio, Root & Nested)
       const parsedPoints = detailedDocs
         .filter(Boolean)
         .map((doc) => {
@@ -173,29 +185,24 @@ export default function InductorDetailPage() {
           const high = ind.high || ind.High || ind.HIGH || ind;
           const inter = ind.intermediate || ind.Intermediate || ind.INTERMEDIATE || {};
 
-          // 4. Safely extract Conductance Ratio (Handles both new and old keys)
+          // 4. Safely extract Conductance Ratio
           let cr =
-            // New Key Formats
             parseNum(high.conductanceRatio) ??
             parseNum(high.condRatio) ??
             parseNum(high.conductance_ratio) ??
             parseNum(high.cr) ??
             parseNum(high.ratio) ??
-            // Old Key Formats (conductanceCurrentRatio / conductanceCurrentRation)
             parseNum(high.conductanceCurrentRatio) ??
             parseNum(high.conductanceCurrentRation) ??
             parseNum(high.conductance_current_ratio) ??
             parseNum(high.conductanceInitialValue) ??
-            // Intermediate Level Fallbacks
             parseNum(inter.conductanceRatio) ??
             parseNum(inter.conductanceCurrentRatio) ??
             parseNum(inter.condRatio) ??
-            // Inductor Level Fallbacks
             parseNum(ind.conductanceRatio) ??
             parseNum(ind.conductanceCurrentRatio) ??
             parseNum(ind.conductanceCurrentRation) ??
             parseNum(ind.cr) ??
-            // Document Level Fallbacks
             parseNum(doc.conductanceRatio) ??
             parseNum(doc.conductanceCurrentRatio) ??
             0;
@@ -354,11 +361,11 @@ export default function InductorDetailPage() {
             {/* Time Range Selector */}
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-xs flex-wrap gap-1">
               {[
-                { key: "5d", label: "Recent 5 Data" },
-                { key: "20d", label: "Recent 20 Data" },
-                { key: "30d", label: "Recent 30 Data" },
-                { key: "1y", label: "Recent 1 Year" },
-                { key: "2y", label: "Recent 2 Years" },
+                { key: "5d", label: "Recent 5 Days" },
+                { key: "20d", label: "Recent 20 Days" },
+                { key: "30d", label: "Recent 30 Days" },
+                { key: "1y", label: "Last 1 Year" },
+                { key: "2y", label: "Last 2 Years" },
               ].map((r) => (
                 <button
                   key={r.key}
@@ -492,7 +499,7 @@ export default function InductorDetailPage() {
               <Table size={14} className="text-blue-600" /> Stored Telemetry Values ({chartData.length} entries)
             </h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-[11px] text-slate-700 border border-slate-200 rounded-xl overflow-hidden">
+              <table className="w-full text-left text-[11px] text-slate-700 border border-slate-200 rounded-xl border-collapse">
                 <thead className="bg-slate-100 text-slate-700 font-black uppercase">
                   <tr>
                     <th className="p-2 border-b">Date</th>
