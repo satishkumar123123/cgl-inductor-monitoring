@@ -15,6 +15,8 @@ import {
   Clock,
   CheckCircle2,
   Send,
+  Lock,
+  XCircle,
 } from "lucide-react";
 import {
   LineChart,
@@ -30,6 +32,9 @@ import {
 } from "recharts";
 import { fetchHistory, fetchDataByDate } from "../services/dataService.js";
 import api from "../services/api.js";
+
+// Authorization Password
+const REMARK_AUTH_PASSWORD = "1234";
 
 // प्रत्येक बार के लिए वाइब्रेंट कलर पैलेट
 const BAR_COLORS = [
@@ -87,21 +92,24 @@ export default function InductorDetailPage() {
   const [remarksList, setRemarksList] = useState([]);
   const [savingRemark, setSavingRemark] = useState(false);
 
-  // Chart & Telemetry States - डिफ़ॉल्ट 'bar'
+  // Password Modal States
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [enteredPassword, setEnteredPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  // Chart & Telemetry States
   const [metric, setMetric] = useState("conductanceRatio");
   const [timeRange, setTimeRange] = useState("5d");
   const [chartType, setChartType] = useState("bar");
   const [chartData, setChartData] = useState([]);
   const [loadingChart, setLoadingChart] = useState(false);
 
-  // Y-Axis Ticks and Domain according to selected metric
   const yAxisDomain = metric === "conductanceRatio" ? [0, 120] : [0, 1800];
   const yAxisTicks =
     metric === "conductanceRatio"
       ? [0, 30, 60, 90, 120]
       : [0, 450, 900, 1350, 1800];
 
-  // Load telemetry data on load or when time range / inductor changes
   useEffect(() => {
     if (inductorKey) {
       loadTelemetryFromHistory();
@@ -109,7 +117,6 @@ export default function InductorDetailPage() {
     }
   }, [inductorKey, timeRange]);
 
-  // Telemetry Fetcher using verified dataService functions
   const loadTelemetryFromHistory = async () => {
     setLoadingChart(true);
     try {
@@ -119,7 +126,6 @@ export default function InductorDetailPage() {
         return;
       }
 
-      // Determine target history according to selected range
       let targetHistory = [];
       const now = new Date();
 
@@ -165,14 +171,11 @@ export default function InductorDetailPage() {
         return isNaN(n) ? null : n;
       };
 
-      // Universal Deep Matcher (Supports conductanceCurrentRatio, conductanceRatio, Root & Nested)
       const parsedPoints = detailedDocs
         .filter(Boolean)
         .map((doc) => {
-          // 1. Pot wrapper or Root fallback
           const pot = doc[potKey] || doc[potKey.toLowerCase()] || doc;
 
-          // 2. Inductor level (A, B, C, D)
           const ind =
             pot[letter] ||
             pot[letter.toLowerCase()] ||
@@ -181,11 +184,9 @@ export default function InductorDetailPage() {
             doc[letter.toLowerCase()] ||
             {};
 
-          // 3. High & Intermediate levels
           const high = ind.high || ind.High || ind.HIGH || ind;
           const inter = ind.intermediate || ind.Intermediate || ind.INTERMEDIATE || {};
 
-          // 4. Safely extract Conductance Ratio
           let cr =
             parseNum(high.conductanceRatio) ??
             parseNum(high.condRatio) ??
@@ -207,7 +208,6 @@ export default function InductorDetailPage() {
             parseNum(doc.conductanceCurrentRatio) ??
             0;
 
-          // 5. Safely extract Inductor Current
           let cur =
             parseNum(high.inductorCurrent) ??
             parseNum(high.current) ??
@@ -221,7 +221,6 @@ export default function InductorDetailPage() {
             parseNum(doc.inductorCurrent) ??
             0;
 
-          // Date formatting
           let rawDate = doc.date || (doc.createdAt ? new Date(doc.createdAt).toISOString().split("T")[0] : "N/A");
           let displayDate = rawDate;
 
@@ -251,7 +250,6 @@ export default function InductorDetailPage() {
     }
   };
 
-  // Fetch Remarks
   const fetchRemarks = async () => {
     try {
       const { data } = await api.get(`/api/inductors/remarks/${inductorKey}`);
@@ -261,11 +259,20 @@ export default function InductorDetailPage() {
     }
   };
 
-  // Save Remark
-  const handleSaveRemark = async (e) => {
+  // 1. Triggered on form submit: Validate text and open Password Modal
+  const handleRemarkFormSubmit = (e) => {
     e.preventDefault();
-    if (!remarkText.trim()) return alert("Please enter remark");
+    if (!remarkText.trim()) {
+      alert("Please enter remark");
+      return;
+    }
+    setPasswordError("");
+    setEnteredPassword("");
+    setShowPasswordModal(true);
+  };
 
+  // 2. Actual API call to save remark
+  const executeSaveRemark = async () => {
     setSavingRemark(true);
     try {
       const { data } = await api.post("/api/inductors/remarks", {
@@ -279,16 +286,27 @@ export default function InductorDetailPage() {
         await fetchRemarks();
       }
     } catch (err) {
-      alert("Error saving remark");
+      alert("Error saving remark: " + (err?.response?.data?.message || err.message));
     } finally {
       setSavingRemark(false);
     }
   };
 
+  // 3. Password Verification Handler
+  const handlePasswordVerify = async (e) => {
+    e.preventDefault();
+    if (enteredPassword !== REMARK_AUTH_PASSWORD) {
+      setPasswordError("Galat Password! Kripya sahi password (1234) enter karein.");
+      return;
+    }
+    setShowPasswordModal(false);
+    await executeSaveRemark();
+  };
+
   const formattedTitle = inductorKey ? inductorKey.replace("_", " ").toUpperCase() : "INDUCTOR";
 
   return (
-    <div className="p-6 space-y-8 bg-slate-50/50 min-h-screen max-w-[1600px] mx-auto font-sans">
+    <div className="p-6 space-y-8 bg-slate-50/50 min-h-screen max-w-[1600px] mx-auto font-sans relative">
       {/* 0. TOP HEADER SECTION */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-cyan-900 p-5 rounded-2xl border border-indigo-200 shadow-md text-white">
         <div className="flex items-center gap-3.5">
@@ -344,7 +362,6 @@ export default function InductorDetailPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* Metric Selector */}
             <div className="flex items-center gap-1.5 bg-cyan-50/80 px-3 py-1.5 rounded-xl border border-cyan-200 shadow-xs">
               <Tag size={13} className="text-cyan-600" />
               <span className="text-[11px] font-bold text-cyan-900 uppercase">Metric:</span>
@@ -358,7 +375,6 @@ export default function InductorDetailPage() {
               </select>
             </div>
 
-            {/* Time Range Selector */}
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-xs flex-wrap gap-1">
               {[
                 { key: "5d", label: "Recent 5 Days" },
@@ -381,7 +397,6 @@ export default function InductorDetailPage() {
               ))}
             </div>
 
-            {/* Chart Type Toggle */}
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-xs">
               <button
                 onClick={() => setChartType("bar")}
@@ -405,7 +420,6 @@ export default function InductorDetailPage() {
           </div>
         </div>
 
-        {/* Dynamic Chart Container */}
         <div className="w-full h-[360px] pt-4">
           {loadingChart ? (
             <div className="h-full flex flex-col items-center justify-center text-xs font-bold text-cyan-600 animate-pulse gap-2">
@@ -492,7 +506,6 @@ export default function InductorDetailPage() {
           )}
         </div>
 
-        {/* SUMMARY DATA TABLE */}
         {chartData.length > 0 && (
           <div className="mt-4 pt-4 border-t border-slate-100">
             <h3 className="text-xs font-black text-slate-600 uppercase mb-2 flex items-center gap-1.5">
@@ -524,7 +537,7 @@ export default function InductorDetailPage() {
 
       {/* 2. MIDDLE: ADD OPERATIONAL REMARK FORM */}
       <div className="bg-white border border-purple-200 rounded-2xl p-6 shadow-sm">
-        <form onSubmit={handleSaveRemark} className="space-y-4">
+        <form onSubmit={handleRemarkFormSubmit} className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-purple-100 pb-4">
             <div>
               <h2 className="text-base font-black text-purple-800 uppercase tracking-wide flex items-center gap-2">
@@ -538,7 +551,6 @@ export default function InductorDetailPage() {
               </p>
             </div>
 
-            {/* Category Selector */}
             <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-xl border border-purple-200 shadow-xs">
               <Tag size={14} className="text-purple-600" />
               <label className="text-xs font-extrabold text-purple-900 uppercase">
@@ -557,7 +569,6 @@ export default function InductorDetailPage() {
             </div>
           </div>
 
-          {/* Textarea Box */}
           <div className="relative">
             <textarea
               rows="3"
@@ -568,7 +579,6 @@ export default function InductorDetailPage() {
             ></textarea>
           </div>
 
-          {/* Action Row */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
               <CheckCircle2 size={14} className="text-emerald-500" />
@@ -591,6 +601,67 @@ export default function InductorDetailPage() {
           </div>
         </form>
       </div>
+
+      {/* PASSWORD CONFIRMATION MODAL */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm border border-slate-200 shadow-2xl animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-3 mb-4">
+              <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+                <Lock size={22} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wide">
+                  Authorization Required
+                </h3>
+                <p className="text-[11px] text-slate-500">
+                  Remark save karne ke liye authorization password daalein.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handlePasswordVerify} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Enter Password
+                </label>
+                <input
+                  type="password"
+                  autoFocus
+                  value={enteredPassword}
+                  onChange={(e) => {
+                    setEnteredPassword(e.target.value);
+                    setPasswordError("");
+                  }}
+                  placeholder="••••"
+                  className="w-full bg-slate-50 border border-slate-300 focus:border-purple-600 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none transition-all"
+                />
+                {passwordError && (
+                  <p className="text-[11px] font-bold text-rose-600 mt-1.5 flex items-center gap-1">
+                    <XCircle size={13} /> {passwordError}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-black shadow-md cursor-pointer transition-all active:scale-95"
+                >
+                  Verify &amp; Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* 3. BOTTOM: SAVED REMARK HISTORY LOGS */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
@@ -659,7 +730,6 @@ export default function InductorDetailPage() {
                     </div>
                   </div>
 
-                  {/* Remark Message Text */}
                   <p className="text-xs font-bold text-slate-800 leading-relaxed bg-white/80 p-3 rounded-lg border border-slate-200/70 mt-1 shadow-2xs">
                     {item.remark}
                   </p>
