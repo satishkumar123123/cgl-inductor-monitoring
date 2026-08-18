@@ -144,22 +144,22 @@ export default function Navbar() {
 
   return (
     <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-md">
-      <div className="max-w-[1700px] mx-auto px-4 lg:px-8 py-3 flex items-center justify-between gap-3 lg:gap-6 flex-wrap">
+      <div className="max-w-[1750px] mx-auto px-3 xl:px-6 py-2.5 flex items-center justify-between gap-2 xl:gap-4 flex-nowrap overflow-x-auto lg:overflow-x-visible">
         
-        {/* LOGO & BRANDING WITH 3D ICON */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="group w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-[0_10px_20px_-5px_rgba(37,99,235,0.4)] transition-all duration-300 transform-gpu hover:-translate-y-1 hover:rotate-6 hover:shadow-[0_15px_25px_-5px_rgba(37,99,235,0.6)] shrink-0">
-            <Zap size={24} className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:scale-110" />
+        {/* LOGO & BRANDING */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <div className="group w-10 h-10 xl:w-11 xl:h-11 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-[0_8px_16px_-4px_rgba(37,99,235,0.4)] transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:rotate-6 shrink-0">
+            <Zap size={20} className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:scale-110" />
           </div>
 
-          <div>
-            <div className="font-black text-base lg:text-lg leading-tight tracking-wide flex items-center gap-2">
+          <div className="shrink-0">
+            <div className="font-black text-sm xl:text-base leading-tight tracking-wide flex items-center gap-1.5 whitespace-nowrap">
               <span className="text-cyan-600 drop-shadow-xs">CGL</span>
               <span className="text-amber-600 drop-shadow-xs">INDUCTOR</span>
               <span className="text-emerald-600 drop-shadow-xs">MONITORING</span>
             </div>
 
-            <div className="text-xs font-bold hidden sm:flex items-center gap-1.5 mt-0.5">
+            <div className="text-[11px] font-bold hidden md:flex items-center gap-1 mt-0.5 whitespace-nowrap">
               <span className="text-rose-600">APL</span>
               <span className="text-purple-600">Apollo</span>
               <span className="text-blue-600">Building</span>
@@ -169,22 +169,22 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* 3D ANIMATED NAVIGATION BUTTONS */}
-        <nav className="flex items-center gap-2 lg:gap-4 overflow-x-visible py-2">
+        {/* 3D NAVIGATION BUTTONS - PUSHED LEFT (mr-auto) */}
+        <nav className="flex items-center gap-1.5 xl:gap-2.5 py-1 mr-auto ml-2 xl:ml-4 shrink-0">
           
-          {/* DASHBOARD BLOCK (3D EFFECT) */}
+          {/* DASHBOARD BLOCK */}
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
-              `group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all duration-300 shrink-0 transform-gpu cursor-pointer ${
+              `group relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs xl:text-sm font-extrabold transition-all duration-300 shrink-0 transform-gpu cursor-pointer ${
                 isActive
-                  ? "bg-gradient-to-b from-cyan-50 to-cyan-100/90 border-t border-l border-cyan-300 border-b-4 border-r-2 border-b-cyan-500 border-r-cyan-400 text-cyan-900 shadow-[0_8px_16px_rgba(6,182,212,0.25)] -translate-y-1"
-                  : "bg-gradient-to-b from-white to-slate-100/90 border-t border-l border-white border-b-4 border-r border-b-slate-300 border-r-slate-200 text-slate-700 shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:border-b-cyan-400 hover:shadow-[0_10px_20px_rgba(6,182,212,0.2)] active:translate-y-0.5 active:border-b active:shadow-inner"
+                  ? "bg-gradient-to-b from-cyan-50 to-cyan-100/90 border-t border-l border-cyan-300 border-b-[3px] border-r-2 border-b-cyan-500 border-r-cyan-400 text-cyan-900 shadow-[0_6px_12px_rgba(6,182,212,0.25)] -translate-y-0.5"
+                  : "bg-gradient-to-b from-white to-slate-100/90 border-t border-l border-white border-b-[3px] border-r border-b-slate-300 border-r-slate-200 text-slate-700 shadow-xs hover:-translate-y-0.5 hover:border-b-cyan-400 hover:shadow-[0_8px_16px_rgba(6,182,212,0.18)] active:translate-y-0 active:border-b active:shadow-inner"
               }`
             }
           >
-            <div className="p-1 rounded-lg bg-cyan-50 transition-all duration-300 group-hover:bg-cyan-100 group-hover:scale-110 group-hover:rotate-6 shadow-xs">
-              <LayoutDashboard size={18} className="text-cyan-600 drop-shadow-xs" />
+            <div className="p-1 rounded-lg bg-cyan-50 transition-all duration-300 group-hover:bg-cyan-100 group-hover:scale-110 group-hover:rotate-6 shadow-2xs">
+              <LayoutDashboard size={15} className="text-cyan-600 drop-shadow-xs" />
             </div>
             <span className="tracking-wide">
               {dashboardChars.map((item, idx) => (
@@ -195,18 +195,18 @@ export default function Navbar() {
             </span>
           </NavLink>
 
-          {/* REPORTS DROPDOWN BLOCK (3D EFFECT) */}
+          {/* REPORTS DROPDOWN BLOCK */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setReportsOpen((o) => !o)}
-              className={`group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all duration-300 shrink-0 transform-gpu cursor-pointer ${
+              className={`group relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs xl:text-sm font-extrabold transition-all duration-300 shrink-0 transform-gpu cursor-pointer ${
                 isReportsActive || reportsOpen
-                  ? "bg-gradient-to-b from-purple-50 to-purple-100/90 border-t border-l border-purple-300 border-b-4 border-r-2 border-b-purple-500 border-r-purple-400 text-purple-900 shadow-[0_8px_16px_rgba(168,85,247,0.25)] -translate-y-1"
-                  : "bg-gradient-to-b from-white to-slate-100/90 border-t border-l border-white border-b-4 border-r border-b-slate-300 border-r-slate-200 text-slate-700 shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:border-b-purple-400 hover:shadow-[0_10px_20px_rgba(168,85,247,0.2)] active:translate-y-0.5 active:border-b active:shadow-inner"
+                  ? "bg-gradient-to-b from-purple-50 to-purple-100/90 border-t border-l border-purple-300 border-b-[3px] border-r-2 border-b-purple-500 border-r-purple-400 text-purple-900 shadow-[0_6px_12px_rgba(168,85,247,0.25)] -translate-y-0.5"
+                  : "bg-gradient-to-b from-white to-slate-100/90 border-t border-l border-white border-b-[3px] border-r border-b-slate-300 border-r-slate-200 text-slate-700 shadow-xs hover:-translate-y-0.5 hover:border-b-purple-400 hover:shadow-[0_8px_16px_rgba(168,85,247,0.18)] active:translate-y-0 active:border-b active:shadow-inner"
               }`}
             >
-              <div className="p-1 rounded-lg bg-purple-50 transition-all duration-300 group-hover:bg-purple-100 group-hover:scale-110 group-hover:rotate-6 shadow-xs">
-                <FileBarChart2 size={18} className="text-purple-600 drop-shadow-xs" />
+              <div className="p-1 rounded-lg bg-purple-50 transition-all duration-300 group-hover:bg-purple-100 group-hover:scale-110 group-hover:rotate-6 shadow-2xs">
+                <FileBarChart2 size={15} className="text-purple-600 drop-shadow-xs" />
               </div>
               <span className="tracking-wide">
                 {reportsChars.map((item, idx) => (
@@ -216,28 +216,28 @@ export default function Navbar() {
                 ))}
               </span>
               <ChevronDown
-                size={16}
+                size={14}
                 className={`text-purple-600 transition-all duration-300 ${
-                  reportsOpen ? "rotate-180 scale-125" : "group-hover:translate-y-0.5"
+                  reportsOpen ? "rotate-180 scale-110" : "group-hover:translate-y-0.5"
                 }`}
               />
             </button>
 
             {/* 3D DROPDOWN MENU */}
             {reportsOpen && (
-              <div className="absolute top-full left-0 mt-3 w-64 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl shadow-[0_20px_35px_-5px_rgba(0,0,0,0.15),0_10px_10px_-5px_rgba(0,0,0,0.04)] py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute top-full left-0 mt-2 w-60 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl shadow-[0_16px_30px_-5px_rgba(0,0,0,0.15)] py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
                 <NavLink
                   to="/reports/pm-pot"
                   className={({ isActive }) =>
-                    `group flex items-center gap-2.5 mx-1.5 px-3.5 py-2.5 rounded-xl text-xs font-black transition-all duration-200 hover:-translate-y-0.5 ${
+                    `group flex items-center gap-2.5 mx-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all duration-200 hover:-translate-y-0.5 ${
                       isActive
-                        ? "bg-purple-100 text-purple-900 shadow-sm border border-purple-200"
+                        ? "bg-purple-100 text-purple-900 shadow-xs border border-purple-200"
                         : "hover:bg-purple-50/80 text-slate-700"
                     }`
                   }
                 >
                   <div className="p-1 rounded-lg bg-purple-50 transition-all group-hover:scale-110 group-hover:bg-purple-100">
-                    <FileText size={15} className="text-purple-600" />
+                    <FileText size={14} className="text-purple-600" />
                   </div>
                   <span className="tracking-wide">
                     {pmPotChars.map((item, idx) => (
@@ -248,20 +248,20 @@ export default function Navbar() {
                   </span>
                 </NavLink>
 
-                <div className="border-t border-slate-100 my-1.5 mx-2" />
+                <div className="border-t border-slate-100 my-1 mx-2" />
 
                 <NavLink
                   to="/reports/main-pot"
                   className={({ isActive }) =>
-                    `group flex items-center gap-2.5 mx-1.5 px-3.5 py-2.5 rounded-xl text-xs font-black transition-all duration-200 hover:-translate-y-0.5 ${
+                    `group flex items-center gap-2.5 mx-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all duration-200 hover:-translate-y-0.5 ${
                       isActive
-                        ? "bg-cyan-100 text-cyan-900 shadow-sm border border-cyan-200"
+                        ? "bg-cyan-100 text-cyan-900 shadow-xs border border-cyan-200"
                         : "hover:bg-cyan-50/80 text-slate-700"
                     }`
                   }
                 >
                   <div className="p-1 rounded-lg bg-cyan-50 transition-all group-hover:scale-110 group-hover:bg-cyan-100">
-                    <FileText size={15} className="text-cyan-600" />
+                    <FileText size={14} className="text-cyan-600" />
                   </div>
                   <span className="tracking-wide">
                     {mainPotChars.map((item, idx) => (
@@ -275,19 +275,19 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* PRODUCTION & DROSS BLOCK (3D EFFECT) */}
+          {/* PRODUCTION & DROSS BLOCK */}
           <NavLink
             to="/production-dross"
             className={({ isActive }) =>
-              `group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all duration-300 shrink-0 transform-gpu cursor-pointer ${
+              `group relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs xl:text-sm font-extrabold transition-all duration-300 shrink-0 transform-gpu cursor-pointer ${
                 isActive
-                  ? "bg-gradient-to-b from-emerald-50 to-emerald-100/90 border-t border-l border-emerald-300 border-b-4 border-r-2 border-b-emerald-500 border-r-emerald-400 text-emerald-900 shadow-[0_8px_16px_rgba(16,185,129,0.25)] -translate-y-1"
-                  : "bg-gradient-to-b from-white to-slate-100/90 border-t border-l border-white border-b-4 border-r border-b-slate-300 border-r-slate-200 text-slate-700 shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:border-b-emerald-400 hover:shadow-[0_10px_20px_rgba(16,185,129,0.2)] active:translate-y-0.5 active:border-b active:shadow-inner"
+                  ? "bg-gradient-to-b from-emerald-50 to-emerald-100/90 border-t border-l border-emerald-300 border-b-[3px] border-r-2 border-b-emerald-500 border-r-emerald-400 text-emerald-900 shadow-[0_6px_12px_rgba(16,185,129,0.25)] -translate-y-0.5"
+                  : "bg-gradient-to-b from-white to-slate-100/90 border-t border-l border-white border-b-[3px] border-r border-b-slate-300 border-r-slate-200 text-slate-700 shadow-xs hover:-translate-y-0.5 hover:border-b-emerald-400 hover:shadow-[0_8px_16px_rgba(16,185,129,0.18)] active:translate-y-0 active:border-b active:shadow-inner"
               }`
             }
           >
-            <div className="p-1 rounded-lg bg-emerald-50 transition-all duration-300 group-hover:bg-emerald-100 group-hover:scale-110 group-hover:rotate-6 shadow-xs">
-              <Factory size={18} className="text-emerald-600 drop-shadow-xs" />
+            <div className="p-1 rounded-lg bg-emerald-50 transition-all duration-300 group-hover:bg-emerald-100 group-hover:scale-110 group-hover:rotate-6 shadow-2xs">
+              <Factory size={15} className="text-emerald-600 drop-shadow-xs" />
             </div>
             <span className="tracking-wide">
               {productionChars.map((item, idx) => (
@@ -298,19 +298,19 @@ export default function Navbar() {
             </span>
           </NavLink>
 
-          {/* HISTORY BLOCK (3D EFFECT) */}
+          {/* HISTORY BLOCK */}
           <NavLink
             to="/history"
             className={({ isActive }) =>
-              `group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all duration-300 shrink-0 transform-gpu cursor-pointer ${
+              `group relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs xl:text-sm font-extrabold transition-all duration-300 shrink-0 transform-gpu cursor-pointer ${
                 isActive
-                  ? "bg-gradient-to-b from-amber-50 to-amber-100/90 border-t border-l border-amber-300 border-b-4 border-r-2 border-b-amber-500 border-r-amber-400 text-amber-900 shadow-[0_8px_16px_rgba(245,158,11,0.25)] -translate-y-1"
-                  : "bg-gradient-to-b from-white to-slate-100/90 border-t border-l border-white border-b-4 border-r border-b-slate-300 border-r-slate-200 text-slate-700 shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:border-b-amber-400 hover:shadow-[0_10px_20px_rgba(245,158,11,0.2)] active:translate-y-0.5 active:border-b active:shadow-inner"
+                  ? "bg-gradient-to-b from-amber-50 to-amber-100/90 border-t border-l border-amber-300 border-b-[3px] border-r-2 border-b-amber-500 border-r-amber-400 text-amber-900 shadow-[0_6px_12px_rgba(245,158,11,0.25)] -translate-y-0.5"
+                  : "bg-gradient-to-b from-white to-slate-100/90 border-t border-l border-white border-b-[3px] border-r border-b-slate-300 border-r-slate-200 text-slate-700 shadow-xs hover:-translate-y-0.5 hover:border-b-amber-400 hover:shadow-[0_8px_16px_rgba(245,158,11,0.18)] active:translate-y-0 active:border-b active:shadow-inner"
               }`
             }
           >
-            <div className="p-1 rounded-lg bg-amber-50 transition-all duration-300 group-hover:bg-amber-100 group-hover:scale-110 group-hover:rotate-6 shadow-xs">
-              <History size={18} className="text-amber-600 drop-shadow-xs" />
+            <div className="p-1 rounded-lg bg-amber-50 transition-all duration-300 group-hover:bg-amber-100 group-hover:scale-110 group-hover:rotate-6 shadow-2xs">
+              <History size={15} className="text-amber-600 drop-shadow-xs" />
             </div>
             <span className="tracking-wide">
               {historyChars.map((item, idx) => (
@@ -323,9 +323,9 @@ export default function Navbar() {
 
         </nav>
 
-        {/* 3D BADGE: WIDER ELECTRICAL */}
-        <div className="flex items-center px-4 py-2 rounded-2xl bg-gradient-to-b from-white to-slate-100 border-t border-l border-white border-b-4 border-r border-b-slate-300 border-r-slate-200 shadow-[0_6px_14px_rgba(0,0,0,0.07)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] shrink-0">
-          <span className="text-lg lg:text-xl font-black tracking-wider uppercase drop-shadow-xs">
+        {/* 3D BADGE: WIDER ELECTRICAL (ALWAYS ON SAME ROW) */}
+        <div className="flex items-center px-3.5 py-1.5 xl:px-4 xl:py-2 rounded-2xl bg-gradient-to-b from-white to-slate-100 border-t border-l border-white border-b-[3px] border-r border-b-slate-300 border-r-slate-200 shadow-[0_4px_10px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(0,0,0,0.1)] shrink-0 ml-auto lg:ml-0">
+          <span className="text-base xl:text-lg font-black tracking-wider uppercase drop-shadow-xs whitespace-nowrap">
             {stylishWiderElectrical.map((item, index) => (
               <span key={index} className={item.color}>
                 {item.char}
