@@ -23,14 +23,13 @@ export default function Navbar() {
     setReportsOpen(false);
   }, [location]);
 
-  // Multi-color letters for SATISH
-  const stylishSatish = [
-    { char: "S", color: "text-cyan-600 font-black" },
-    { char: "a", color: "text-amber-600 font-black" },
-    { char: "t", color: "text-emerald-600 font-black" },
-    { char: "i", color: "text-purple-600 font-black" },
-    { char: "s", color: "text-rose-600 font-black" },
-    { char: "h", color: "text-blue-600 font-black" },
+  // Multi-color letters for WIDER
+  const stylishWider = [
+    { char: "W", color: "text-cyan-600 font-black" },
+    { char: "i", color: "text-amber-600 font-black" },
+    { char: "d", color: "text-emerald-600 font-black" },
+    { char: "e", color: "text-purple-600 font-black" },
+    { char: "r", color: "text-rose-600 font-black" },
   ];
 
   // Colorful characters for DASHBOARD
@@ -298,10 +297,10 @@ export default function Navbar() {
 
         </nav>
 
-        {/* STYLISH MULTI-COLOR NAME 'SATISH' */}
+        {/* STYLISH MULTI-COLOR NAME 'WIDER' */}
         <div className="flex items-center px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 shadow-sm shrink-0">
           <span className="text-base lg:text-lg font-black tracking-widest uppercase">
-            {stylishSatish.map((item, index) => (
+            {stylishWider.map((item, index) => (
               <span key={index} className={item.color}>
                 {item.char}
               </span>
