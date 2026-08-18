@@ -17,6 +17,7 @@ import {
   Send,
   Lock,
   XCircle,
+  AlertTriangle,
 } from "lucide-react";
 import {
   LineChart,
@@ -29,6 +30,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  ReferenceLine,
 } from "recharts";
 import { fetchHistory, fetchDataByDate } from "../services/dataService.js";
 import api from "../services/api.js";
@@ -36,7 +38,7 @@ import api from "../services/api.js";
 // Authorization Password
 const REMARK_AUTH_PASSWORD = "1234";
 
-// प्रत्येक बार के लिए वाइब्रेंट कलर पैलेट
+// Vibrant Bar Color Palette
 const BAR_COLORS = [
   "#06b6d4", // Cyan
   "#8b5cf6", // Purple / Violet
@@ -50,7 +52,6 @@ const BAR_COLORS = [
   "#84cc16", // Lime
 ];
 
-// रिमार्क कैटेगरीज के लिए वाइब्रेंट कलर स्टाइलिंग
 const CATEGORY_STYLES = {
   Maintenance: {
     badge: "bg-rose-100 text-rose-700 border-rose-300",
@@ -82,6 +83,86 @@ const CATEGORY_STYLES = {
   },
 };
 
+// Custom Multi-Line X-Axis Tick (Date/Month on top, Year on bottom)
+const CustomXAxisTick = ({ x, y, payload }) => {
+  const raw = payload?.value || "";
+  const [datePart, yearPart] = raw.split("\n");
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0}
+        y={0}
+        dy={10}
+        textAnchor="middle"
+        fill="#475569"
+        fontSize={11}
+        fontWeight={700}
+      >
+        {datePart || raw}
+      </text>
+      {yearPart && (
+        <text
+          x={0}
+          y={0}
+          dy={23}
+          textAnchor="middle"
+          fill="#94a3b8"
+          fontSize={9.5}
+          fontWeight={800}
+        >
+          {yearPart}
+        </text>
+      )}
+    </g>
+  );
+};
+
+// Custom Chart Tooltip with Inductor Change Notification
+const CustomChartTooltip = ({ active, payload, label, metric }) => {
+  if (!active || !payload || !payload.length) return null;
+
+  const dataPoint = payload[0]?.payload || {};
+  const isInductorJumpPoint = dataPoint?.isInductorChange;
+
+  return (
+    <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xl max-w-xs text-xs font-sans">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-1.5 mb-2">
+        <span className="font-extrabold text-slate-800 flex items-center gap-1">
+          <Calendar size={13} className="text-cyan-600" /> {dataPoint.fullDate || label}
+        </span>
+        <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded">
+          {dataPoint.year}
+        </span>
+      </div>
+
+      <div className="space-y-1">
+        <div className="flex justify-between items-center gap-3">
+          <span className="text-slate-500 font-semibold">
+            {metric === "conductanceRatio" ? "Conductance Ratio:" : "Inductor Current:"}
+          </span>
+          <span className="font-black text-slate-900">
+            {payload[0]?.value} {metric === "current" ? "A" : ""}
+          </span>
+        </div>
+      </div>
+
+      {/* Pop Message on Sudden Jump / Replacement Date */}
+      {isInductorJumpPoint && (
+        <div className="mt-2 pt-2 border-t border-amber-100 bg-amber-50 -mx-1 -mb-1 p-2 rounded-lg border border-amber-200">
+          <div className="flex items-center gap-1 text-amber-800 font-black text-[11px]">
+            <AlertTriangle size={13} className="text-amber-600 animate-bounce" />
+            <span>Inductor Change / Replaced</span>
+          </div>
+          <p className="text-[10px] text-amber-700 font-semibold mt-0.5">
+            Sudden jump detected due to inductor replacement activity.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function InductorDetailPage() {
   const { inductorKey } = useParams();
   const navigate = useNavigate();
@@ -102,6 +183,7 @@ export default function InductorDetailPage() {
   const [timeRange, setTimeRange] = useState("5d");
   const [chartType, setChartType] = useState("bar");
   const [chartData, setChartData] = useState([]);
+  const [jumpDateKey, setJumpDateKey] = useState(null);
   const [loadingChart, setLoadingChart] = useState(false);
 
   const yAxisDomain = metric === "conductanceRatio" ? [0, 120] : [0, 1800];
@@ -171,6 +253,8 @@ export default function InductorDetailPage() {
         return isNaN(n) ? null : n;
       };
 
+      let foundJumpKey = null;
+
       const parsedPoints = detailedDocs
         .filter(Boolean)
         .map((doc) => {
@@ -221,26 +305,53 @@ export default function InductorDetailPage() {
             parseNum(doc.inductorCurrent) ??
             0;
 
+          // Extract Date, Month, Year accurately
           let rawDate = doc.date || (doc.createdAt ? new Date(doc.createdAt).toISOString().split("T")[0] : "N/A");
-          let displayDate = rawDate;
+          let dayMonth = rawDate;
+          let yearVal = new Date().getFullYear();
 
           if (rawDate.includes("-")) {
             const parts = rawDate.split("-");
-            if (parts.length === 3) displayDate = `${parts[1]}/${parts[2]}`;
+            if (parts.length === 3) {
+              yearVal = parts[0];
+              dayMonth = `${parts[2]}/${parts[1]}`; // DD/MM
+            }
           } else if (rawDate.includes("/")) {
             const parts = rawDate.split("/");
-            if (parts.length >= 2) displayDate = `${parts[0]}/${parts[1]}`;
+            if (parts.length === 3) {
+              yearVal = parts[2].length === 4 ? parts[2] : `20${parts[2]}`;
+              dayMonth = `${parts[0]}/${parts[1]}`;
+            }
+          }
+
+          // Composite Display for 2-line tick: "DD/MM\nYYYY"
+          const displayAxisLabel = `${dayMonth}\n${yearVal}`;
+
+          // Detect September 30, 2025 to October 2025 replacement jump
+          const isJumpDate =
+            rawDate.startsWith("2025-09-30") ||
+            rawDate.startsWith("2025-10-01") ||
+            rawDate.startsWith("2025-10") ||
+            rawDate.includes("30/09/2025") ||
+            rawDate.includes("01/10/2025");
+
+          if (isJumpDate && !foundJumpKey) {
+            foundJumpKey = displayAxisLabel;
           }
 
           return {
-            date: displayDate,
+            date: displayAxisLabel,
+            dayMonth,
+            year: yearVal,
             fullDate: rawDate,
             conductanceRatio: Number(Number(cr).toFixed(2)),
             current: Number(Number(cur).toFixed(2)),
+            isInductorChange: isJumpDate,
           };
         })
         .reverse();
 
+      setJumpDateKey(foundJumpKey);
       setChartData(parsedPoints);
     } catch (err) {
       console.error("Telemetry Extraction Error:", err);
@@ -259,7 +370,6 @@ export default function InductorDetailPage() {
     }
   };
 
-  // 1. Triggered on form submit: Validate text and open Password Modal
   const handleRemarkFormSubmit = (e) => {
     e.preventDefault();
     if (!remarkText.trim()) {
@@ -271,7 +381,6 @@ export default function InductorDetailPage() {
     setShowPasswordModal(true);
   };
 
-  // 2. Actual API call to save remark
   const executeSaveRemark = async () => {
     setSavingRemark(true);
     try {
@@ -292,7 +401,6 @@ export default function InductorDetailPage() {
     }
   };
 
-  // 3. Password Verification Handler
   const handlePasswordVerify = async (e) => {
     e.preventDefault();
     if (enteredPassword !== REMARK_AUTH_PASSWORD) {
@@ -356,9 +464,16 @@ export default function InductorDetailPage() {
               <span className="text-cyan-600">Performance</span>
               <span className="text-indigo-600">Analytics</span>
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Showing {chartData.length} records from database
-            </p>
+            <div className="flex items-center gap-3 mt-1">
+              <p className="text-xs text-slate-500">
+                Showing {chartData.length} records from database
+              </p>
+              {jumpDateKey && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-100 border border-amber-300 text-amber-800 rounded-full text-[10px] font-black animate-pulse">
+                  ⚡ 30 Sept/Oct 2025: Inductor Changed
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -420,17 +535,24 @@ export default function InductorDetailPage() {
           </div>
         </div>
 
-        <div className="w-full h-[360px] pt-4">
+        {/* Dynamic Chart Container */}
+        <div className="w-full h-[380px] pt-4">
           {loadingChart ? (
             <div className="h-full flex flex-col items-center justify-center text-xs font-bold text-cyan-600 animate-pulse gap-2">
               <Sparkles size={20} /> Loading telemetry records from database...
             </div>
           ) : chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={330}>
+            <ResponsiveContainer width="100%" height={350}>
               {chartType === "bar" ? (
-                <BarChart data={chartData} margin={{ top: 15, right: 30, left: 10, bottom: 20 }}>
+                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 25 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} tickLine={false} />
+                  <XAxis
+                    dataKey="date"
+                    interval={0}
+                    tick={<CustomXAxisTick />}
+                    tickLine={false}
+                    height={45}
+                  />
                   <YAxis
                     stroke="#64748b"
                     fontSize={11}
@@ -439,18 +561,25 @@ export default function InductorDetailPage() {
                     ticks={yAxisTicks}
                     tickLine={false}
                   />
-                  <Tooltip
-                    cursor={{ fill: "#f8fafc" }}
-                    contentStyle={{
-                      backgroundColor: "#ffffff",
-                      borderRadius: "12px",
-                      border: "1px solid #e2e8f0",
-                      boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
-                      color: "#0f172a",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                    }}
-                  />
+                  <Tooltip content={<CustomChartTooltip metric={metric} />} />
+                  
+                  {/* Highlight replacement jump */}
+                  {jumpDateKey && (
+                    <ReferenceLine
+                      x={jumpDateKey}
+                      stroke="#f59e0b"
+                      strokeWidth={2}
+                      strokeDasharray="4 4"
+                      label={{
+                        value: "⚡ Inductor Change",
+                        position: "top",
+                        fill: "#d97706",
+                        fontSize: 10.5,
+                        fontWeight: 900,
+                      }}
+                    />
+                  )}
+
                   <Bar
                     dataKey={metric}
                     name={metric === "conductanceRatio" ? "Conductance Ratio" : "Inductor Current (A)"}
@@ -459,15 +588,25 @@ export default function InductorDetailPage() {
                     {chartData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={BAR_COLORS[index % BAR_COLORS.length]}
+                        fill={
+                          entry.isInductorChange
+                            ? "#f59e0b"
+                            : BAR_COLORS[index % BAR_COLORS.length]
+                        }
                       />
                     ))}
                   </Bar>
                 </BarChart>
               ) : (
-                <LineChart data={chartData} margin={{ top: 15, right: 30, left: 10, bottom: 20 }}>
+                <LineChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 25 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} fontWeight={700} tickLine={false} />
+                  <XAxis
+                    dataKey="date"
+                    interval={0}
+                    tick={<CustomXAxisTick />}
+                    tickLine={false}
+                    height={45}
+                  />
                   <YAxis
                     stroke="#64748b"
                     fontSize={11}
@@ -476,24 +615,43 @@ export default function InductorDetailPage() {
                     ticks={yAxisTicks}
                     tickLine={false}
                   />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#ffffff",
-                      borderRadius: "12px",
-                      border: "1px solid #e2e8f0",
-                      boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
-                      color: "#0f172a",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                    }}
-                  />
+                  <Tooltip content={<CustomChartTooltip metric={metric} />} />
+                  
+                  {jumpDateKey && (
+                    <ReferenceLine
+                      x={jumpDateKey}
+                      stroke="#f59e0b"
+                      strokeWidth={2}
+                      strokeDasharray="4 4"
+                      label={{
+                        value: "⚡ Inductor Change",
+                        position: "top",
+                        fill: "#d97706",
+                        fontSize: 10.5,
+                        fontWeight: 900,
+                      }}
+                    />
+                  )}
+
                   <Line
                     type="monotone"
                     dataKey={metric}
                     name={metric === "conductanceRatio" ? "Conductance Ratio" : "Inductor Current (A)"}
                     stroke={metric === "conductanceRatio" ? "#0891b2" : "#9333ea"}
                     strokeWidth={3}
-                    dot={{ r: 5, strokeWidth: 2, fill: "#ffffff" }}
+                    dot={(props) => {
+                      const { cx, cy, payload } = props;
+                      if (payload.isInductorChange) {
+                        return (
+                          <svg key={`dot-${payload.date}`} x={cx - 7} y={cy - 7} width={14} height={14}>
+                            <circle cx="7" cy="7" r="6" fill="#f59e0b" stroke="#ffffff" strokeWidth="2" />
+                          </svg>
+                        );
+                      }
+                      return (
+                        <circle key={`dot-${payload.date}`} cx={cx} cy={cy} r={4.5} fill="#ffffff" stroke={metric === "conductanceRatio" ? "#0891b2" : "#9333ea"} strokeWidth={2} />
+                      );
+                    }}
                     activeDot={{ r: 7, fill: metric === "conductanceRatio" ? "#0891b2" : "#9333ea" }}
                   />
                 </LineChart>
@@ -506,6 +664,7 @@ export default function InductorDetailPage() {
           )}
         </div>
 
+        {/* SUMMARY DATA TABLE */}
         {chartData.length > 0 && (
           <div className="mt-4 pt-4 border-t border-slate-100">
             <h3 className="text-xs font-black text-slate-600 uppercase mb-2 flex items-center gap-1.5">
@@ -515,17 +674,29 @@ export default function InductorDetailPage() {
               <table className="w-full text-left text-[11px] text-slate-700 border border-slate-200 rounded-xl border-collapse">
                 <thead className="bg-slate-100 text-slate-700 font-black uppercase">
                   <tr>
-                    <th className="p-2 border-b">Date</th>
+                    <th className="p-2 border-b">Date &amp; Year</th>
                     <th className="p-2 border-b text-cyan-700">Conductance Ratio</th>
                     <th className="p-2 border-b text-purple-700">Inductor Current (A)</th>
+                    <th className="p-2 border-b text-slate-600">Observation / Event</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
                   {chartData.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50">
-                      <td className="p-2 font-bold text-slate-900">{row.fullDate || row.date}</td>
+                    <tr key={idx} className={row.isInductorChange ? "bg-amber-50/60 font-bold" : "hover:bg-slate-50"}>
+                      <td className="p-2 font-bold text-slate-900">
+                        {row.fullDate} <span className="text-[10px] text-slate-400 font-semibold">({row.year})</span>
+                      </td>
                       <td className="p-2 font-black text-cyan-700">{row.conductanceRatio}</td>
                       <td className="p-2 font-black text-purple-700">{row.current} A</td>
+                      <td className="p-2">
+                        {row.isInductorChange ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-300">
+                            ⚡ Inductor Change
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 font-medium">Standard Reading</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
