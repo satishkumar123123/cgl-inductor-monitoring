@@ -143,24 +143,22 @@ export default function Navbar() {
   const isReportsActive = location.pathname.startsWith("/reports");
 
   return (
-    <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white shadow-sm">
+    <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-md">
       <div className="max-w-[1700px] mx-auto px-4 lg:px-8 py-3 flex items-center justify-between gap-3 lg:gap-6 flex-wrap">
         
-        {/* LOGO & BRANDING */}
+        {/* LOGO & BRANDING WITH 3D ICON */}
         <div className="flex items-center gap-3 shrink-0">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-md shrink-0">
-            <Zap size={24} className="text-white" />
+          <div className="group w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-[0_10px_20px_-5px_rgba(37,99,235,0.4)] transition-all duration-300 transform-gpu hover:-translate-y-1 hover:rotate-6 hover:shadow-[0_15px_25px_-5px_rgba(37,99,235,0.6)] shrink-0">
+            <Zap size={24} className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:scale-110" />
           </div>
 
           <div>
-            {/* BIGGER FONT: CGL INDUCTOR MONITORING */}
             <div className="font-black text-base lg:text-lg leading-tight tracking-wide flex items-center gap-2">
-              <span className="text-cyan-600">CGL</span>
-              <span className="text-amber-600">INDUCTOR</span>
-              <span className="text-emerald-600">MONITORING</span>
+              <span className="text-cyan-600 drop-shadow-xs">CGL</span>
+              <span className="text-amber-600 drop-shadow-xs">INDUCTOR</span>
+              <span className="text-emerald-600 drop-shadow-xs">MONITORING</span>
             </div>
 
-            {/* BIGGER FONT: APL APOLLO & REMOVED ELECTRICAL DEPT */}
             <div className="text-xs font-bold hidden sm:flex items-center gap-1.5 mt-0.5">
               <span className="text-rose-600">APL</span>
               <span className="text-purple-600">Apollo</span>
@@ -171,21 +169,23 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* NAVIGATION BLOCKS */}
-        <nav className="flex items-center gap-2 lg:gap-4 overflow-x-visible py-1">
+        {/* 3D ANIMATED NAVIGATION BUTTONS */}
+        <nav className="flex items-center gap-2 lg:gap-4 overflow-x-visible py-2">
           
-          {/* DASHBOARD BLOCK */}
+          {/* DASHBOARD BLOCK (3D EFFECT) */}
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
-              `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all border shadow-sm shrink-0 ${
+              `group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all duration-300 shrink-0 transform-gpu cursor-pointer ${
                 isActive
-                  ? "bg-cyan-100/90 border-cyan-400 shadow-cyan-500/10 scale-105"
-                  : "border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-300"
+                  ? "bg-gradient-to-b from-cyan-50 to-cyan-100/90 border-t border-l border-cyan-300 border-b-4 border-r-2 border-b-cyan-500 border-r-cyan-400 text-cyan-900 shadow-[0_8px_16px_rgba(6,182,212,0.25)] -translate-y-1"
+                  : "bg-gradient-to-b from-white to-slate-100/90 border-t border-l border-white border-b-4 border-r border-b-slate-300 border-r-slate-200 text-slate-700 shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:border-b-cyan-400 hover:shadow-[0_10px_20px_rgba(6,182,212,0.2)] active:translate-y-0.5 active:border-b active:shadow-inner"
               }`
             }
           >
-            <LayoutDashboard size={18} className="text-cyan-600 shrink-0" />
+            <div className="p-1 rounded-lg bg-cyan-50 transition-all duration-300 group-hover:bg-cyan-100 group-hover:scale-110 group-hover:rotate-6 shadow-xs">
+              <LayoutDashboard size={18} className="text-cyan-600 drop-shadow-xs" />
+            </div>
             <span className="tracking-wide">
               {dashboardChars.map((item, idx) => (
                 <span key={idx} className={item.color}>
@@ -195,17 +195,19 @@ export default function Navbar() {
             </span>
           </NavLink>
 
-          {/* REPORTS DROPDOWN BLOCK */}
+          {/* REPORTS DROPDOWN BLOCK (3D EFFECT) */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setReportsOpen((o) => !o)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all border shadow-sm shrink-0 cursor-pointer ${
+              className={`group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all duration-300 shrink-0 transform-gpu cursor-pointer ${
                 isReportsActive || reportsOpen
-                  ? "bg-purple-100/90 border-purple-400 shadow-purple-500/10 scale-105"
-                  : "border-slate-200 bg-slate-50 hover:bg-purple-50 hover:border-purple-300"
+                  ? "bg-gradient-to-b from-purple-50 to-purple-100/90 border-t border-l border-purple-300 border-b-4 border-r-2 border-b-purple-500 border-r-purple-400 text-purple-900 shadow-[0_8px_16px_rgba(168,85,247,0.25)] -translate-y-1"
+                  : "bg-gradient-to-b from-white to-slate-100/90 border-t border-l border-white border-b-4 border-r border-b-slate-300 border-r-slate-200 text-slate-700 shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:border-b-purple-400 hover:shadow-[0_10px_20px_rgba(168,85,247,0.2)] active:translate-y-0.5 active:border-b active:shadow-inner"
               }`}
             >
-              <FileBarChart2 size={18} className="text-purple-600 shrink-0" />
+              <div className="p-1 rounded-lg bg-purple-50 transition-all duration-300 group-hover:bg-purple-100 group-hover:scale-110 group-hover:rotate-6 shadow-xs">
+                <FileBarChart2 size={18} className="text-purple-600 drop-shadow-xs" />
+              </div>
               <span className="tracking-wide">
                 {reportsChars.map((item, idx) => (
                   <span key={idx} className={item.color}>
@@ -215,22 +217,28 @@ export default function Navbar() {
               </span>
               <ChevronDown
                 size={16}
-                className={`text-purple-600 transition-transform ${reportsOpen ? "rotate-180" : ""}`}
+                className={`text-purple-600 transition-all duration-300 ${
+                  reportsOpen ? "rotate-180 scale-125" : "group-hover:translate-y-0.5"
+                }`}
               />
             </button>
 
-            {/* DROPDOWN MENU */}
+            {/* 3D DROPDOWN MENU */}
             {reportsOpen && (
-              <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute top-full left-0 mt-3 w-64 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl shadow-[0_20px_35px_-5px_rgba(0,0,0,0.15),0_10px_10px_-5px_rgba(0,0,0,0.04)] py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
                 <NavLink
                   to="/reports/pm-pot"
                   className={({ isActive }) =>
-                    `flex items-center gap-2.5 px-4 py-3 text-xs font-black transition-all hover:bg-purple-50 ${
-                      isActive ? "bg-purple-100 text-purple-900" : ""
+                    `group flex items-center gap-2.5 mx-1.5 px-3.5 py-2.5 rounded-xl text-xs font-black transition-all duration-200 hover:-translate-y-0.5 ${
+                      isActive
+                        ? "bg-purple-100 text-purple-900 shadow-sm border border-purple-200"
+                        : "hover:bg-purple-50/80 text-slate-700"
                     }`
                   }
                 >
-                  <FileText size={15} className="text-purple-600 shrink-0" />
+                  <div className="p-1 rounded-lg bg-purple-50 transition-all group-hover:scale-110 group-hover:bg-purple-100">
+                    <FileText size={15} className="text-purple-600" />
+                  </div>
                   <span className="tracking-wide">
                     {pmPotChars.map((item, idx) => (
                       <span key={idx} className={item.color}>
@@ -240,17 +248,21 @@ export default function Navbar() {
                   </span>
                 </NavLink>
 
-                <div className="border-t border-slate-100 my-1" />
+                <div className="border-t border-slate-100 my-1.5 mx-2" />
 
                 <NavLink
                   to="/reports/main-pot"
                   className={({ isActive }) =>
-                    `flex items-center gap-2.5 px-4 py-3 text-xs font-black transition-all hover:bg-cyan-50 ${
-                      isActive ? "bg-cyan-100 text-cyan-900" : ""
+                    `group flex items-center gap-2.5 mx-1.5 px-3.5 py-2.5 rounded-xl text-xs font-black transition-all duration-200 hover:-translate-y-0.5 ${
+                      isActive
+                        ? "bg-cyan-100 text-cyan-900 shadow-sm border border-cyan-200"
+                        : "hover:bg-cyan-50/80 text-slate-700"
                     }`
                   }
                 >
-                  <FileText size={15} className="text-cyan-600 shrink-0" />
+                  <div className="p-1 rounded-lg bg-cyan-50 transition-all group-hover:scale-110 group-hover:bg-cyan-100">
+                    <FileText size={15} className="text-cyan-600" />
+                  </div>
                   <span className="tracking-wide">
                     {mainPotChars.map((item, idx) => (
                       <span key={idx} className={item.color}>
@@ -263,18 +275,20 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* PRODUCTION & DROSS BLOCK */}
+          {/* PRODUCTION & DROSS BLOCK (3D EFFECT) */}
           <NavLink
             to="/production-dross"
             className={({ isActive }) =>
-              `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all border shadow-sm shrink-0 ${
+              `group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all duration-300 shrink-0 transform-gpu cursor-pointer ${
                 isActive
-                  ? "bg-emerald-100/90 border-emerald-400 shadow-emerald-500/10 scale-105"
-                  : "border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300"
+                  ? "bg-gradient-to-b from-emerald-50 to-emerald-100/90 border-t border-l border-emerald-300 border-b-4 border-r-2 border-b-emerald-500 border-r-emerald-400 text-emerald-900 shadow-[0_8px_16px_rgba(16,185,129,0.25)] -translate-y-1"
+                  : "bg-gradient-to-b from-white to-slate-100/90 border-t border-l border-white border-b-4 border-r border-b-slate-300 border-r-slate-200 text-slate-700 shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:border-b-emerald-400 hover:shadow-[0_10px_20px_rgba(16,185,129,0.2)] active:translate-y-0.5 active:border-b active:shadow-inner"
               }`
             }
           >
-            <Factory size={18} className="text-emerald-600 shrink-0" />
+            <div className="p-1 rounded-lg bg-emerald-50 transition-all duration-300 group-hover:bg-emerald-100 group-hover:scale-110 group-hover:rotate-6 shadow-xs">
+              <Factory size={18} className="text-emerald-600 drop-shadow-xs" />
+            </div>
             <span className="tracking-wide">
               {productionChars.map((item, idx) => (
                 <span key={idx} className={item.color}>
@@ -284,18 +298,20 @@ export default function Navbar() {
             </span>
           </NavLink>
 
-          {/* HISTORY BLOCK */}
+          {/* HISTORY BLOCK (3D EFFECT) */}
           <NavLink
             to="/history"
             className={({ isActive }) =>
-              `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all border shadow-sm shrink-0 ${
+              `group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all duration-300 shrink-0 transform-gpu cursor-pointer ${
                 isActive
-                  ? "bg-amber-100/90 border-amber-400 shadow-amber-500/10 scale-105"
-                  : "border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300"
+                  ? "bg-gradient-to-b from-amber-50 to-amber-100/90 border-t border-l border-amber-300 border-b-4 border-r-2 border-b-amber-500 border-r-amber-400 text-amber-900 shadow-[0_8px_16px_rgba(245,158,11,0.25)] -translate-y-1"
+                  : "bg-gradient-to-b from-white to-slate-100/90 border-t border-l border-white border-b-4 border-r border-b-slate-300 border-r-slate-200 text-slate-700 shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:border-b-amber-400 hover:shadow-[0_10px_20px_rgba(245,158,11,0.2)] active:translate-y-0.5 active:border-b active:shadow-inner"
               }`
             }
           >
-            <History size={18} className="text-amber-600 shrink-0" />
+            <div className="p-1 rounded-lg bg-amber-50 transition-all duration-300 group-hover:bg-amber-100 group-hover:scale-110 group-hover:rotate-6 shadow-xs">
+              <History size={18} className="text-amber-600 drop-shadow-xs" />
+            </div>
             <span className="tracking-wide">
               {historyChars.map((item, idx) => (
                 <span key={idx} className={item.color}>
@@ -307,9 +323,9 @@ export default function Navbar() {
 
         </nav>
 
-        {/* STYLISH BIGGER MULTI-COLOR NAME 'WIDER ELECTRICAL' */}
-        <div className="flex items-center px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 shadow-sm shrink-0">
-          <span className="text-lg lg:text-xl font-black tracking-wider uppercase">
+        {/* 3D BADGE: WIDER ELECTRICAL */}
+        <div className="flex items-center px-4 py-2 rounded-2xl bg-gradient-to-b from-white to-slate-100 border-t border-l border-white border-b-4 border-r border-b-slate-300 border-r-slate-200 shadow-[0_6px_14px_rgba(0,0,0,0.07)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] shrink-0">
+          <span className="text-lg lg:text-xl font-black tracking-wider uppercase drop-shadow-xs">
             {stylishWiderElectrical.map((item, index) => (
               <span key={index} className={item.color}>
                 {item.char}
