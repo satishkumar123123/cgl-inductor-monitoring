@@ -71,14 +71,30 @@ export default function ProductionDrossPage() {
         const data = res.data.data;
         setCurrentReport(data);
         setMonthlyData({
-          productionMT: data.productionMT || "",
-          metalChargedMT: data.metalChargedMT || "",
-          totalDrossMT: data.totalDrossMT || "",
+          productionMT: data.productionMT !== undefined ? data.productionMT : "",
+          metalChargedMT: data.metalChargedMT !== undefined ? data.metalChargedMT : "",
+          totalDrossMT: data.totalDrossMT !== undefined ? data.totalDrossMT : "",
           remarks: data.remarks || "",
+        });
+      } else {
+        // Reset if no data
+        setCurrentReport(null);
+        setMonthlyData({
+          productionMT: "",
+          metalChargedMT: "",
+          totalDrossMT: "",
+          remarks: "",
         });
       }
     } catch (err) {
-      console.error("Fetch month report error:", err);
+      console.warn("Fetch month report error / No data:", err?.response?.data || err.message);
+      setCurrentReport(null);
+      setMonthlyData({
+        productionMT: "",
+        metalChargedMT: "",
+        totalDrossMT: "",
+        remarks: "",
+      });
     } finally {
       setLoading(false);
     }
@@ -91,7 +107,7 @@ export default function ProductionDrossPage() {
         setHistoryList(res.data.data || []);
       }
     } catch (err) {
-      console.error("History fetch error:", err);
+      console.error("History fetch error:", err?.response?.data || err.message);
     }
   };
 
@@ -130,8 +146,15 @@ export default function ProductionDrossPage() {
     return { totalProd, totalMetal, totalDross, avgPct, avgKgMT };
   }, [rangeFilteredData]);
 
+  // Active Month Calculations
+  const prod = parseFloat(monthlyData.productionMT) || 0;
+  const metal = parseFloat(monthlyData.metalChargedMT) || 0;
+  const dross = parseFloat(monthlyData.totalDrossMT) || 0;
+  const drossPct = metal > 0 ? ((dross / metal) * 100).toFixed(2) : "0.00";
+  const drossKgMT = prod > 0 ? ((dross * 1000) / prod).toFixed(2) : "0.00";
+
   // =====================================================
-  // HANDLERS
+  // HANDLERS (WITH CLEAN NUMBER PARSING & DETAILED ERRORS)
   // =====================================================
 
   const handleSaveMonthly = async () => {
@@ -140,11 +163,19 @@ export default function ProductionDrossPage() {
       return;
     }
 
+    // Prepare clean payload with proper numeric values
+    const payload = {
+      monthYear: entryMonth,
+      productionMT: monthlyData.productionMT === "" ? 0 : Number(monthlyData.productionMT),
+      metalChargedMT: monthlyData.metalChargedMT === "" ? 0 : Number(monthlyData.metalChargedMT),
+      totalDrossMT: monthlyData.totalDrossMT === "" ? 0 : Number(monthlyData.totalDrossMT),
+      drossPercent: Number(drossPct),
+      drossKgPerMT: Number(drossKgMT),
+      remarks: monthlyData.remarks || "",
+    };
+
     try {
-      const res = await axios.post("/api/production-dross/save-monthly", {
-        monthYear: entryMonth,
-        ...monthlyData,
-      });
+      const res = await axios.post("/api/production-dross/save-monthly", payload);
       if (res.data.success) {
         alert(`Monthly Production & Dross Data Saved for ${entryMonth}!`);
         
@@ -158,10 +189,13 @@ export default function ProductionDrossPage() {
 
         await fetchMonthReport(entryMonth);
         await fetchHistory();
+      } else {
+        alert(res.data.message || "Failed to save data");
       }
     } catch (err) {
       console.error("Save monthly error:", err);
-      alert("Error saving monthly Production & Dross data");
+      const serverErrMsg = err.response?.data?.message || err.response?.data?.error || err.message;
+      alert(`Error saving data: ${serverErrMsg}`);
     }
   };
 
@@ -170,16 +204,19 @@ export default function ProductionDrossPage() {
       alert("Please select date");
       return;
     }
-    if (!bottomEntry.quantityMT) {
-      alert("Please enter Bottom Dross Quantity");
+    if (!bottomEntry.quantityMT || isNaN(Number(bottomEntry.quantityMT))) {
+      alert("Please enter a valid Bottom Dross Quantity");
       return;
     }
 
+    const payload = {
+      ...bottomEntry,
+      monthYear: entryMonth,
+      quantityMT: Number(bottomEntry.quantityMT),
+    };
+
     try {
-      const res = await axios.post(
-        "/api/production-dross/add-bottom-dross",
-        bottomEntry
-      );
+      const res = await axios.post("/api/production-dross/add-bottom-dross", payload);
       if (res.data.success) {
         alert("Bottom Dross Entry Added!");
         setBottomEntry({
@@ -189,19 +226,15 @@ export default function ProductionDrossPage() {
         });
         await fetchMonthReport(entryMonth);
         await fetchHistory();
+      } else {
+        alert(res.data.message || "Failed to add entry");
       }
     } catch (err) {
       console.error("Bottom dross error:", err);
-      alert("Error adding Bottom Dross entry");
+      const serverErrMsg = err.response?.data?.message || err.response?.data?.error || err.message;
+      alert(`Error adding Bottom Dross entry: ${serverErrMsg}`);
     }
   };
-
-  // Active Month Calculations
-  const prod = parseFloat(monthlyData.productionMT) || 0;
-  const metal = parseFloat(monthlyData.metalChargedMT) || 0;
-  const dross = parseFloat(monthlyData.totalDrossMT) || 0;
-  const drossPct = metal > 0 ? ((dross / metal) * 100).toFixed(2) : "0.00";
-  const drossKgMT = prod > 0 ? ((dross * 1000) / prod).toFixed(2) : "0.00";
 
   // =====================================================
   // EXPORT EXCEL
@@ -540,8 +573,7 @@ export default function ProductionDrossPage() {
 
         {/* INPUT GRID - COLOURFUL PARAMETERS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          
-          {/* PRODUCTION (MT) - BLUE THEME */}
+          {/* PRODUCTION (MT) */}
           <div className="bg-blue-50/70 p-3.5 rounded-xl border border-blue-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200 transition-all shadow-xs">
             <div className="flex items-center justify-between">
               <label className="text-[11px] font-black text-blue-800 uppercase tracking-wide flex items-center gap-1.5">
@@ -560,7 +592,7 @@ export default function ProductionDrossPage() {
             />
           </div>
 
-          {/* METAL CHARGED (MT) - TEAL THEME */}
+          {/* METAL CHARGED (MT) */}
           <div className="bg-teal-50/70 p-3.5 rounded-xl border border-teal-200 focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-200 transition-all shadow-xs">
             <div className="flex items-center justify-between">
               <label className="text-[11px] font-black text-teal-800 uppercase tracking-wide flex items-center gap-1.5">
@@ -582,7 +614,7 @@ export default function ProductionDrossPage() {
             />
           </div>
 
-          {/* TOTAL DROSS (MT) - AMBER THEME */}
+          {/* TOTAL DROSS (MT) */}
           <div className="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all shadow-xs">
             <div className="flex items-center justify-between">
               <label className="text-[11px] font-black text-amber-800 uppercase tracking-wide flex items-center gap-1.5">
@@ -601,7 +633,7 @@ export default function ProductionDrossPage() {
             />
           </div>
 
-          {/* REMARKS - VIOLET THEME */}
+          {/* REMARKS */}
           <div className="bg-violet-50/70 p-3.5 rounded-xl border border-violet-200 focus-within:border-violet-500 focus-within:ring-2 focus-within:ring-violet-200 transition-all shadow-xs">
             <div className="flex items-center justify-between">
               <label className="text-[11px] font-black text-violet-800 uppercase tracking-wide flex items-center gap-1.5">
@@ -619,7 +651,6 @@ export default function ProductionDrossPage() {
               className="w-full mt-2 bg-white px-3 py-1.5 rounded-lg border border-violet-200 text-xs font-semibold text-violet-900 outline-none focus:border-violet-400 placeholder:text-violet-300 shadow-xs"
             />
           </div>
-
         </div>
 
         {/* CALCULATED KPI CARDS */}
@@ -658,7 +689,7 @@ export default function ProductionDrossPage() {
       </div>
 
       {/* ================================================= */}
-      {/* 2. PRINT / EXPORT RANGE SECTION WITH EDITABLE FROM & TO */}
+      {/* 2. PRINT / EXPORT RANGE SECTION */}
       {/* ================================================= */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6 border-b border-slate-100 pb-4">
@@ -671,7 +702,6 @@ export default function ProductionDrossPage() {
             </p>
           </div>
 
-          {/* EDITABLE RANGE SELECTOR (FROM MONTH/YEAR -> TO MONTH/YEAR) */}
           <div className="flex flex-wrap items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
             <div className="flex items-center gap-1.5 text-xs">
               <label className="font-semibold text-slate-500 uppercase">From:</label>
@@ -710,7 +740,7 @@ export default function ProductionDrossPage() {
           </div>
         </div>
 
-        {/* CONSOLIDATED DYNAMIC REPORT TABLE */}
+        {/* CONSOLIDATED REPORT TABLE */}
         <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full text-xs text-left">
             <thead className="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
@@ -789,7 +819,7 @@ export default function ProductionDrossPage() {
       </div>
 
       {/* ================================================= */}
-      {/* 3. BOTTOM DROSS ENTRY FORM (COLOURFUL PARAMETERS) */}
+      {/* 3. BOTTOM DROSS ENTRY FORM */}
       {/* ================================================= */}
       <div className="bg-white border border-purple-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap justify-between items-center gap-3 mb-6 border-b border-purple-100 pb-4">
@@ -824,10 +854,8 @@ export default function ProductionDrossPage() {
           </div>
         </div>
 
-        {/* BOTTOM DROSS COLOURFUL INPUT GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          
-          {/* LOG DATE - ROSE THEME */}
+          {/* LOG DATE */}
           <div className="bg-rose-50/70 p-3.5 rounded-xl border border-rose-200 focus-within:border-rose-500 focus-within:ring-2 focus-within:ring-rose-200 transition-all shadow-xs">
             <div className="flex items-center justify-between">
               <label className="text-[11px] font-black text-rose-800 uppercase tracking-wide flex items-center gap-1.5">
@@ -845,7 +873,7 @@ export default function ProductionDrossPage() {
             />
           </div>
 
-          {/* QUANTITY (MT) - PURPLE THEME */}
+          {/* QUANTITY (MT) */}
           <div className="bg-purple-50/70 p-3.5 rounded-xl border border-purple-200 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-200 transition-all shadow-xs">
             <div className="flex items-center justify-between">
               <label className="text-[11px] font-black text-purple-800 uppercase tracking-wide flex items-center gap-1.5">
@@ -864,7 +892,7 @@ export default function ProductionDrossPage() {
             />
           </div>
 
-          {/* LINE REMARKS - INDIGO THEME */}
+          {/* LINE REMARKS */}
           <div className="bg-indigo-50/70 p-3.5 rounded-xl border border-indigo-200 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-200 transition-all shadow-xs">
             <div className="flex items-center justify-between">
               <label className="text-[11px] font-black text-indigo-800 uppercase tracking-wide flex items-center gap-1.5">
@@ -882,7 +910,6 @@ export default function ProductionDrossPage() {
               className="w-full mt-2 bg-white px-3 py-1.5 rounded-lg border border-indigo-200 text-xs font-semibold text-indigo-900 outline-none focus:border-indigo-400 placeholder:text-indigo-300 shadow-xs"
             />
           </div>
-
         </div>
       </div>
 
