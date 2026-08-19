@@ -157,8 +157,8 @@ export default function Navbar() {
   const isReportsActive = location.pathname.startsWith("/reports");
 
   return (
-    <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-md">
-      <div className="max-w-[1750px] mx-auto px-3 xl:px-6 py-2.5 flex items-center justify-between gap-2 xl:gap-4 flex-nowrap">
+    <header className="no-print sticky top-0 z-30 w-full bg-white border-b border-slate-200 shadow-md">
+      <div className="w-full max-w-[1750px] mx-auto px-3 xl:px-6 py-2.5 flex items-center justify-between gap-2 xl:gap-4 flex-nowrap bg-white">
         
         {/* LOGO & BRANDING */}
         <div className="flex items-center gap-2.5 shrink-0">
@@ -173,7 +173,7 @@ export default function Navbar() {
               <span className="text-emerald-600 drop-shadow-xs">MONITORING</span>
             </div>
 
-            <div className="text-[11px] font-bold hidden sm:flex items-center gap-1 mt-0.5 whitespace-nowrap">
+            <div className="text-[11px] font-bold hidden md:flex items-center gap-1 mt-0.5 whitespace-nowrap">
               <span className="text-rose-600">APL</span>
               <span className="text-purple-600">Apollo</span>
               <span className="text-blue-600">Building</span>
@@ -183,7 +183,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* 3D NAVIGATION BUTTONS - DESKTOP & LAPTOP (HIDDEN ON MOBILE/TABLET) */}
+        {/* 3D NAVIGATION BUTTONS - DESKTOP (HIDDEN ON MOBILE/TABLET) */}
         <nav className="hidden lg:flex items-center gap-1.5 xl:gap-3 py-1 mr-auto ml-2 xl:ml-4 shrink-0">
           
           {/* DASHBOARD BLOCK */}
@@ -239,7 +239,7 @@ export default function Navbar() {
 
             {/* 3D DROPDOWN MENU */}
             {reportsOpen && (
-              <div className="absolute top-full left-0 mt-2 w-60 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl shadow-[0_16px_30px_-5px_rgba(0,0,0,0.15)] py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute top-full left-0 mt-2 w-60 bg-white border border-slate-200 rounded-2xl shadow-[0_16px_30px_-5px_rgba(0,0,0,0.15)] py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
                 <NavLink
                   to="/reports/pm-pot"
                   className={({ isActive }) =>
@@ -338,7 +338,7 @@ export default function Navbar() {
         </nav>
 
         {/* RIGHT SIDE: 3D BADGE & MOBILE HAMBURGER BUTTON */}
-        <div className="flex items-center gap-2 shrink-0 ml-auto lg:ml-0">
+        <div className="flex items-center gap-2 shrink-0 ml-auto lg:ml-0 bg-white">
           
           {/* 3D BADGE: WIDER ELECTRICAL */}
           <div className="flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl bg-gradient-to-b from-white to-slate-100 border-t border-l border-white border-b-[3px] border-r border-b-slate-300 border-r-slate-200 shadow-[0_4px_10px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(0,0,0,0.1)] shrink-0">
@@ -354,7 +354,7 @@ export default function Navbar() {
           {/* MOBILE / TABLET MENU TOGGLE BUTTON (VISIBLE ONLY ON < lg SCREENS) */}
           <button
             onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="lg:hidden p-2 rounded-xl bg-gradient-to-b from-white to-slate-100 border border-slate-200 shadow-xs text-slate-700 hover:text-cyan-600 active:scale-95 transition-all cursor-pointer"
+            className="lg:hidden p-2 rounded-xl bg-white border border-slate-200 shadow-xs text-slate-700 hover:text-cyan-600 active:scale-95 transition-all cursor-pointer"
             aria-label="Toggle Navigation Menu"
           >
             {mobileMenuOpen ? <X size={22} className="text-rose-600" /> : <Menu size={22} className="text-cyan-700" />}
@@ -364,16 +364,16 @@ export default function Navbar() {
 
       </div>
 
-      {/* MOBILE / TABLET SLIDE-DOWN DRAWER */}
+      {/* MOBILE / TABLET SLIDE-DOWN DRAWER (100% PURE WHITE & FULL WIDTH) */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 bg-white/95 backdrop-blur-md px-4 py-3 space-y-2 shadow-xl animate-in slide-in-from-top-2 duration-200">
+        <div className="lg:hidden w-full border-t border-slate-200 bg-white px-4 py-3 space-y-2 shadow-xl animate-in slide-in-from-top-2 duration-200">
           
           {/* MOBILE: DASHBOARD */}
           <NavLink
             to="/dashboard"
             onClick={() => setMobileMenuOpen(false)}
             className={({ isActive }) =>
-              `flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all border ${
+              `w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all border ${
                 isActive
                   ? "bg-cyan-50 border-cyan-400 text-cyan-900 shadow-xs"
                   : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-cyan-50"
@@ -393,7 +393,7 @@ export default function Navbar() {
           </NavLink>
 
           {/* MOBILE: REPORTS ACCORDION */}
-          <div className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
+          <div className="w-full rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
             <button
               onClick={() => setMobileReportsOpen((prev) => !prev)}
               className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-extrabold text-slate-700 cursor-pointer"
@@ -417,12 +417,12 @@ export default function Navbar() {
             </button>
 
             {mobileReportsOpen && (
-              <div className="px-3 pb-2 space-y-1.5 bg-white border-t border-slate-100 pt-2">
+              <div className="w-full px-3 pb-2 space-y-1.5 bg-white border-t border-slate-100 pt-2">
                 <NavLink
                   to="/reports/pm-pot"
                   onClick={() => setMobileMenuOpen(false)}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-black ${
+                    `w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-black ${
                       isActive ? "bg-purple-100 text-purple-900" : "text-slate-600 hover:bg-purple-50"
                     }`
                   }
@@ -441,7 +441,7 @@ export default function Navbar() {
                   to="/reports/main-pot"
                   onClick={() => setMobileMenuOpen(false)}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-black ${
+                    `w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-black ${
                       isActive ? "bg-cyan-100 text-cyan-900" : "text-slate-600 hover:bg-cyan-50"
                     }`
                   }
@@ -464,7 +464,7 @@ export default function Navbar() {
             to="/production-dross"
             onClick={() => setMobileMenuOpen(false)}
             className={({ isActive }) =>
-              `flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all border ${
+              `w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all border ${
                 isActive
                   ? "bg-emerald-50 border-emerald-400 text-emerald-900 shadow-xs"
                   : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-emerald-50"
@@ -488,7 +488,7 @@ export default function Navbar() {
             to="/history"
             onClick={() => setMobileMenuOpen(false)}
             className={({ isActive }) =>
-              `flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all border ${
+              `w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all border ${
                 isActive
                   ? "bg-amber-50 border-amber-400 text-amber-900 shadow-xs"
                   : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-amber-50"
