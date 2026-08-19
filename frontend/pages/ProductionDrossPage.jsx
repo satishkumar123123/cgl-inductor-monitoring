@@ -16,18 +16,9 @@ import {
   Scale,
   Clock
 } from "lucide-react";
-import axios from "axios";
 import * as XLSX from "xlsx";
-
-// ----------------------------------------------------------------------
-// Backend API Base URL setup (Aapke backend port 5000 ko direct target karega)
-// ----------------------------------------------------------------------
-const API_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000";
-
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-});
+// Project ka central api client import karein
+import api from "../services/api.js"; // Agar api.js kisi dusre folder me ho to path adjust kar lein (e.g. "./api.js" ya "../api.js")
 
 export default function ProductionDrossPage() {
   // 1. Entry Month State
@@ -77,7 +68,7 @@ export default function ProductionDrossPage() {
       const res = await api.get(
         `/api/production-dross/get-report?monthYear=${month}`
       );
-      if (res.data.success) {
+      if (res.data?.success) {
         const data = res.data.data;
         setCurrentReport(data);
         setMonthlyData({
@@ -112,7 +103,7 @@ export default function ProductionDrossPage() {
   const fetchHistory = async () => {
     try {
       const res = await api.get("/api/production-dross/history");
-      if (res.data.success) {
+      if (res.data?.success) {
         setHistoryList(res.data.data || []);
       }
     } catch (err) {
@@ -184,7 +175,7 @@ export default function ProductionDrossPage() {
 
     try {
       const res = await api.post("/api/production-dross/save-monthly", payload);
-      if (res.data.success) {
+      if (res.data?.success) {
         alert(`Monthly Production & Dross Data Saved for ${entryMonth}!`);
         
         if (entryMonth > printEndMonth) {
@@ -197,7 +188,7 @@ export default function ProductionDrossPage() {
         await fetchMonthReport(entryMonth);
         await fetchHistory();
       } else {
-        alert(res.data.message || "Failed to save data");
+        alert(res.data?.message || "Failed to save data");
       }
     } catch (err) {
       console.error("Save monthly error:", err);
@@ -223,7 +214,7 @@ export default function ProductionDrossPage() {
 
     try {
       const res = await api.post("/api/production-dross/add-bottom-dross", payload);
-      if (res.data.success) {
+      if (res.data?.success) {
         alert("Bottom Dross Entry Added!");
         setBottomEntry({
           date: new Date().toISOString().split("T")[0],
@@ -233,7 +224,7 @@ export default function ProductionDrossPage() {
         await fetchMonthReport(entryMonth);
         await fetchHistory();
       } else {
-        alert(res.data.message || "Failed to add entry");
+        alert(res.data?.message || "Failed to add entry");
       }
     } catch (err) {
       console.error("Bottom dross error:", err);
@@ -543,7 +534,7 @@ export default function ProductionDrossPage() {
       )}
 
       {/* ================================================= */}
-      {/* 1. ENTRY SECTION WITH COLOURFUL PARAMETER INPUTS */}
+      {/* 1. ENTRY SECTION */}
       {/* ================================================= */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-slate-100 pb-4">
@@ -556,7 +547,6 @@ export default function ProductionDrossPage() {
             </p>
           </div>
 
-          {/* CHANGEABLE MONTH & YEAR SELECTOR FOR ENTRY */}
           <div className="flex items-center gap-3 bg-blue-50/70 px-4 py-2 rounded-xl border border-blue-200 shadow-xs">
             <Calendar size={16} className="text-blue-600" />
             <label className="text-xs font-bold text-blue-900 uppercase">
@@ -733,13 +723,13 @@ export default function ProductionDrossPage() {
 
             <button
               onClick={exportRangeProductionExcel}
-              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ml-2"
+              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ml-2 cursor-pointer"
             >
               <FileSpreadsheet size={14} /> Export Excel
             </button>
             <button
               onClick={printRangeProductionReport}
-              className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+              className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer"
             >
               <Printer size={14} /> Print PDF
             </button>
@@ -841,19 +831,19 @@ export default function ProductionDrossPage() {
           <div className="flex flex-wrap gap-2.5">
             <button
               onClick={handleAddBottomDross}
-              className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all active:scale-95"
+              className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer"
             >
               <PlusCircle size={14} /> Add Entry
             </button>
             <button
               onClick={exportBottomDrossExcel}
-              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold px-3.5 py-2 rounded-xl transition-all"
+              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
             >
               <FileSpreadsheet size={14} /> Excel ({entryMonth})
             </button>
             <button
               onClick={printBottomDrossReport}
-              className="flex items-center gap-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-300 text-xs font-bold px-3.5 py-2 rounded-xl transition-all"
+              className="flex items-center gap-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-300 text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
             >
               <Printer size={14} /> Print PDF ({entryMonth})
             </button>
