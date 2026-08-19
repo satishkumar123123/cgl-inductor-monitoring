@@ -14,13 +14,18 @@ import {
   Tag,
   MessageSquare,
   Scale,
-  Clock
+  Clock,
+  FileBarChart2,
+  ListOrdered
 } from "lucide-react";
 import * as XLSX from "xlsx";
-// Project ka central api client import karein
-import api from "../services/api.js"; // Agar api.js kisi dusre folder me ho to path adjust kar lein (e.g. "./api.js" ya "../api.js")
+import api from "../services/api.js";
 
 export default function ProductionDrossPage() {
+  // Toggle States for Tabs
+  const [prodViewTab, setProdViewTab] = useState("history"); // "history" or "report"
+  const [drossViewTab, setDrossViewTab] = useState("history"); // "history" or "report"
+
   // 1. Entry Month State
   const [entryMonth, setEntryMonth] = useState(
     new Date().toISOString().slice(0, 7)
@@ -112,9 +117,24 @@ export default function ProductionDrossPage() {
   };
 
   // =====================================================
-  // DYNAMIC RANGE FILTERING FOR TABLE & PRINT
+  // ALL HISTORY & DYNAMIC RANGE FILTERING FOR TABLE & PRINT
   // =====================================================
 
+  // Sorted Full History for History Tab
+  const sortedFullHistory = useMemo(() => {
+    return [...historyList].sort((a, b) => (b.monthYear || "").localeCompare(a.monthYear || ""));
+  }, [historyList]);
+
+  const fullHistoryTotals = useMemo(() => {
+    const totalProd = sortedFullHistory.reduce((acc, item) => acc + (Number(item.productionMT) || 0), 0);
+    const totalMetal = sortedFullHistory.reduce((acc, item) => acc + (Number(item.metalChargedMT) || 0), 0);
+    const totalDross = sortedFullHistory.reduce((acc, item) => acc + (Number(item.totalDrossMT) || 0), 0);
+    const avgPct = totalMetal > 0 ? ((totalDross / totalMetal) * 100).toFixed(2) : "0.00";
+    const avgKgMT = totalProd > 0 ? ((totalDross * 1000) / totalProd).toFixed(2) : "0.00";
+    return { totalProd, totalMetal, totalDross, avgPct, avgKgMT };
+  }, [sortedFullHistory]);
+
+  // Range Filtered Data for Report Tab
   const rangeFilteredData = useMemo(() => {
     return historyList
       .filter((item) => {
@@ -145,6 +165,23 @@ export default function ProductionDrossPage() {
 
     return { totalProd, totalMetal, totalDross, avgPct, avgKgMT };
   }, [rangeFilteredData]);
+
+  // Extract all bottom dross logs across all history
+  const allBottomDrossHistory = useMemo(() => {
+    const list = [];
+    historyList.forEach((h) => {
+      if (h.bottomDrossLogs && Array.isArray(h.bottomDrossLogs)) {
+        h.bottomDrossLogs.forEach((log) => {
+          list.push({ ...log, monthYear: h.monthYear });
+        });
+      }
+    });
+    return list.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  }, [historyList]);
+
+  const totalAllBottomDrossQuantity = useMemo(() => {
+    return allBottomDrossHistory.reduce((acc, log) => acc + (Number(log.quantityMT) || 0), 0);
+  }, [allBottomDrossHistory]);
 
   // Active Month Calculations
   const prod = parseFloat(monthlyData.productionMT) || 0;
@@ -236,6 +273,62 @@ export default function ProductionDrossPage() {
   // =====================================================
   // EXPORT EXCEL
   // =====================================================
+
+  const exportAllHistoryExcel = () => {
+    if (sortedFullHistory.length === 0) {
+      alert("No production history records found to export.");
+      return;
+    }
+
+    const rows = [
+      ["APL APOLLO - CGL INDUCTOR ALL TIME PRODUCTION & DROSS HISTORY"],
+      [`Exported On: ${new Date().toLocaleDateString()}`],
+      [],
+      [
+        "Month / Year",
+        "Production (MT)",
+        "Metal Charged (MT)",
+        "Total Dross (MT)",
+        "Dross %",
+        "Dross Kg/MT",
+      ],
+    ];
+
+    sortedFullHistory.forEach((item) => {
+      rows.push([
+        item.monthYear,
+        Number(item.productionMT || 0).toFixed(2),
+        Number(item.metalChargedMT || 0).toFixed(2),
+        Number(item.totalDrossMT || 0).toFixed(2),
+        `${Number(item.drossPercent || 0).toFixed(2)}%`,
+        Number(item.drossKgPerMT || 0).toFixed(2),
+      ]);
+    });
+
+    rows.push([]);
+    rows.push([
+      "TOTAL / AVERAGE",
+      fullHistoryTotals.totalProd.toFixed(2),
+      fullHistoryTotals.totalMetal.toFixed(2),
+      fullHistoryTotals.totalDross.toFixed(2),
+      `${fullHistoryTotals.avgPct}%`,
+      fullHistoryTotals.avgKgMT,
+    ]);
+
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    worksheet["!cols"] = [
+      { wch: 16 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 15 },
+      { wch: 18 },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "All History");
+    XLSX.writeFile(workbook, `Production_Dross_All_History.xlsx`);
+  };
 
   const exportRangeProductionExcel = () => {
     if (rangeFilteredData.length === 0) {
@@ -509,7 +602,7 @@ export default function ProductionDrossPage() {
   };
 
   return (
-    <div className="p-6 space-y-8 bg-white text-slate-800 min-h-screen max-w-[1600px] mx-auto">
+    <div className="p-6 space-y-8 bg-white text-slate-800 min-h-screen max-w-[1600px] mx-auto font-sans">
       {/* HEADER SECTION */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-cyan-900 p-5 rounded-2xl border border-indigo-200 shadow-md text-white">
         <div className="flex items-center gap-3.5">
@@ -560,7 +653,7 @@ export default function ProductionDrossPage() {
             />
             <button
               onClick={handleSaveMonthly}
-              className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-extrabold px-4 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 ml-2"
+              className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-extrabold px-4 py-1.5 rounded-lg shadow-sm transition-all active:scale-95 ml-2 cursor-pointer"
             >
               <Save size={14} /> Save Data
             </button>
@@ -685,133 +778,261 @@ export default function ProductionDrossPage() {
       </div>
 
       {/* ================================================= */}
-      {/* 2. PRINT / EXPORT RANGE SECTION */}
+      {/* 2. DYNAMIC VIEW: HISTORY vs CONSOLIDATED REPORT */}
       {/* ================================================= */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <div className="flex flex-wrap justify-between items-center gap-4 mb-6 border-b border-slate-100 pb-4">
-          <div>
-            <h3 className="flex items-center gap-2 text-sm font-black text-blue-700 uppercase tracking-wider">
-              <History size={16} /> Print & Consolidated Report Section
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Change 'From' and 'To' Month/Year to dynamically render row-by-row printable report
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
-            <div className="flex items-center gap-1.5 text-xs">
-              <label className="font-semibold text-slate-500 uppercase">From:</label>
-              <input
-                type="month"
-                value={printStartMonth}
-                onChange={(e) => setPrintStartMonth(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-blue-700 outline-none cursor-pointer focus:border-blue-500"
-              />
-            </div>
-
-            <span className="text-slate-400 font-bold">→</span>
-
-            <div className="flex items-center gap-1.5 text-xs">
-              <label className="font-semibold text-slate-500 uppercase">To:</label>
-              <input
-                type="month"
-                value={printEndMonth}
-                onChange={(e) => setPrintEndMonth(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-blue-700 outline-none cursor-pointer focus:border-blue-500"
-              />
-            </div>
-
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+        
+        {/* VIBRANT TOGGLE BUTTONS / TABS (HISTORY & REPORT) */}
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-5">
+          <div className="flex items-center gap-3">
+            {/* HISTORY TOGGLE BLOCK */}
             <button
-              onClick={exportRangeProductionExcel}
-              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ml-2 cursor-pointer"
+              onClick={() => setProdViewTab("history")}
+              className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 cursor-pointer transform-gpu ${
+                prodViewTab === "history"
+                  ? "bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-[0_8px_16px_rgba(245,158,11,0.3)] border-t border-l border-amber-300 border-b-4 border-r-2 border-b-amber-700 -translate-y-1"
+                  : "bg-slate-100 text-slate-600 border-b-4 border-slate-300 hover:bg-amber-50 hover:text-amber-800"
+              }`}
             >
-              <FileSpreadsheet size={14} /> Export Excel
+              <History size={18} className={prodViewTab === "history" ? "text-amber-100" : "text-amber-600"} />
+              <span>PRODUCTION HISTORY (ALL DATA)</span>
+              <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
+                prodViewTab === "history" ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
+              }`}>
+                {sortedFullHistory.length} Records
+              </span>
             </button>
+
+            {/* REPORT TOGGLE BLOCK */}
             <button
-              onClick={printRangeProductionReport}
-              className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+              onClick={() => setProdViewTab("report")}
+              className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 cursor-pointer transform-gpu ${
+                prodViewTab === "report"
+                  ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 text-white shadow-[0_8px_16px_rgba(147,51,234,0.3)] border-t border-l border-purple-300 border-b-4 border-r-2 border-b-purple-800 -translate-y-1"
+                  : "bg-slate-100 text-slate-600 border-b-4 border-slate-300 hover:bg-purple-50 hover:text-purple-800"
+              }`}
             >
-              <Printer size={14} /> Print PDF
+              <FileBarChart2 size={18} className={prodViewTab === "report" ? "text-purple-100" : "text-purple-600"} />
+              <span>CONSOLIDATED REPORT (RANGE & PRINT)</span>
             </button>
           </div>
+
+          {/* ACTION BUTTONS (EXCEL / PRINT) */}
+          {prodViewTab === "history" ? (
+            <button
+              onClick={exportAllHistoryExcel}
+              className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
+            >
+              <FileSpreadsheet size={15} /> Export All History (Excel)
+            </button>
+          ) : (
+            <div className="flex flex-wrap items-center gap-3 bg-purple-50/70 p-2.5 rounded-2xl border border-purple-200 shadow-xs">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-purple-900">
+                <label className="uppercase">From:</label>
+                <input
+                  type="month"
+                  value={printStartMonth}
+                  onChange={(e) => setPrintStartMonth(e.target.value)}
+                  className="bg-white border border-purple-300 rounded-lg px-2.5 py-1 text-xs font-black text-purple-800 outline-none cursor-pointer focus:border-purple-500"
+                />
+              </div>
+
+              <span className="text-purple-400 font-black">→</span>
+
+              <div className="flex items-center gap-1.5 text-xs font-bold text-purple-900">
+                <label className="uppercase">To:</label>
+                <input
+                  type="month"
+                  value={printEndMonth}
+                  onChange={(e) => setPrintEndMonth(e.target.value)}
+                  className="bg-white border border-purple-300 rounded-lg px-2.5 py-1 text-xs font-black text-purple-800 outline-none cursor-pointer focus:border-purple-500"
+                />
+              </div>
+
+              <button
+                onClick={exportRangeProductionExcel}
+                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-3.5 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer ml-1"
+              >
+                <FileSpreadsheet size={14} /> Export Range
+              </button>
+              <button
+                onClick={printRangeProductionReport}
+                className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-black px-3.5 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer"
+              >
+                <Printer size={14} /> Print PDF
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* CONSOLIDATED REPORT TABLE */}
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full text-xs text-left">
-            <thead className="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
-              <tr>
-                <th className="p-3.5">Month / Year</th>
-                <th className="p-3.5 text-center">Production (MT)</th>
-                <th className="p-3.5 text-center">Metal Charged (MT)</th>
-                <th className="p-3.5 text-center">Total Dross (MT)</th>
-                <th className="p-3.5 text-center">Dross %</th>
-                <th className="p-3.5 text-center">Kg/MT</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {rangeFilteredData.length > 0 ? (
-                rangeFilteredData.map((item) => (
-                  <tr
-                    key={item._id || item.monthYear}
-                    className="hover:bg-slate-50/80 transition-colors"
-                  >
-                    <td className="p-3.5 font-bold text-blue-700">
-                      {item.monthYear}
-                    </td>
-                    <td className="p-3.5 text-center font-bold text-blue-900">
-                      {Number(item.productionMT || 0).toFixed(2)}
-                    </td>
-                    <td className="p-3.5 text-center font-bold text-teal-800">
-                      {Number(item.metalChargedMT || 0).toFixed(2)}
-                    </td>
-                    <td className="p-3.5 text-center font-bold text-amber-600">
-                      {Number(item.totalDrossMT || 0).toFixed(2)}
-                    </td>
-                    <td className="p-3.5 text-center font-bold text-orange-600">
-                      {Number(item.drossPercent || 0).toFixed(2)}%
-                    </td>
-                    <td className="p-3.5 text-center font-bold text-emerald-600">
-                      {Number(item.drossKgPerMT || 0).toFixed(2)}
-                    </td>
+        {/* TAB 1: ALL HISTORY VIEW */}
+        {prodViewTab === "history" && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                <Flame size={15} className="text-amber-600" /> Complete Historical Records Database ({sortedFullHistory.length} Total Months)
+              </span>
+            </div>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white font-black uppercase tracking-wider">
+                  <tr>
+                    <th className="p-3.5">Month / Year</th>
+                    <th className="p-3.5 text-center">Production (MT)</th>
+                    <th className="p-3.5 text-center">Metal Charged (MT)</th>
+                    <th className="p-3.5 text-center">Total Dross (MT)</th>
+                    <th className="p-3.5 text-center">Dross %</th>
+                    <th className="p-3.5 text-center">Dross Kg/MT</th>
+                    <th className="p-3.5 text-center">Remarks</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="p-6 text-center text-slate-400 font-medium"
-                  >
-                    No production history records found from {printStartMonth} to{" "}
-                    {printEndMonth}.
-                  </td>
-                </tr>
-              )}
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {sortedFullHistory.length > 0 ? (
+                    sortedFullHistory.map((item, idx) => (
+                      <tr key={item._id || idx} className="hover:bg-amber-50/50 transition-colors">
+                        <td className="p-3.5 font-black text-amber-900">{item.monthYear}</td>
+                        <td className="p-3.5 text-center font-bold text-blue-900">
+                          {Number(item.productionMT || 0).toFixed(2)}
+                        </td>
+                        <td className="p-3.5 text-center font-bold text-teal-800">
+                          {Number(item.metalChargedMT || 0).toFixed(2)}
+                        </td>
+                        <td className="p-3.5 text-center font-black text-amber-600">
+                          {Number(item.totalDrossMT || 0).toFixed(2)}
+                        </td>
+                        <td className="p-3.5 text-center font-black text-orange-600">
+                          {Number(item.drossPercent || 0).toFixed(2)}%
+                        </td>
+                        <td className="p-3.5 text-center font-black text-emerald-600">
+                          {Number(item.drossKgPerMT || 0).toFixed(2)}
+                        </td>
+                        <td className="p-3.5 text-center text-slate-500 font-medium">
+                          {item.remarks || "—"}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="p-8 text-center text-slate-400 font-medium">
+                        No production records saved in the database yet.
+                      </td>
+                    </tr>
+                  )}
 
-              {/* SUMMARY ROW FOR SELECTED RANGE */}
-              {rangeFilteredData.length > 0 && (
-                <tr className="bg-blue-50/80 font-extrabold text-blue-900 border-t-2 border-blue-200">
-                  <td className="p-3.5">TOTAL / AVERAGE</td>
-                  <td className="p-3.5 text-center text-blue-900">
-                    {rangeTotals.totalProd.toFixed(2)}
-                  </td>
-                  <td className="p-3.5 text-center text-teal-900">
-                    {rangeTotals.totalMetal.toFixed(2)}
-                  </td>
-                  <td className="p-3.5 text-center text-amber-700">
-                    {rangeTotals.totalDross.toFixed(2)}
-                  </td>
-                  <td className="p-3.5 text-center text-orange-700">
-                    {rangeTotals.avgPct}%
-                  </td>
-                  <td className="p-3.5 text-center text-emerald-700">
-                    {rangeTotals.avgKgMT}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                  {/* ALL TIME TOTAL ROW */}
+                  {sortedFullHistory.length > 0 && (
+                    <tr className="bg-amber-100/80 font-black text-amber-950 border-t-2 border-amber-300">
+                      <td className="p-3.5">ALL TIME TOTAL / AVG</td>
+                      <td className="p-3.5 text-center text-blue-950">
+                        {fullHistoryTotals.totalProd.toFixed(2)}
+                      </td>
+                      <td className="p-3.5 text-center text-teal-950">
+                        {fullHistoryTotals.totalMetal.toFixed(2)}
+                      </td>
+                      <td className="p-3.5 text-center text-amber-900">
+                        {fullHistoryTotals.totalDross.toFixed(2)}
+                      </td>
+                      <td className="p-3.5 text-center text-orange-900">
+                        {fullHistoryTotals.avgPct}%
+                      </td>
+                      <td className="p-3.5 text-center text-emerald-900">
+                        {fullHistoryTotals.avgKgMT}
+                      </td>
+                      <td className="p-3.5 text-center">—</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: CONSOLIDATED REPORT (RANGE & PRINT) VIEW */}
+        {prodViewTab === "report" && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-purple-900 uppercase tracking-wider flex items-center gap-1.5">
+                <FileBarChart2 size={15} className="text-purple-600" /> Filtered Range ({printStartMonth} to {printEndMonth})
+              </span>
+            </div>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-gradient-to-r from-purple-700 via-indigo-700 to-cyan-700 text-white font-black uppercase tracking-wider">
+                  <tr>
+                    <th className="p-3.5">Month / Year</th>
+                    <th className="p-3.5 text-center">Production (MT)</th>
+                    <th className="p-3.5 text-center">Metal Charged (MT)</th>
+                    <th className="p-3.5 text-center">Total Dross (MT)</th>
+                    <th className="p-3.5 text-center">Dross %</th>
+                    <th className="p-3.5 text-center">Kg/MT</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {rangeFilteredData.length > 0 ? (
+                    rangeFilteredData.map((item) => (
+                      <tr
+                        key={item._id || item.monthYear}
+                        className="hover:bg-purple-50/40 transition-colors"
+                      >
+                        <td className="p-3.5 font-bold text-purple-800">
+                          {item.monthYear}
+                        </td>
+                        <td className="p-3.5 text-center font-bold text-blue-900">
+                          {Number(item.productionMT || 0).toFixed(2)}
+                        </td>
+                        <td className="p-3.5 text-center font-bold text-teal-800">
+                          {Number(item.metalChargedMT || 0).toFixed(2)}
+                        </td>
+                        <td className="p-3.5 text-center font-bold text-amber-600">
+                          {Number(item.totalDrossMT || 0).toFixed(2)}
+                        </td>
+                        <td className="p-3.5 text-center font-bold text-orange-600">
+                          {Number(item.drossPercent || 0).toFixed(2)}%
+                        </td>
+                        <td className="p-3.5 text-center font-bold text-emerald-600">
+                          {Number(item.drossKgPerMT || 0).toFixed(2)}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="6"
+                        className="p-6 text-center text-slate-400 font-medium"
+                      >
+                        No production history records found from {printStartMonth} to {printEndMonth}.
+                      </td>
+                    </tr>
+                  )}
+
+                  {/* SUMMARY ROW FOR SELECTED RANGE */}
+                  {rangeFilteredData.length > 0 && (
+                    <tr className="bg-purple-100/80 font-black text-purple-950 border-t-2 border-purple-300">
+                      <td className="p-3.5">TOTAL / AVERAGE</td>
+                      <td className="p-3.5 text-center text-blue-950">
+                        {rangeTotals.totalProd.toFixed(2)}
+                      </td>
+                      <td className="p-3.5 text-center text-teal-950">
+                        {rangeTotals.totalMetal.toFixed(2)}
+                      </td>
+                      <td className="p-3.5 text-center text-amber-900">
+                        {rangeTotals.totalDross.toFixed(2)}
+                      </td>
+                      <td className="p-3.5 text-center text-orange-900">
+                        {rangeTotals.avgPct}%
+                      </td>
+                      <td className="p-3.5 text-center text-emerald-900">
+                        {rangeTotals.avgKgMT}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ================================================= */}
@@ -834,18 +1055,6 @@ export default function ProductionDrossPage() {
               className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer"
             >
               <PlusCircle size={14} /> Add Entry
-            </button>
-            <button
-              onClick={exportBottomDrossExcel}
-              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
-            >
-              <FileSpreadsheet size={14} /> Excel ({entryMonth})
-            </button>
-            <button
-              onClick={printBottomDrossReport}
-              className="flex items-center gap-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-300 text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
-            >
-              <Printer size={14} /> Print PDF ({entryMonth})
             </button>
           </div>
         </div>
@@ -910,62 +1119,187 @@ export default function ProductionDrossPage() {
       </div>
 
       {/* ================================================= */}
-      {/* 4. BOTTOM DROSS HISTORY TABLE */}
+      {/* 4. DYNAMIC VIEW: BOTTOM DROSS HISTORY vs REPORT */}
       {/* ================================================= */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
-          <h3 className="flex items-center gap-2 text-sm font-black text-purple-700 uppercase tracking-wider">
-            <History size={16} /> Bottom Dross Logs ({entryMonth})
-          </h3>
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+        
+        {/* VIBRANT TOGGLE BUTTONS (BOTTOM DROSS HISTORY & MONTHLY LOGS) */}
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-5">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setDrossViewTab("history")}
+              className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 cursor-pointer transform-gpu ${
+                drossViewTab === "history"
+                  ? "bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white shadow-[0_8px_16px_rgba(244,63,94,0.3)] border-t border-l border-rose-300 border-b-4 border-r-2 border-b-rose-700 -translate-y-1"
+                  : "bg-slate-100 text-slate-600 border-b-4 border-slate-300 hover:bg-rose-50 hover:text-rose-800"
+              }`}
+            >
+              <History size={18} className={drossViewTab === "history" ? "text-rose-100" : "text-rose-600"} />
+              <span>ALL DROSS HISTORY (ALL ENTRIES)</span>
+              <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
+                drossViewTab === "history" ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
+              }`}>
+                {allBottomDrossHistory.length} Logs
+              </span>
+            </button>
 
-          <div className="text-xs font-bold text-purple-800 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-xl shadow-xs">
-            Total Monthly:{" "}
-            <span className="text-purple-950 font-extrabold">
-              {Number(currentReport?.totalBottomDrossMT || 0).toFixed(2)} MT
-            </span>
+            <button
+              onClick={() => setDrossViewTab("report")}
+              className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all duration-300 cursor-pointer transform-gpu ${
+                drossViewTab === "report"
+                  ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 text-white shadow-[0_8px_16px_rgba(147,51,234,0.3)] border-t border-l border-purple-300 border-b-4 border-r-2 border-b-purple-800 -translate-y-1"
+                  : "bg-slate-100 text-slate-600 border-b-4 border-slate-300 hover:bg-purple-50 hover:text-purple-800"
+              }`}
+            >
+              <ListOrdered size={18} className={drossViewTab === "report" ? "text-purple-100" : "text-purple-600"} />
+              <span>MONTHLY REPORT LOGS ({entryMonth})</span>
+            </button>
           </div>
+
+          {/* DROSS ACTIONS */}
+          {drossViewTab === "report" && (
+            <div className="flex flex-wrap gap-2.5">
+              <button
+                onClick={exportBottomDrossExcel}
+                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+              >
+                <FileSpreadsheet size={14} /> Excel ({entryMonth})
+              </button>
+              <button
+                onClick={printBottomDrossReport}
+                className="flex items-center gap-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-300 text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+              >
+                <Printer size={14} /> Print PDF ({entryMonth})
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full text-xs text-left">
-            <thead className="bg-purple-50 text-purple-900 font-bold uppercase tracking-wider border-b border-purple-100">
-              <tr>
-                <th className="p-3.5">Date</th>
-                <th className="p-3.5">Quantity (MT)</th>
-                <th className="p-3.5">Remarks / Line Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {currentReport?.bottomDrossLogs?.length > 0 ? (
-                currentReport.bottomDrossLogs.map((log, index) => (
-                  <tr
-                    key={log._id || index}
-                    className="hover:bg-purple-50/40 transition-colors"
-                  >
-                    <td className="p-3.5 font-bold text-rose-700">
-                      {log.date}
-                    </td>
-                    <td className="p-3.5 font-extrabold text-purple-700">
-                      {Number(log.quantityMT || 0).toFixed(2)}
-                    </td>
-                    <td className="p-3.5 text-indigo-800 font-medium">
-                      {log.lineRemarks || "Line Active"}
-                    </td>
+        {/* DROSS TAB 1: ALL TIME LOGS */}
+        {drossViewTab === "history" && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-rose-900 uppercase tracking-wider flex items-center gap-1.5">
+                <Flame size={15} className="text-rose-600" /> Complete Bottom Dross History Across All Months
+              </span>
+              <span className="text-xs font-extrabold text-rose-950 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl shadow-xs">
+                Total All-Time Dross: <span className="text-rose-600 font-black">{totalAllBottomDrossQuantity.toFixed(2)} MT</span>
+              </span>
+            </div>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white font-black uppercase tracking-wider">
+                  <tr>
+                    <th className="p-3.5">Month</th>
+                    <th className="p-3.5">Log Date</th>
+                    <th className="p-3.5 text-center">Quantity (MT)</th>
+                    <th className="p-3.5">Remarks / Line Status</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="3"
-                    className="p-6 text-center text-slate-400 font-medium"
-                  >
-                    No Bottom Dross log entries found for {entryMonth}.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {allBottomDrossHistory.length > 0 ? (
+                    allBottomDrossHistory.map((log, index) => (
+                      <tr key={index} className="hover:bg-rose-50/40 transition-colors">
+                        <td className="p-3.5 font-bold text-slate-800">{log.monthYear}</td>
+                        <td className="p-3.5 font-bold text-rose-700">{log.date}</td>
+                        <td className="p-3.5 text-center font-black text-purple-700">
+                          {Number(log.quantityMT || 0).toFixed(2)}
+                        </td>
+                        <td className="p-3.5 text-indigo-900 font-medium">
+                          {log.lineRemarks || "Line Active"}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="p-8 text-center text-slate-400 font-medium">
+                        No Bottom Dross entries found in the entire database.
+                      </td>
+                    </tr>
+                  )}
+                  {allBottomDrossHistory.length > 0 && (
+                    <tr className="bg-rose-100/80 font-black text-rose-950 border-t-2 border-rose-300">
+                      <td colSpan="2" className="p-3.5 text-right uppercase">TOTAL ALL-TIME QUANTITY:</td>
+                      <td className="p-3.5 text-center text-purple-900 font-black text-sm">
+                        {totalAllBottomDrossQuantity.toFixed(2)} MT
+                      </td>
+                      <td className="p-3.5">—</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* DROSS TAB 2: MONTHLY SELECTED LOGS */}
+        {drossViewTab === "report" && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div className="flex flex-wrap justify-between items-center gap-3">
+              <h3 className="flex items-center gap-2 text-xs font-black text-purple-700 uppercase tracking-wider">
+                <History size={15} /> Bottom Dross Logs for ({entryMonth})
+              </h3>
+
+              <div className="text-xs font-bold text-purple-800 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-xl shadow-xs">
+                Total Monthly:{" "}
+                <span className="text-purple-950 font-extrabold">
+                  {Number(currentReport?.totalBottomDrossMT || 0).toFixed(2)} MT
+                </span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-purple-50 text-purple-900 font-bold uppercase tracking-wider border-b border-purple-100">
+                  <tr>
+                    <th className="p-3.5">Date</th>
+                    <th className="p-3.5 text-center">Quantity (MT)</th>
+                    <th className="p-3.5">Remarks / Line Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {currentReport?.bottomDrossLogs?.length > 0 ? (
+                    currentReport.bottomDrossLogs.map((log, index) => (
+                      <tr
+                        key={log._id || index}
+                        className="hover:bg-purple-50/40 transition-colors"
+                      >
+                        <td className="p-3.5 font-bold text-rose-700">
+                          {log.date}
+                        </td>
+                        <td className="p-3.5 text-center font-extrabold text-purple-700">
+                          {Number(log.quantityMT || 0).toFixed(2)}
+                        </td>
+                        <td className="p-3.5 text-indigo-800 font-medium">
+                          {log.lineRemarks || "Line Active"}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="3"
+                        className="p-6 text-center text-slate-400 font-medium"
+                      >
+                        No Bottom Dross log entries found for {entryMonth}.
+                      </td>
+                    </tr>
+                  )}
+                  {currentReport?.bottomDrossLogs?.length > 0 && (
+                    <tr className="bg-purple-50 font-black text-purple-950 border-t border-purple-200">
+                      <td className="p-3.5 text-right uppercase">MONTHLY TOTAL:</td>
+                      <td className="p-3.5 text-center text-purple-900 font-black">
+                        {Number(currentReport?.totalBottomDrossMT || 0).toFixed(2)} MT
+                      </td>
+                      <td className="p-3.5">—</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
