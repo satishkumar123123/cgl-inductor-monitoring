@@ -550,7 +550,7 @@ export default function DashboardPage() {
                   {item.label}
                 </span>
                 <span className="text-[10px] font-bold text-white/80 group-hover:text-white transition-colors">
-                  View &rarr;
+                  Click &rarr;
                 </span>
               </div>
 
