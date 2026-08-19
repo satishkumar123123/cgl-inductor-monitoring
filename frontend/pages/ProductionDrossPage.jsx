@@ -19,6 +19,16 @@ import {
 import axios from "axios";
 import * as XLSX from "xlsx";
 
+// ----------------------------------------------------------------------
+// Backend API Base URL setup (Aapke backend port 5000 ko direct target karega)
+// ----------------------------------------------------------------------
+const API_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000";
+
+const api = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
+
 export default function ProductionDrossPage() {
   // 1. Entry Month State
   const [entryMonth, setEntryMonth] = useState(
@@ -64,7 +74,7 @@ export default function ProductionDrossPage() {
   const fetchMonthReport = async (month) => {
     setLoading(true);
     try {
-      const res = await axios.get(
+      const res = await api.get(
         `/api/production-dross/get-report?monthYear=${month}`
       );
       if (res.data.success) {
@@ -77,7 +87,6 @@ export default function ProductionDrossPage() {
           remarks: data.remarks || "",
         });
       } else {
-        // Reset if no data
         setCurrentReport(null);
         setMonthlyData({
           productionMT: "",
@@ -102,7 +111,7 @@ export default function ProductionDrossPage() {
 
   const fetchHistory = async () => {
     try {
-      const res = await axios.get("/api/production-dross/history");
+      const res = await api.get("/api/production-dross/history");
       if (res.data.success) {
         setHistoryList(res.data.data || []);
       }
@@ -154,7 +163,7 @@ export default function ProductionDrossPage() {
   const drossKgMT = prod > 0 ? ((dross * 1000) / prod).toFixed(2) : "0.00";
 
   // =====================================================
-  // HANDLERS (WITH CLEAN NUMBER PARSING & DETAILED ERRORS)
+  // HANDLERS
   // =====================================================
 
   const handleSaveMonthly = async () => {
@@ -163,7 +172,6 @@ export default function ProductionDrossPage() {
       return;
     }
 
-    // Prepare clean payload with proper numeric values
     const payload = {
       monthYear: entryMonth,
       productionMT: monthlyData.productionMT === "" ? 0 : Number(monthlyData.productionMT),
@@ -175,11 +183,10 @@ export default function ProductionDrossPage() {
     };
 
     try {
-      const res = await axios.post("/api/production-dross/save-monthly", payload);
+      const res = await api.post("/api/production-dross/save-monthly", payload);
       if (res.data.success) {
         alert(`Monthly Production & Dross Data Saved for ${entryMonth}!`);
         
-        // Auto-adjust range filter so new saved month is immediately visible
         if (entryMonth > printEndMonth) {
           setPrintEndMonth(entryMonth);
         }
@@ -211,12 +218,11 @@ export default function ProductionDrossPage() {
 
     const payload = {
       ...bottomEntry,
-      monthYear: entryMonth,
       quantityMT: Number(bottomEntry.quantityMT),
     };
 
     try {
-      const res = await axios.post("/api/production-dross/add-bottom-dross", payload);
+      const res = await api.post("/api/production-dross/add-bottom-dross", payload);
       if (res.data.success) {
         alert("Bottom Dross Entry Added!");
         setBottomEntry({
@@ -571,7 +577,7 @@ export default function ProductionDrossPage() {
           </div>
         </div>
 
-        {/* INPUT GRID - COLOURFUL PARAMETERS */}
+        {/* INPUT GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* PRODUCTION (MT) */}
           <div className="bg-blue-50/70 p-3.5 rounded-xl border border-blue-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200 transition-all shadow-xs">
