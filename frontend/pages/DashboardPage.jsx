@@ -550,7 +550,7 @@ export default function DashboardPage() {
                   {item.label}
                 </span>
                 <span className="text-[10px] font-bold text-white/80 group-hover:text-white transition-colors">
-                  Click &rarr;
+                  Click Me &rarr;
                 </span>
               </div>
 
@@ -575,7 +575,7 @@ export default function DashboardPage() {
 
                 <div className={`flex justify-between items-center px-2.5 py-1.5 rounded-lg border shadow-xs ${style.boxBg}`}>
                   <span className="text-amber-700 font-bold flex items-center gap-1">
-                    <Zap size={12} className="text-amber-600" /> Ratio:
+                    <Zap size={12} className="text-amber-600" /> CR Ratio:
                   </span>
                   <span className="font-extrabold text-slate-900">
                     {metrics.ratio}
