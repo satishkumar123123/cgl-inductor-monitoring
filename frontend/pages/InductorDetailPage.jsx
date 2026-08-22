@@ -327,13 +327,17 @@ export default function InductorDetailPage() {
           // Composite Display for 2-line tick: "DD/MM\nYYYY"
           const displayAxisLabel = `${dayMonth}\n${yearVal}`;
 
-          // Detect September 30, 2025 to October 2025 replacement jump
-          const isJumpDate =
-            rawDate.startsWith("2025-09-30") ||
-            rawDate.startsWith("2025-10-01") ||
-            rawDate.startsWith("2025-10") ||
-            rawDate.includes("30/09/2025") ||
-            rawDate.includes("01/10/2025");
+          // Detect replacement jump according to Pot Type
+          // PM Pot: November 2024 | Main Pot: 30 September / October 2025
+          const isJumpDate = isPm
+            ? (rawDate.startsWith("2024-11") || rawDate.includes("/11/2024") || rawDate.includes("/11/24"))
+            : (
+                rawDate.startsWith("2025-09-30") ||
+                rawDate.startsWith("2025-10-01") ||
+                rawDate.startsWith("2025-10") ||
+                rawDate.includes("30/09/2025") ||
+                rawDate.includes("01/10/2025")
+              );
 
           if (isJumpDate && !foundJumpKey) {
             foundJumpKey = displayAxisLabel;
@@ -412,6 +416,7 @@ export default function InductorDetailPage() {
   };
 
   const formattedTitle = inductorKey ? inductorKey.replace("_", " ").toUpperCase() : "INDUCTOR";
+  const isPm = String(inductorKey || "MAIN_A").toUpperCase().includes("PM");
 
   return (
     <div className="p-6 space-y-8 bg-slate-50/50 min-h-screen max-w-[1600px] mx-auto font-sans relative">
@@ -470,7 +475,7 @@ export default function InductorDetailPage() {
               </p>
               {jumpDateKey && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-100 border border-amber-300 text-amber-800 rounded-full text-[10px] font-black animate-pulse">
-                  ⚡ 30 Sept/Oct 2025: Inductor Changed
+                  {isPm ? "⚡ Nov 2024: Inductor Changed" : "⚡ 30 Sept/Oct 2025: Inductor Changed"}
                 </span>
               )}
             </div>
