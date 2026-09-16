@@ -6,6 +6,8 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import ToastContainer from "./components/ToastContainer.jsx";
 import LoadingSpinner from "./components/LoadingSpinner.jsx";
 
+const ProductionQrAnalyticsPage = lazy(() => import("./pages/ProductionQrAnalyticsPage.jsx"));
+
 // Route-level code splitting
 const InductorQrPage = lazy(() => import("./pages/InductorQrPage.jsx"));
 const InductorQrReadingsPage = lazy(() => import("./pages/InductorQrReadingsPage.jsx"));
@@ -37,6 +39,8 @@ export default function App() {
   return (
     <>
       <Routes>
+        <Route path="/qr/production" element={page(ProductionQrAnalyticsPage)} />
+        <Route path="/qr/bottom-dross" element={page(ProductionQrAnalyticsPage)} />
         <Route path="/qr-codes" element={<MainLayout>{page(InductorQrPage)}</MainLayout>} />
         <Route path="/qr/inductor/:inductorKey" element={page(InductorQrReadingsPage)} />
         <Route

@@ -12,3 +12,14 @@ export function monthlyProductionTrends(history, endMonth, count) {
       drossKgMT: production > 0 && dross !== null ? dross * 1000 / production : null };
   });
 }
+
+export function monthlyBottomDrossTrends(history, endMonth, count) {
+  const totals = new Map();
+  for (const row of history) for (const log of row.bottomDrossLogs || []) {
+    const quantity = number(log.quantityMT);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(log.date || '') || quantity === null) continue;
+    const month = log.date.slice(0, 7);
+    totals.set(month, (totals.get(month) || 0) + quantity);
+  }
+  return monthlyProductionTrends([], endMonth, count).map((row) => ({ ...row, bottomDross: totals.get(row.month) ?? null }));
+}

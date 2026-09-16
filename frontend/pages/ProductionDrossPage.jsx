@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import api from "../services/api.js";
+import ProductionQrButtons from "../components/ProductionQrButtons.jsx";
 import ProductionMonthlyCharts from "../components/ProductionMonthlyCharts.jsx";
 
 export default function ProductionDrossPage() {
@@ -619,6 +620,7 @@ export default function ProductionDrossPage() {
             </p>
           </div>
         </div>
+        <ProductionQrButtons />
       </div>
 
       {loading && (
