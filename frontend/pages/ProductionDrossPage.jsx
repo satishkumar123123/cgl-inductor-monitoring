@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import api from "../services/api.js";
+import "../styles/production.css";
 import ProductionQrButtons from "../components/ProductionQrButtons.jsx";
 import ProductionMonthlyCharts from "../components/ProductionMonthlyCharts.jsx";
 
@@ -604,9 +605,9 @@ export default function ProductionDrossPage() {
   };
 
   return (
-    <div className="p-6 space-y-8 bg-white text-slate-800 min-h-screen max-w-[1600px] mx-auto font-sans">
+    <div className="production-studio p-6 space-y-8 bg-white text-slate-800 min-h-screen max-w-[1600px] mx-auto font-sans">
       {/* HEADER SECTION */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-cyan-900 p-5 rounded-2xl border border-indigo-200 shadow-md text-white">
+      <div className="production-hero flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-cyan-900 p-5 rounded-2xl border border-indigo-200 shadow-md text-white">
         <div className="flex items-center gap-3.5">
           <div className="p-3 bg-white/10 rounded-xl border border-white/20 text-cyan-300">
             <Flame size={24} />

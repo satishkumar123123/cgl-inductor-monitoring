@@ -2,21 +2,23 @@ import React, { useMemo, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { monthlyProductionTrends, monthlyBottomDrossTrends } from '../utils/productionTrends.js';
 
-const productionMetrics = [
+export const productionMetrics = [
   { key: 'production', title: 'Production', unit: 'MT', color: '#2563eb' },
   { key: 'metal', title: 'Metal Charged', unit: 'MT', color: '#7c3aed' },
   { key: 'dross', title: 'Total Dross', unit: 'MT', color: '#ea580c' },
   { key: 'drossPercent', title: 'Dross Percentage', unit: '%', color: '#e11d48' },
   { key: 'drossKgMT', title: 'Dross per Production', unit: 'kg/MT', color: '#059669' },
 ];
-export default function ProductionMonthlyCharts({ history, selectedMonth, bottomDross = false }) {
+export default function ProductionMonthlyCharts({ history, selectedMonth, bottomDross = false, period, onPeriodChange }) {
   const metrics = bottomDross ? [{ key: 'bottomDross', title: 'Bottom Dross Quantity', unit: 'MT', color: '#9333ea' }] : productionMetrics;
-  const [months, setMonths] = useState(6);
+  const [localMonths, setLocalMonths] = useState(6);
+  const months = period ?? localMonths;
+  const setMonths = onPeriodChange || setLocalMonths;
   const [mode, setMode] = useState('both');
   const data = useMemo(() => (bottomDross ? monthlyBottomDrossTrends : monthlyProductionTrends)(history, selectedMonth, months), [history, selectedMonth, months, bottomDross]);
   const types = mode === 'both' ? ['bar', 'line'] : [mode];
   const hasData = data.some((row) => metrics.some((metric) => row[metric.key] !== null));
-  return <section className="rounded-3xl border border-indigo-200 bg-slate-50 p-4 sm:p-6 space-y-5">
+  return <section className="production-trends rounded-3xl border border-indigo-200 bg-slate-50 p-4 sm:p-6 space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div><h2 className="text-lg font-black text-indigo-900">{bottomDross ? 'Monthly Bottom Dross Trends' : 'Monthly Production & Dross Trends'}</h2><p className="text-xs text-slate-600 mt-1">{months} calendar months ending {selectedMonth}. Change the selected month to move this period.</p></div>
       <div className="flex flex-wrap gap-3">
@@ -30,7 +32,7 @@ export default function ProductionMonthlyCharts({ history, selectedMonth, bottom
       <div className={`grid gap-4 ${mode === 'both' ? 'lg:grid-cols-2' : ''}`}>
         {types.map((type) => {
           const Chart = type === 'bar' ? BarChart : LineChart;
-          return <div key={type} className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          return <div key={type} style={{ "--metric-color": metric.color }} className="production-chart-card min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <p className="text-xs font-bold text-slate-600 mb-3">{type === 'bar' ? 'Monthly comparison' : 'Monthly trend'}</p>
             {!data.some((r) => r[metric.key] !== null) ? <p className="h-64 flex items-center justify-center text-sm text-slate-500">No valid values available for this parameter.</p> : <div className="overflow-x-auto" tabIndex={0} aria-label={`${metric.title} ${type} chart`}>
               <div style={{ height: 270, minWidth: months === 12 ? 560 : 300 }}>
