@@ -5,7 +5,7 @@ import {
 } from "recharts";
 import {
   Save, FileSpreadsheet, FileText, UploadCloud, Download,
-  Zap, Activity, Gauge, Calendar, Lock, XCircle
+  Zap, Activity, Gauge, Calendar, Lock, XCircle, QrCode
 } from "lucide-react";
 import ChartCard, { chartTheme } from "../components/ChartCard.jsx";
 import DataTable from "../components/DataTable.jsx";
@@ -456,6 +456,9 @@ export default function DashboardPage() {
           className="flex items-center gap-1.5 bg-pink-600 hover:bg-pink-700 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
         >
           <Zap size={15} /> Balancing KVAR
+        </button>
+        <button onClick={() => navigate("/qr-codes")} className="flex items-center gap-1.5 bg-violet-700 hover:bg-violet-800 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer">
+          <QrCode size={15} /> QR Codes
         </button>
 
       </div>

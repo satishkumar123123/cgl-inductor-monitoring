@@ -7,6 +7,8 @@ import ToastContainer from "./components/ToastContainer.jsx";
 import LoadingSpinner from "./components/LoadingSpinner.jsx";
 
 // Route-level code splitting
+const InductorQrPage = lazy(() => import("./pages/InductorQrPage.jsx"));
+const InductorQrReadingsPage = lazy(() => import("./pages/InductorQrReadingsPage.jsx"));
 const LoginPage = lazy(() => import("./pages/LoginPage.jsx"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage.jsx"));
 const HistoryPage = lazy(() => import("./pages/HistoryPage.jsx"));
@@ -35,6 +37,8 @@ export default function App() {
   return (
     <>
       <Routes>
+        <Route path="/qr-codes" element={<MainLayout>{page(InductorQrPage)}</MainLayout>} />
+        <Route path="/qr/inductor/:inductorKey" element={page(InductorQrReadingsPage)} />
         <Route
           path="/login"
           element={<AuthLayout>{page(LoginPage)}</AuthLayout>}
