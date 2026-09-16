@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { ArrowLeft, RefreshCw, Activity } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Activity, Download } from 'lucide-react';
 import api from '../services/api.js';
 import { INDUCTORS, METRICS, latestInductorReadings } from '../utils/inductorTelemetry.js';
 
@@ -13,6 +13,8 @@ export default function InductorQrReadingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [reload, setReload] = useState(0);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
   useEffect(() => {
     const controller = new AbortController();
     if (!inductor) { setLoading(false); return; }
@@ -27,6 +29,15 @@ export default function InductorQrReadingsPage() {
     return () => controller.abort();
   }, [inductorKey, reload]);
   const points = useMemo(() => latestInductorReadings(records, inductorKey, level), [records, inductorKey, level]);
+  const downloadReport = async () => {
+    setExporting(true); setExportError('');
+    try {
+      const { downloadInductorPdf } = await import('../utils/inductorPdfReport.js');
+      downloadInductorPdf({ inductor, points, level });
+    } catch (err) {
+      setExportError('Report could not be downloaded. Please try again.');
+    } finally { setExporting(false); }
+  };
   if (!inductor) return <main className="p-8 text-slate-900 bg-white min-h-screen"><h1 className="text-xl font-bold">Inductor not found</h1><Link to="/qr-codes" className="text-indigo-700 underline">View all QR codes</Link></main>;
   return (
     <main className="bg-slate-50 min-h-screen text-slate-900 p-3 sm:p-6">
@@ -40,8 +51,10 @@ export default function InductorQrReadingsPage() {
         </header>
         <div className="flex flex-wrap items-center justify-between gap-3 my-5">
           <label className="text-sm font-bold">Tap level <select value={level} onChange={(e) => setLevel(e.target.value)} className="ml-2 rounded-lg border border-slate-300 bg-white px-3 py-2"><option value="high">High</option><option value="intermediate">Intermediate</option></select></label>
+          <button onClick={downloadReport} disabled={exporting || loading || !!error || !points.length} className="inline-flex items-center gap-2 bg-gradient-to-r from-violet-700 to-fuchsia-600 text-white rounded-lg px-4 py-2 font-bold text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"><Download size={17} />{exporting ? 'Preparing PDF…' : 'Download PDF Report'}</button>
           <button onClick={() => setReload((r) => r + 1)} disabled={loading} className="inline-flex items-center gap-2 bg-indigo-700 text-white rounded-lg px-4 py-2 font-bold text-sm disabled:opacity-50"><RefreshCw size={16} className={loading ? 'animate-spin' : ''} />{error ? 'Retry' : 'Refresh'}</button>
         </div>
+        {exportError && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{exportError}</p>}
         {loading ? <p role="status" className="p-10 text-center text-slate-600">Loading saved readings…</p> : error ? <p role="alert" className="p-6 bg-red-50 text-red-700 rounded-xl">{error}</p> : !points.length ? <div className="p-10 text-center bg-white rounded-2xl border"><Activity className="mx-auto mb-3 text-indigo-500" /><h2 className="font-bold">No saved readings for this tap level</h2><p className="text-sm text-slate-500 mt-2">Save readings from the dashboard or select another tap level.</p></div> : <>
           <p className="text-xs text-slate-500 mb-5">Saved measurements, not live telemetry. Missing values remain blank. Tap a bar for its date and value; scroll charts sideways on mobile.</p>
           <div className="grid gap-5 lg:grid-cols-2">
