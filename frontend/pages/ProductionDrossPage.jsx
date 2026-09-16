@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import api from "../services/api.js";
+import ProductionMonthlyCharts from "../components/ProductionMonthlyCharts.jsx";
 
 export default function ProductionDrossPage() {
   // Toggle States for Tabs
@@ -1034,6 +1035,8 @@ export default function ProductionDrossPage() {
           </div>
         )}
       </div>
+
+      <ProductionMonthlyCharts history={historyList} selectedMonth={entryMonth} />
 
       {/* ================================================= */}
       {/* 3. BOTTOM DROSS ENTRY FORM */}
