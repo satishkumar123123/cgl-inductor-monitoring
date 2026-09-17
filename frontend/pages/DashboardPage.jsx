@@ -18,6 +18,9 @@ import { ROWS, POTS, emptyRecord, todayStr, fmtDateLong } from "../utils/rowsCon
 import { parseExcelFile, downloadSampleTemplate, exportRecordToExcel } from "../utils/excelMapper.js";
 import { fetchDataByDate, createData, updateData } from "../services/dataService.js";
 
+import DashboardInsights, { InductorMiniTrend } from "../components/DashboardInsights.jsx";
+import useDashboardHistory from "../hooks/useDashboardHistory.js";
+
 // Save Authorization Password
 const SAVE_AUTH_PASSWORD = "1234";
 
@@ -75,6 +78,7 @@ const BLOCK_STYLES = [
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const dashboardHistory = useDashboardHistory();
   const auth = useAuth();
   const user = auth?.user || null;
 
@@ -191,6 +195,7 @@ export default function DashboardPage() {
 
       if (saved) {
         setRecord(saved?.data || saved || payload);
+        dashboardHistory.refresh();
       }
     } catch (err) {
       console.error("Save error:", err);
@@ -585,10 +590,13 @@ export default function DashboardPage() {
                   </span>
                 </div>
               </div>
+              <InductorMiniTrend history={dashboardHistory} inductorKey={item.key} selectedDate={selectedDate} />
             </div>
           );
         })}
       </div>
+
+      <DashboardInsights history={dashboardHistory} selectedDate={selectedDate} />
 
       {/* DATA TABLES */}
       <div className="flex flex-col gap-5">
