@@ -766,6 +766,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      <DashboardInsights history={dashboardHistory} selectedDate={selectedDate} comparisonOnly />
+
       <ConfirmDialog
         open={!!confirmDialog}
         title={confirmDialog?.title}
