@@ -596,8 +596,6 @@ export default function DashboardPage() {
         })}
       </div>
 
-      <DashboardInsights history={dashboardHistory} selectedDate={selectedDate} />
-
       {/* DATA TABLES */}
       <div className="flex flex-col gap-5">
         <DataTable 
